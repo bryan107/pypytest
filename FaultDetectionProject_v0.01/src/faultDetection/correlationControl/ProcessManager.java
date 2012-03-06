@@ -1,5 +1,8 @@
 package faultDetection.correlationControl;
 
-public class CorrelationStrengthTableManager {
+public class ProcessManager {
 
+	
+
+	
 }

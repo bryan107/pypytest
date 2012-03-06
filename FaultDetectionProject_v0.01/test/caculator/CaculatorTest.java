@@ -23,5 +23,8 @@ public class CaculatorTest extends TestCase {
 	}
 	
 	
-	
+	public void testCaculatorCorrelation(){
+		System.out.println(Caculator.getInstance().correlationStrength(1.09, 1, 2));
+		System.out.println(Caculator.getInstance().correlationStrength(0.65, 1, 1.2));
+	}
 }

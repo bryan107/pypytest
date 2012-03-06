@@ -1,14 +1,12 @@
 package faultDetection.tools;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import flanagan.analysis.Regression;
 import flanagan.analysis.Stat;
 
 public final class Caculator {
 	private Regression reg;
-	private static Log logger = LogFactory.getLog(Caculator.class);
+//	private static Log logger = LogFactory.getLog(Caculator.class);
 	
 	private static Caculator self = new Caculator();
 	
@@ -25,16 +23,18 @@ public final class Caculator {
 	public double correlationStrength(double input, double estimatecorrelation, double bondary){
 		double upperbondary = estimatecorrelation*bondary;
 		double lowerbondary = estimatecorrelation/bondary;
-		
+		double result = 1;
 		if(input < estimatecorrelation){
-			return (input - lowerbondary) / (estimatecorrelation - lowerbondary);
+			result = (input - lowerbondary) / (estimatecorrelation - lowerbondary);
+			if(result < 0)
+				return 0;
 		}
 		else if(input > estimatecorrelation){
-			return (upperbondary - input) / (upperbondary - estimatecorrelation);
+			result = (upperbondary - input) / (upperbondary - estimatecorrelation);
+			if(result < 0)
+				return 0;
 		}
-		else{
-			return 1;
-		}
+		return result;
 	}
 	
 	public double generateCorrelation(double x , double y){
@@ -53,10 +53,10 @@ public final class Caculator {
 		regressionSetup(x, y);
 		double[] read = reg.getBestEstimates();
 		if (read.length == 1){
-			logger.info("Regression read success");
+//			logger.info("Regression read success");
 			return read[0];
 		}
-		logger.error("Regression read out of boundary");
+//		logger.error("Regression read out of boundary");
 		return 0;
 	}
 	
@@ -64,10 +64,10 @@ public final class Caculator {
 		regressionSetup(x, y);
 		double[] read = reg.getBestEstimatesErrors();
 		if (read.length == 1){
-			logger.info("Regression error read success");
+//			logger.info("Regression error read success");
 			return read[0];
 		}
-		logger.error("Regression error read out of boundary");
+//		logger.error("Regression error read out of boundary");
 		return 0;
 	}
 	

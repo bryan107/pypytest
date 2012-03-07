@@ -2,39 +2,38 @@ package faultDetection.correlationControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 
 public class CorrelationManager {
-	//----------------------------Variables---------------------------------
+	//------------------------Private Variables------------------------------
 	private Map<Integer, Map<Integer, Correlation>> correlationmap = new HashMap<Integer, Map<Integer, Correlation>>(); 
 	private List<Integer> nodeindex = new ArrayList<Integer>(); 
 	private Map<Integer, Map<Integer, Double>> correlationtable = new HashMap<Integer, Map<Integer,Double>>();
-	private int mapsize;
+	private int samplesize;
 	private ReadingBuffer buffer =new ReadingBuffer();	
 	
 	private static Log logger = LogFactory.getLog(CorrelationManager.class);
 	//----------------------------------------------------------------------
 	
-	//--------------------------Public Functions----------------------------
-	public CorrelationManager(int mapsize){
-		this.mapsize = mapsize;
+	//----------------------------Constructor-------------------------------
+	public CorrelationManager(int size){
+		updateSampleSize(size);
 	}
+	//----------------------------------------------------------------------
+	//--------------------------Public Functions----------------------------
 
-	public void updateMapSize(int mapsize){
-		this.mapsize = mapsize;
+	public void updateSampleSize(int size){
+		this.samplesize = size;
 	}
 	public void putReading(int nodeid, double reading){
 		for(int i : nodeindex){
 			if(i == nodeid){
 //				logger.info("GetData=> Node: " + nodeid + " Reading:" + reading);
 				buffer.putBufferData(nodeid, reading);
+				logger.info("Node" + nodeid + " has been update");
 				return;
 			}
 		}
@@ -51,20 +50,20 @@ public class CorrelationManager {
 		}
 	}
 	public Map<Integer, Map<Integer, Double>> getCorrelationTable(){
-		bufferToCorrelationt();
+//		bufferToCorrelationt();
 		updateCorrelationTable();
 		return correlationtable;
 	}
-	public void updateCorrelations(){
+	public void updateCorrelations(){//From buffer to correlation Map
 		bufferToCorrelationt();
 	}
-
+	//----------------------------------------------------------------------
 	//--------------------------Private Functions---------------------------
 	private void bufferToCorrelationt(){	
 		for(int i : nodeindex){
 			for(int j : nodeindex){
 				if(j != i){
-//					logger.info("readfrombuffer: " + buffer.getBufferData(i) + " " + buffer.getBufferData(j));
+					logger.info("readfrombuffer: " + buffer.getBufferData(i) + " " + buffer.getBufferData(j));
 					correlationmap.get(i).get(j).addPair(buffer.getBufferData(i), buffer.getBufferData(j));
 				}
 			}
@@ -92,7 +91,7 @@ public class CorrelationManager {
 	}
 	private void newCorrelationMapEntry(int nodeid){
 		for(int i = 0 ; i < correlationmap.size() ; i++){
-			correlationmap.get(nodeindex.get(i)).put(nodeid, new Correlation(mapsize));
+			correlationmap.get(nodeindex.get(i)).put(nodeid, new Correlation(samplesize));
 		}
 		correlationmap.put(nodeid, newCorrelationMapList());
 	}
@@ -107,7 +106,7 @@ public class CorrelationManager {
 	private Map<Integer, Correlation> newCorrelationMapList(){
 		Map<Integer, Correlation> newnodecorrelation = new HashMap<Integer, Correlation>();
 		for(int i = 0 ; i < nodeindex.size() ; i++){
-			newnodecorrelation.put(nodeindex.get(i) ,new Correlation(mapsize));
+			newnodecorrelation.put(nodeindex.get(i) ,new Correlation(samplesize));
 		}
 		return newnodecorrelation;
 	}
@@ -124,9 +123,9 @@ public class CorrelationManager {
 		for(int i : nodeindex){
 			for(int j : nodeindex){
 				if(j != i){
-					double correlationstrength = correlationmap.get(i).get(j).getCorrelation();
-					correlationtable.get(i).put(j, correlationstrength);
-					correlationtable.get(j).put(i, correlationstrength);
+					double correlation = correlationmap.get(i).get(j).getCorrelation();
+					correlationtable.get(i).put(j, correlation);
+//					correlationtable.get(j).put(i, correlation);
 				}
 			}
 		}

@@ -7,22 +7,22 @@ import faultDetection.tools.Caculator;
 public class Correlation {
 	private double[][] pair;
 	private int mappointer;
-	private int mapsize;	//Max number of pairs
+	private int samplesize;	//Max number of pairs
 	private boolean mapenable;	//Fulfill the requirement 
 	private static Log logger = LogFactory.getLog(Correlation.class);
 	
 	public Correlation(int mapsize){
 		mappointer = 0;
 		mapenable = false;
-		this.mapsize = mapsize;
-		pair = new double[2][this.mapsize];
+		this.samplesize = mapsize;
+		pair = new double[2][this.samplesize];
 	}
 	
 	public void addPair(double x , double y){
 		pair[0][mappointer] = x;
 		pair[1][mappointer] = y;
 		mappointer++;
-		if(mappointer < mapsize){			
+		if(mappointer < samplesize){			
 			return;
 		}
 		else{
@@ -35,8 +35,8 @@ public class Correlation {
 	
 	public double[][] getPair(){
 		if(mapenable == true){
-			double[][] result = new double[mapsize][2];
-			for(int i = 0 ; i < mapsize ; i++){
+			double[][] result = new double[samplesize][2];
+			for(int i = 0 ; i < samplesize ; i++){
 				result[i][0] = pair[0][i];
 				result[i][1] = pair[1][i];
 			}

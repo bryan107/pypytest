@@ -2,8 +2,11 @@ package faultDetection.correlationControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -11,7 +14,10 @@ public class CorrelationManager {
 	//------------------------Private Variables------------------------------
 	private Map<Integer, Map<Integer, Correlation>> correlationmap = new HashMap<Integer, Map<Integer, Correlation>>(); 
 	private List<Integer> nodeindex = new ArrayList<Integer>(); 
+	private Map<Integer, Map<Integer, Double>> correlationtrendtable = new HashMap<Integer, Map<Integer,Double>>();
+	//Correlation Trend Table is the estimate correlation calculated with regression
 	private Map<Integer, Map<Integer, Double>> correlationtable = new HashMap<Integer, Map<Integer,Double>>();
+	//Correlation Table is the correlation between readings in the reading buffer
 	private int samplesize;
 	private ReadingBuffer buffer =new ReadingBuffer();	
 	
@@ -42,17 +48,51 @@ public class CorrelationManager {
 		logger.info("Index Size = " + nodeindex.size());
 		buffer.putBufferData(nodeid, reading);
 	}
-	
+	public void putReading(Map<Integer, Double> reading){
+		Set<Integer> key = reading.keySet();
+		Iterator<Integer> iterator = key.iterator();
+		for(double i : reading.values()){
+			buffer.putBufferData(iterator.next(), i);
+		}
+	}
+	//TODO Test getCorrelationTable
+	public Map<Integer, Map<Integer, Double>> getCorrelationTable(){//get correlation from reading buffer	
+		Map<Integer, Double> reading = buffer.getBufferData();
+		Set<Integer> key = reading.keySet();
+		Iterator<Integer> iterator= key.iterator();
+		for(double i : reading.values()){
+			int nodei = iterator.next();
+			Set<Integer> key2 = reading.keySet();
+			Iterator<Integer> iterator2= key2.iterator();
+			Map<Integer, Double> temp = new HashMap<Integer, Double>();
+			for(double j : reading.values()){
+				int nodej = iterator2.next();
+				if(i != j){
+					temp.put(nodej, (i/j));
+				}
+			}
+			correlationtable.put(nodei, temp);
+		}		
+		if(correlationtable == null){
+			logger.warn("Warn: Null correlation table");
+			return null;
+		}
+		return correlationtable;
+	}
 	public void removeNode(int nodeid){
 		correlationmap.remove(nodeid);
 		for(int i = 0 ; i < correlationmap.size() ; i++){
 			correlationmap.get(nodeindex.get(i)).remove(nodeid);
 		}
 	}
-	public Map<Integer, Map<Integer, Double>> getCorrelationTable(){
+	public Map<Integer, Map<Integer, Double>> getCorrelationTrendTable(){//get correlation from regression correlation
 //		bufferToCorrelationt();
 		updateCorrelationTable();
-		return correlationtable;
+		if(correlationtrendtable == null){
+			logger.warn("Warn: Null correlation trend table");
+			return null;
+		}
+		return correlationtrendtable;
 	}
 	public void updateCorrelations(){//From buffer to correlation Map
 		bufferToCorrelationt();
@@ -67,7 +107,7 @@ public class CorrelationManager {
 					correlationmap.get(i).get(j).addPair(buffer.getBufferData(i), buffer.getBufferData(j));
 				}
 			}
-		}
+		} 
 		
 //		Map<Integer, Double> bufferdata = buffer.getBufferData();
 //		Set<Integer> key = bufferdata.keySet();
@@ -97,10 +137,10 @@ public class CorrelationManager {
 	}
 	
 	private void newCorrelationTableEntry(int nodeid){
-		for(int i = 0 ; i < correlationtable.size() ; i++){
-			correlationtable.get(nodeindex.get(i)).put(nodeid, (double) 0);
+		for(int i = 0 ; i < correlationtrendtable.size() ; i++){
+			correlationtrendtable.get(nodeindex.get(i)).put(nodeid, (double) 0);
 		}
-		correlationtable.put(nodeid, newCorrelationTableList());
+		correlationtrendtable.put(nodeid, newCorrelationTableList());
 	}
 	
 	private Map<Integer, Correlation> newCorrelationMapList(){
@@ -124,7 +164,7 @@ public class CorrelationManager {
 			for(int j : nodeindex){
 				if(j != i){
 					double correlation = correlationmap.get(i).get(j).getCorrelation();
-					correlationtable.get(i).put(j, correlation);
+					correlationtrendtable.get(i).put(j, correlation);
 //					correlationtable.get(j).put(i, correlation);
 				}
 			}

@@ -28,7 +28,6 @@ public class ProcessManager {
 	}
 
 	//TODO To complete the Function
-	//TODO Construct DFD Manager
 	public void putReading(int nodeid, double reading){
 		readingbuffer.putBufferData(nodeid, reading);
 	}

@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 public final class DFDEngine {
 	// Set up final Instance
-	private static DFDEngine self = new DFDEngine(0.2, 0.5);
+	private static DFDEngine self = new DFDEngine(0.8, 0.5);
 	// Private variables
 	//faulty conditions
 	private short FT = 0;
@@ -51,17 +51,13 @@ public final class DFDEngine {
 	//Private Functions
 	private void firstRoundVoting(){
 		logger.info("Start first voting / size = " + correlationstrengthtable.size());
-		logger.info("ttt 1 : " + correlationstrengthtable.get(1).size());
 		faultycondition.clear();
 		Set<Integer> key = correlationstrengthtable.keySet();
 		Iterator<Integer> iterator = key.iterator();
-		for(Map<Integer, Double> i : correlationstrengthtable.values()){
-			int e = iterator.next();
-			logger.info("first marking : " + e + " size : " + i.size());
+		for(Map<Integer, Double> i : correlationstrengthtable.values()){;
 			int totalneighbournumber = 0;
 			int goodneighbournumber = 0;
-			double goodratio = 0;
-			//iterate all its correlation strength
+			//Count good neighbour number through all its correlation strength
 			for(double j : i.values()){
 				totalneighbournumber++;
 				if(j >= threshold){
@@ -70,30 +66,25 @@ public final class DFDEngine {
 			}
 			//setup up first voting result
 			try {
-				goodratio = goodneighbournumber/totalneighbournumber;
+				if ((double)goodneighbournumber/(double)totalneighbournumber >= faultneighbourthreshold) {//more then 1/2 neighbours think claim you are normal
+					faultycondition.put(iterator.next(), LG);
+				} else {
+					faultycondition.put(iterator.next(), LF);
+				}
 			} catch (Exception e2) {
-				logger.error("divide zero error");
+				logger.error("Error: No neighbour error in DFD process");
 			}
-			
-			
-			if(goodratio > faultneighbourthreshold){
-				logger.info("mark " + e);
-				faultycondition.put(e, LG);
-				logger.info("mark " + e);
-			}
-			else{
-				faultycondition.put(e, LF);
-				logger.warn("mark " + e);
-			}
+
 		}
 		logger.info("First voting complete");
 	}
-	
+
 	private void secondRoundVoting(){
 		logger.info("Second voting start");
 		Set<Integer> key = correlationstrengthtable.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		for(Map<Integer, Double> i : correlationstrengthtable.values()){
+			int iteratenumber = iterator.next();
 			int totalneighbournumber = 0;
 			int goodneighbournumber = 0;
 			int LGneighbournumber = 0;
@@ -102,28 +93,40 @@ public final class DFDEngine {
 			Iterator<Integer> iterator2 = key2.iterator();
 			for(double j : i.values()){
 				totalneighbournumber++;
-				if(j >= threshold && faultycondition.get(iterator2.next()) ==LG){ // only count LG neighbour's reference
-					goodneighbournumber++;
-					LGneighbournumber++;
+				int neighbour = iterator2.next();
+				try {
+					
+					if (faultycondition.get(neighbour) == LG) { 
+						LGneighbournumber++;
+						if (j >= threshold) {
+							goodneighbournumber++;
+						}
+					}
+				} catch (Exception e) {
+					logger.error("Error: Correlation strength table does not symmetrically paired on Node[" + iteratenumber + "] with unknown Node[" + neighbour + "]");
 				}
+
 			}
 			//setup up second voting result
-			if((goodneighbournumber/totalneighbournumber) >= faultneighbourthreshold){
-				if(LGneighbournumber >= leastLGnumber){
-					finalfaultycondition.put(iterator.next(), GD);
+			try {
+				if ((double)goodneighbournumber / (double)totalneighbournumber >= faultneighbourthreshold) {														
+					if (LGneighbournumber >= leastLGnumber) {
+						finalfaultycondition.put(iteratenumber, GD);
+					} else {
+						finalfaultycondition.put(iteratenumber, LG);
+					}
+				} 
+				else {
+					if (LGneighbournumber >= leastLGnumber) {
+						finalfaultycondition.put(iteratenumber, FT);
+					} else {
+						finalfaultycondition.put(iteratenumber, LF);
+					}
 				}
-				else{
-					finalfaultycondition.put(iterator.next(), LG);
-				}
+			} catch (Exception e) {
+				logger.error("Error: divide zero error");
 			}
-			else{
-				if(LGneighbournumber >= leastLGnumber){
-					finalfaultycondition.put(iterator.next(), FT);
-				}
-				else{
-					finalfaultycondition.put(iterator.next(), LF);
-				}
-			}
+			
 		}
 		logger.info("Second voting Finish");
 	}

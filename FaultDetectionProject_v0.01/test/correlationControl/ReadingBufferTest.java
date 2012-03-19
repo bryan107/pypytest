@@ -45,7 +45,7 @@ public class ReadingBufferTest extends TestCase {
 			manager.putReading(3, reading3[i]);
 			manager.updateCorrelations();
 		}
-		Map<Integer,Map<Integer,Double>> correlationtable = manager.getCorrelationTable();
+		Map<Integer,Map<Integer,Double>> correlationtable = manager.getCorrelationTrendTable();
 		
 		Correlation correlation1 = new Correlation(5);
 		Correlation correlation2 = new Correlation(5);

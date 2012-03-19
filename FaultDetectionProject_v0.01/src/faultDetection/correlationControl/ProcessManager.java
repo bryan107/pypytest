@@ -23,6 +23,9 @@ public class ProcessManager {
 	public void updateCorrelationSampleSize(int size){
 		manager.updateSampleSize(size);
 	}
+	public void updateDFDThreshold(double threshold){
+		
+	}
 
 	//TODO To complete the Function
 	//TODO Construct DFD Manager

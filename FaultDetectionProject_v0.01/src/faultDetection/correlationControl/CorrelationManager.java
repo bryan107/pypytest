@@ -19,43 +19,50 @@ public class CorrelationManager {
 	private Map<Integer, Map<Integer, Double>> correlationtable = new HashMap<Integer, Map<Integer,Double>>();
 	//Correlation Table is the correlation between readings in the reading buffer
 	private int samplesize;
+	private int correlationpower;
 	private ReadingBuffer buffer =new ReadingBuffer();	
 	
 	private static Log logger = LogFactory.getLog(CorrelationManager.class);
 	//----------------------------------------------------------------------
 	
 	//----------------------------Constructor-------------------------------
-	public CorrelationManager(int size){
-		updateSampleSize(size);
+	public CorrelationManager(int samplesize, int correlationpower){
+		updateSampleSize(samplesize);
+		updateCorrelationPower(correlationpower);
 	}
 	//----------------------------------------------------------------------
 	//--------------------------Public Functions----------------------------
 
-	public void updateSampleSize(int size){
-		this.samplesize = size;
+	public void updateSampleSize(int samplesize){
+		this.samplesize = samplesize;
 	}
+	
+	public void updateCorrelationPower(int correlationpower){
+		this.correlationpower = correlationpower;
+	}
+	
 	public void putReading(int nodeid, double reading){
 		for(int i : nodeindex){
 			if(i == nodeid){
 //				logger.info("GetData=> Node: " + nodeid + " Reading:" + reading);
-				buffer.putBufferData(nodeid, reading);
-				logger.info("Node" + nodeid + " has been update");
+				buffer.putBufferData(nodeid, Math.pow(reading, (1.0/correlationpower)));
+				logger.info("Node[" + nodeid + "] has been update");
 				return;
 			}
 		}
-		logger.info("New Node" + nodeid + " has been added");
+		logger.info("New Node[" + nodeid + "] has been added");
 		addNewNode(nodeid);
 		logger.info("Index Size = " + nodeindex.size());
-		buffer.putBufferData(nodeid, reading);
+//		logger.info("Reading = " + reading + " Correlation = " + Math.pow(reading, (1.0/correlationpower)) + "Power" + correlationpower);
+		buffer.putBufferData(nodeid, Math.pow(reading, (1.0/correlationpower)));
 	}
 	public void putReading(Map<Integer, Double> reading){
 		Set<Integer> key = reading.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		for(double i : reading.values()){
-			buffer.putBufferData(iterator.next(), i);
+			buffer.putBufferData(iterator.next(), Math.pow(i, (1.0/correlationpower)));
 		}
 	}
-	//TODO Test getCorrelationTable
 	public Map<Integer, Map<Integer, Double>> getCorrelationTable(){//get correlation from reading buffer	
 		Map<Integer, Double> reading = buffer.getBufferData();
 		Set<Integer> key = reading.keySet();
@@ -67,13 +74,14 @@ public class CorrelationManager {
 			Map<Integer, Double> temp = new HashMap<Integer, Double>();
 			for(double j : reading.values()){
 				int nodej = iterator2.next();
-				if(i != j){
-					temp.put(nodej, (i/j));
+				
+				if(nodei != nodej){
+					temp.put(nodej, (j/i));
 				}
 			}
 			correlationtable.put(nodei, temp);
 		}		
-		if(correlationtable == null){
+		if(correlationtable.size() == 0){
 			logger.warn("Warn: Null correlation table");
 			return null;
 		}
@@ -94,6 +102,7 @@ public class CorrelationManager {
 		}
 		return correlationtrendtable;
 	}
+	//TODO only update the readings qualified by DFDEngine
 	public void updateCorrelations(){//From buffer to correlation Map
 		bufferToCorrelationt();
 	}

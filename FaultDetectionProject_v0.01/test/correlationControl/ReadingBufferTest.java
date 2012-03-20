@@ -38,7 +38,7 @@ public class ReadingBufferTest extends TestCase {
 		double[] reading2 = {20,20,20,20,20};
 		double[] reading3 = {22,24,23,20,21};
 		
-		CorrelationManager manager = new CorrelationManager(5);
+		CorrelationManager manager = new CorrelationManager(5,1);
 		for(int i = 0 ; i < 5 ; i++){
 			manager.putReading(1, reading1[i]);
 			manager.putReading(2, reading2[i]);

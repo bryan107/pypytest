@@ -11,9 +11,9 @@ public class ProcessManager {
 	private Map<Integer, double[]> markedreading = new HashMap<Integer, double[]>();
 	//--------------------------------------------------------------
 	//----------------------Constructor-----------------------------
-	public ProcessManager(IntervalControl intervalControl, int size){
+	public ProcessManager(IntervalControl intervalControl, int samplesize, int eventpower){
 		updateIntervalController(intervalControl);
-		manager = new CorrelationManager(size);
+		manager = new CorrelationManager(samplesize, eventpower);
 	}
 	//--------------------------------------------------------------
 	//---------------------Public Functions--------------------------

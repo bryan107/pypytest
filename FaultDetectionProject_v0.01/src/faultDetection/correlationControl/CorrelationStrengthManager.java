@@ -16,7 +16,7 @@ public final class CorrelationStrengthManager {
 	public void updateErrorTolerance(double errortolerance){
 		this.errortolerance = errortolerance;
 	}
-	public void updateCorrelationStrengthTable(Map<Integer, Map<Integer, Double>> correlationtable, Map<Integer, Double> readings){
+	public void updateCorrelationStrengthTable(Map<Integer, Map<Integer, Double>> correlationtable, Map<Integer, Map<Integer, Double>> correlationtrendtable){
 		
 	}
 	public Map<Integer, Map<Integer, Double>> getCorrelationStrength(){

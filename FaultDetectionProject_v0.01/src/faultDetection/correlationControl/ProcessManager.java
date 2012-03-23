@@ -13,7 +13,7 @@ public class ProcessManager {
 	//----------------------Constructor-----------------------------
 	public ProcessManager(IntervalControl intervalControl, int samplesize, int eventpower){
 		updateIntervalController(intervalControl);
-		manager = new CorrelationManager(samplesize, eventpower);
+//		manager = new CorrelationManager(samplesize, eventpower);
 	}
 	//--------------------------------------------------------------
 	//---------------------Public Functions--------------------------

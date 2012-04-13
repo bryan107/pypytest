@@ -17,18 +17,22 @@ public class CorrelationManager {
 	private Map<Integer, Map<Integer, Correlation>> correlationmap = new HashMap<Integer, Map<Integer, Correlation>>();
 	private List<Integer> nodeindex = new ArrayList<Integer>();
 	private Map<Integer, Queue<Boolean>> deviceconditioncount = new HashMap<Integer, Queue<Boolean>>();
+	// A count logging the counts of faulty readings before the node is declared to be faulty when reaching the threshold.
 	private Map<Integer, Boolean> devicecondition = new HashMap<Integer, Boolean>();
+	// Node faulty condition.
 	private Map<Integer, Map<Integer, Double>> correlationtrendtable = new HashMap<Integer, Map<Integer, Double>>();
-	// Correlation Trend Table is the estimate correlation calculated with
-	// regression
+	// Correlation Trend Table is the estimate correlation calculated with regression analysis
 	private Map<Integer, Map<Integer, Double>> correlationtable = new HashMap<Integer, Map<Integer, Double>>();
-	// Correlation Table is the correlation between readings in the reading
-	// buffer
+	// Correlation Table is the correlation between readings in the reading buffer
 	private int samplesize;
 	private int correlationpower;
 	private double maxfaultratio;
 	private ReadingBuffer buffer = new ReadingBuffer();
-
+	// Definition of reading conditions
+//	private final short FT = 0;
+//	private final short LF = 1;
+//	private final short LG = 2;
+//	private final short GD = 3;
 	private static Log logger = LogFactory.getLog(CorrelationManager.class);
 
 	// ----------------------------------------------------------------------
@@ -43,7 +47,7 @@ public class CorrelationManager {
 
 	// ----------------------------------------------------------------------
 	// --------------------------Public Functions----------------------------
-
+	//TODO A new function that reset faulty node as a default node when the nodes are repaired.
 	public void updateSampleSize(int samplesize) {
 		this.samplesize = samplesize;
 	}
@@ -113,12 +117,12 @@ public class CorrelationManager {
 
 	// TODO only update the readings qualified by DFDEngine
 	public void updateCorrelations(Map<Integer, Boolean> devicefaultcondition) {
-		checkDeviceCondition(devicefaultcondition);
-		bufferToCorrelationt();
+		checkDeviceCondition(devicefaultcondition); // Update node condition
+		bufferToCorrelation(); // buffer to correlation if node condition is normal.
 	}
 
 	public void updateCorrelations() {// From buffer to correlation Map
-		bufferToCorrelationt();
+		bufferToCorrelation();
 	}
 
 	public Map<Integer, Boolean> getDeviceCondition() {
@@ -146,7 +150,7 @@ public class CorrelationManager {
 		buffer.putBufferData(nodeid,
 				Math.pow(reading, (1.0 / correlationpower)));
 	}
-
+	
 	private void checkDeviceCondition(Map<Integer, Boolean> devicefaultcondition) {
 		Set<Integer> key = devicefaultcondition.keySet();
 		Iterator<Integer> iterator = key.iterator();
@@ -192,7 +196,7 @@ public class CorrelationManager {
 
 	}
 
-	private void bufferToCorrelationt() {
+	private void bufferToCorrelation() {
 		for (int i : nodeindex) {
 			for (int j : nodeindex) {
 				try {

@@ -7,16 +7,16 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+//TODO DFD only reference node which has normal condition
 public final class DFDEngine {
 	// Set up final Instance
 	private static DFDEngine self = new DFDEngine(0.8, 0.5);
 	// Private variables
 	//faulty conditions
-	private short FT = 0;
-	private short LF = 1;
-	private short LG = 2;
-	private short GD = 3;
+	private final short FT = 0;
+	private final short LF = 1;
+	private final short LG = 2;
+	private final short GD = 3;
 	//
 	private double threshold; 
 	private double leastLGnumber;

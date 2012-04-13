@@ -11,12 +11,17 @@ public class Correlation {
 	private boolean mapenable;	//Fulfill the requirement 
 	private static Log logger = LogFactory.getLog(Correlation.class);
 	
-	public Correlation(int mapsize){
+	public Correlation(int samplesize){
+		resetCorrelation(samplesize);
+	}
+
+	public void resetCorrelation(int samplesize) {
 		mappointer = 0;
 		mapenable = false;
-		this.samplesize = mapsize;
+		this.samplesize = samplesize;
 		pair = new double[2][this.samplesize];
 	}
+
 	
 	public void addPair(double x , double y){
 		pair[0][mappointer] = x;

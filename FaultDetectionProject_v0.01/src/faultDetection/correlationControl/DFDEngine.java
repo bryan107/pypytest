@@ -1,7 +1,9 @@
 package faultDetection.correlationControl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 public final class DFDEngine {
 	// Set up final Instance
 	private static DFDEngine self = new DFDEngine(0.8, 0.5);
-	// Private variables
+	//---------------------Private variables--------------------------
 	//faulty conditions
 	private final short FT = 0;
 	private final short LF = 1;
@@ -21,18 +23,19 @@ public final class DFDEngine {
 	private double threshold; 
 	private double leastLGnumber;
 	private double faultneighbourthreshold = 0.5;
-	private Map<Integer, Map<Integer, Double>> correlationstrengthtable;
+	private Map<Integer, Map<Integer, Double>> correlationstrengthtable = new HashMap<Integer, Map<Integer, Double>>();
 	private Map<Integer, Short> faultycondition = new HashMap<Integer, Short>();
 	private Map<Integer, Short> finalfaultycondition = new HashMap<Integer, Short>();
 	
 	private static Log logger = LogFactory.getLog(DFDEngine.class);
-	
-	// Constructor
+	//---------------------------------------------------------------
+	//-------------------------Constructor---------------------------
 	public DFDEngine(double threshold, double leastLGnumber){
 		updateThreshold(threshold);
 		updateLeastLGNumber(leastLGnumber);
 	}
-	// Public Functions
+	//---------------------------------------------------------------
+	//------------------------Public Functions-----------------------
 	public static DFDEngine getInstance(){
 		return self;
 	}
@@ -42,13 +45,49 @@ public final class DFDEngine {
 	public void updateThreshold(double threshold){
 		this.threshold = threshold;
 	}
-	public Map<Integer, Short> faultConditionalMarking(Map<Integer, Map<Integer, Double>> correlationstrengthtable){
-		this.correlationstrengthtable = correlationstrengthtable;
+	public Map<Integer, Short> faultConditionalMarking(Map<Integer, Map<Integer, Double>> correlationstrengthtable, Map<Integer, Boolean> devicecondition){
+		
+		setupLocalCorrelationStrengthTable(correlationstrengthtable, devicecondition);
 		firstRoundVoting();
 		secondRoundVoting();
 		return finalfaultycondition;
 	}
-	//Private Functions
+	//----------------------------------------------------------------
+	//------------------------Private Functions-----------------------
+	private void setupLocalCorrelationStrengthTable(
+			Map<Integer, Map<Integer, Double>> correlationstrengthtable,
+			Map<Integer, Boolean> devicecondition) {
+		if(this.correlationstrengthtable.isEmpty() != true){
+			this.correlationstrengthtable.clear();
+		}
+		List<Integer> faultynodeid = new ArrayList<Integer>();
+		Set<Integer> key1 = devicecondition.keySet();
+		Iterator<Integer> iterator1= key1.iterator();
+		while(iterator1.hasNext()){
+			int nodeid = iterator1.next();
+			if(devicecondition.get(nodeid) == false){
+				faultynodeid.add(nodeid);
+			}
+		}
+						
+		Set<Integer> key2 = correlationstrengthtable.keySet();
+		Iterator<Integer> iterator2= key2.iterator();
+		for(Map<Integer, Double> raw : correlationstrengthtable.values()){
+			int nodeid = iterator2.next();
+			if(devicecondition.get(nodeid) != false){
+				for(int id : faultynodeid){
+					raw.remove(id);
+				}
+				try {
+					this.correlationstrengthtable.put(nodeid, raw);
+				} catch (Exception e) {
+					logger.error("Error:" + e.toString());
+				}
+				
+			}
+		}
+	}
+
 	private void firstRoundVoting(){
 		logger.info("Start first voting / size = " + correlationstrengthtable.size());
 		faultycondition.clear();

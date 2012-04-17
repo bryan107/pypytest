@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 public final class DFDEngine {
+	// Predefined variable
+	private final static double predefinedthreshold = 0.8;
+	private final static double predefinedleastLGnumber = 0.5;
 	// Set up final Instance
-	private static DFDEngine self = new DFDEngine(0.8, 0.5);
+	private static DFDEngine self = new DFDEngine(predefinedthreshold, predefinedleastLGnumber);
 	//---------------------Private variables--------------------------
 	//faulty conditions
 	private final short FT = 0;

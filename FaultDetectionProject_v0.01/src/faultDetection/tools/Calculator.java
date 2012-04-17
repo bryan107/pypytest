@@ -19,7 +19,6 @@ public final class Calculator {
 	}
 
 //	General purpose for the project-------------------------------
-	//TODO Fix the boundary error
 	public double correlationStrengthOriginal(double input, double estimatecorrelation, double boundary){
 		double upperbondary = estimatecorrelation*(1.0 + boundary);
 		double lowerbondary = estimatecorrelation/(1.0 + boundary);
@@ -58,7 +57,7 @@ public final class Calculator {
 		return (y/x);
 	}
 	
-	
+	//TODO implement Theil-Sen estimator regression
 //	Regression----------------------------------------------------
 	
 	private void regressionSetup(double[] x, double[] y){

@@ -37,7 +37,7 @@ public class ProcessManager {
 
 	}
 
-	// TODO To complete the Process
+	// TODO To test the Process
 	public Map<Integer, MarkedReading> MarkReadings(Map<Integer, Double> readingpack) {
 		// Variables
 		Map<Integer, Boolean> devicecondition;
@@ -51,20 +51,22 @@ public class ProcessManager {
 		putReading(readingpack);
 		// SETP 1: Put readings to correlation manager
 		manager.putReading(readingbuffer.getBufferData());
-		// SETP 2: Correlation Manager Setup: 1.device condition 2.correlation
-		// table 3.correlation trend table
+		//
+		// SETP 2: Correlation Manager Setup: 1.device condition 2.correlation table 3.correlation trend table
 		devicecondition = manager.getDeviceCondition();
 		correlationtable = manager.getCorrelationTable();
 		correlationtrendtable = manager.getCorrelationTrendTable();
-		// SETP 3 : Correlation Strength Manager setup: correlation strength
-		// table
+		//
+		// SETP 3 : Correlation Strength Manager setup: correlation strength table
 		correlationstrengthtable = CorrelationStrengthManager.getInstance()
 				.getCorrelationStrengthTable(correlationtable,
 						correlationtrendtable);
+		//
 		// SETP 4 : DFD Engine marks the readings
 		readingfaultcondition = DFDEngine.getInstance()
 				.faultConditionalMarking(correlationstrengthtable,
 						devicecondition);
+		//
 		// SETP 5 : Update device condition from the result of DFD & generate
 		// reading trustworthiness
 		manager.updateCorrelations(readingfaultcondition);
@@ -72,7 +74,7 @@ public class ProcessManager {
 				.getReadingTrustworthiness(correlationstrengthtable,
 						readingfaultcondition);
 		// Return result
-		// TODO return process
+		
 		devicecondition = manager.getDeviceCondition();
 		Set<Integer> key = readingpack.keySet();
 		Iterator<Integer> iterator = key.iterator();

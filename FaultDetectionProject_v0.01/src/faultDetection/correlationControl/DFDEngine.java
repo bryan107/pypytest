@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//TODO DFD only reference node which has normal condition
 public final class DFDEngine {
 	// Set up final Instance
 	private static DFDEngine self = new DFDEngine(0.8, 0.5);

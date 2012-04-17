@@ -4,25 +4,42 @@ package faultDetection.tools;
 import flanagan.analysis.Regression;
 import flanagan.analysis.Stat;
 
-public final class Caculator {
+public final class Calculator {
 	private Regression reg;
 //	private static Log logger = LogFactory.getLog(Caculator.class);
 	
-	private static Caculator self = new Caculator();
+	private static Calculator self = new Calculator();
 	
-	public Caculator(){
+	public Calculator(){
 
 	}
 	
-	public static Caculator getInstance(){
+	public static Calculator getInstance(){
 		return self;
 	}
 
 //	General purpose for the project-------------------------------
+	//TODO Fix the boundary error
+	public double correlationStrengthOriginal(double input, double estimatecorrelation, double boundary){
+		double upperbondary = estimatecorrelation*(1.0 + boundary);
+		double lowerbondary = estimatecorrelation/(1.0 + boundary);
+		double result = 1;
+		if(input < estimatecorrelation){
+			result = (input - lowerbondary) / (estimatecorrelation - lowerbondary);
+			if(result < 0)
+				return 0;
+		}
+		else if(input > estimatecorrelation){
+			result = (upperbondary - input) / (upperbondary - estimatecorrelation);
+			if(result < 0)
+				return 0;
+		}
+		return result;
+	}
 	
-	public double correlationStrength(double input, double estimatecorrelation, double bondary){
-		double upperbondary = estimatecorrelation*bondary;
-		double lowerbondary = estimatecorrelation/bondary;
+	public double correlationStrength(double input, double estimatecorrelation, double boundary){
+		double upperbondary = estimatecorrelation + (estimatecorrelation*boundary);
+		double lowerbondary = estimatecorrelation - (estimatecorrelation*boundary);
 		double result = 1;
 		if(input < estimatecorrelation){
 			result = (input - lowerbondary) / (estimatecorrelation - lowerbondary);

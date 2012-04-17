@@ -12,7 +12,6 @@ public class JustTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
 		nodemap.put(12, 12);
 		nodemap.put(13, 12);

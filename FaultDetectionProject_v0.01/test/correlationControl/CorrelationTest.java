@@ -1,7 +1,7 @@
 package correlationControl;
 
 import faultDetection.correlationControl.Correlation;
-import faultDetection.tools.Caculator;
+import faultDetection.tools.Calculator;
 import junit.framework.TestCase;
 
 public class CorrelationTest extends TestCase {
@@ -22,7 +22,7 @@ public class CorrelationTest extends TestCase {
 		System.out.println("Error = " + co1.getCorrelationError());
 		double[][] updatedpair1 = co1.getPair();
 		
-		double test = Caculator.getInstance().correlationStrength(Caculator.getInstance().generateCorrelation(30, 19), co1.getCorrelation(), 1.8);
+		double test = Calculator.getInstance().correlationStrength(Calculator.getInstance().generateCorrelation(30, 19), co1.getCorrelation(), 1.8);
 		System.out.println("New pair Strength = " + test);
 		
 		co1.addPair(30, 19);

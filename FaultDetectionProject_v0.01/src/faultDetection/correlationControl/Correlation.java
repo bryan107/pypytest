@@ -2,7 +2,7 @@ package faultDetection.correlationControl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import faultDetection.tools.Caculator;
+import faultDetection.tools.Calculator;
 
 public class Correlation {
 	private double[][] pair;
@@ -56,7 +56,7 @@ public class Correlation {
 	
 	public double getCorrelation(){
 		if(mapenable == true){
-			return Caculator.getInstance().getRegressionSlope(pair[0], pair[1]);
+			return Calculator.getInstance().getRegressionSlope(pair[0], pair[1]);
 		}
 		else{
 			logger.warn("Not enough inputs for getCorrelation");
@@ -67,7 +67,7 @@ public class Correlation {
 	
 	public double getCorrelationError(){
 		if(mapenable == true){
-			return Caculator.getInstance().getRegressionError(pair[0], pair[1]);
+			return Calculator.getInstance().getRegressionError(pair[0], pair[1]);
 		}
 		else{
 			logger.warn("Not enough inputs for getCorrelationError");

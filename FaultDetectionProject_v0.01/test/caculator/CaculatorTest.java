@@ -1,6 +1,6 @@
 package caculator;
 
-import faultDetection.tools.Caculator;
+import faultDetection.tools.Calculator;
 import flanagan.analysis.Regression;
 import junit.framework.TestCase;
 
@@ -9,7 +9,7 @@ public class CaculatorTest extends TestCase {
 	double[] y = {50,50,50,50,50};
 	
 	public void testCaculatorRegression(){
-		Caculator calc = new Caculator();
+		Calculator calc = new Calculator();
 	
 		Regression reg = new Regression(x, y);
 		reg.linearGeneral();
@@ -24,7 +24,7 @@ public class CaculatorTest extends TestCase {
 	
 	
 	public void testCaculatorCorrelation(){
-		System.out.println(Caculator.getInstance().correlationStrength(1.09, 1, 2));
-		System.out.println(Caculator.getInstance().correlationStrength(0.65, 1, 1.2));
+		System.out.println(Calculator.getInstance().correlationStrength(1.09, 1, 2));
+		System.out.println(Calculator.getInstance().correlationStrength(0.65, 1, 1.2));
 	}
 }

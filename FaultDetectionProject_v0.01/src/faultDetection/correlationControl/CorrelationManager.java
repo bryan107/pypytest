@@ -36,6 +36,7 @@ public class CorrelationManager {
 //	private final short LF = 1;
 //	private final short LG = 2;
 //	private final short GD = 3;
+	private final boolean devicedefaultcondition = true;
 	private static Log logger = LogFactory.getLog(CorrelationManager.class);
 
 	// ----------------------------------------------------------------------
@@ -199,10 +200,8 @@ public class CorrelationManager {
 		for (boolean i : readingfaultcondition.values()) {
 			int nodeid = iterator.next();
 			try {
-				if (deviceconditioncount.get(nodeid).size() == 0) {
-					deviceconditioncount.get(nodeid).add(i);
-				} else if (deviceconditioncount.get(nodeid).size() < samplesize) {
-					deviceconditioncount.get(nodeid).add(i);
+				if (deviceconditioncount.get(nodeid).size() < samplesize) {//Assume new node are normal in the learning stage.
+					deviceconditioncount.get(nodeid).add(true);
 					if (deviceconditioncount.get(nodeid).size() == samplesize) {
 						updateDeviceCondition(nodeid);
 					}
@@ -228,8 +227,8 @@ public class CorrelationManager {
 					count++;
 				}
 			}
-			logger.info("[" + nodeid + "] samplesize = " + samplesize + " errorcount:" + count);
-			logger.info("[" + nodeid + "]fault ratio:" +  (double)count / samplesize + " max:" + maxfaultratio);
+//			logger.info("[" + nodeid + "] samplesize = " + samplesize + " errorcount:" + count);
+//			logger.info("[" + nodeid + "]fault ratio:" +  (double)count / samplesize + " max:" + maxfaultratio);
 			if ((double) count / samplesize >= maxfaultratio) {
 				logger.info("device fault");
 				devicecondition.put(nodeid, false);
@@ -270,7 +269,7 @@ public class CorrelationManager {
 		newCorrelationMapEntry(nodeid);
 		newCorrelationTableEntry(nodeid);
 		deviceconditioncount.put(nodeid, new LinkedList<Boolean>());
-		devicecondition.put(nodeid, true);
+		devicecondition.put(nodeid, devicedefaultcondition);
 		// logger.info("Has addd node[" + nodeid + "] to devicecondition");
 		nodeindex.add(nodeid); // put last to avoid self-reference
 		// devicecondition.put(nodeid, value)

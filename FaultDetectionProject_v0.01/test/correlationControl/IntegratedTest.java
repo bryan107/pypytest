@@ -19,6 +19,7 @@ public class IntegratedTest extends TestCase {
 	private final short LF = 1;
 	private final short LG = 2;
 	private final short GD = 3;
+	private final String[] faultcondition = {"FT", "LF", "LG", "GD", "UNKNOWN"};
 	
 	private static Log logger = LogFactory.getLog(IntegratedTest.class);
 	
@@ -26,7 +27,7 @@ public class IntegratedTest extends TestCase {
 	
 	public void testReadingPack(){
 		System.out.println("Reading Pack:");
-		readingpack = setupReadingPack(0.1, 0.1, 100, 100, 25, 5, 5);
+		readingpack = setupReadingPack(0.1, 4, 0.1, 100, 100, 25, 5, 5);
 		Set<Integer> key = readingpack.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		while(iterator.hasNext()){
@@ -48,19 +49,20 @@ public class IntegratedTest extends TestCase {
 		int samplesize = 20;  //Critical
 		int correlationpower = 1;
 		double maxfaultratio = 0.293; //Static
-		double cstrcorrelationerrortolerance = 0.2; //Criical
+		double cstrcorrelationerrortolerance = 0.2; //Critical
 		double dfdtreshold = 0.7; //Critical
 		//Setup reading package (Auto data generating)
-		int readingpacksize = 100;
+		int readingpacksize = 22;
 		double noise = 0.1;
+		int errornodeid = 4;
 		double error = 1.0;
 		int errorround = 35;
 		int newnoderound = 75;
 		double readingbaseline = 25;
-		int nodenumber = 5;
+		int newnodeid = 5;
 		
 		//Define Objects
-		Map<Integer, Boolean> devicecondition;
+		Map<Integer, Short> devicecondition;
 		Map<Integer, Map<Integer, Double>> correlationtable;
 		Map<Integer, Map<Integer, Double>> correlationtrendtable;
 		Map<Integer, Map<Integer, Double>> correlationstrengthtable;
@@ -71,7 +73,7 @@ public class IntegratedTest extends TestCase {
 		DFDEngine.getInstance().updateThreshold(dfdtreshold);
 		CorrelationStrengthManager.getInstance().updateErrorTolerance(cstrcorrelationerrortolerance);
 		CorrelationManager manager = new CorrelationManager(samplesize, correlationpower, maxfaultratio);
-		readingpack = setupReadingPack(noise, error, errorround, newnoderound, readingbaseline, readingpacksize, nodenumber);
+		readingpack = setupReadingPack(noise, errornodeid, error, errorround, newnoderound, readingbaseline, readingpacksize, newnodeid);
 		
 		
 
@@ -124,13 +126,13 @@ public class IntegratedTest extends TestCase {
 			System.out.print("[" + nodeid + "] in round" + devicefaultround.get(nodeid) + "; ");
 		}
 	}
-	private void logDeviceFaultRound(Map<Integer, Boolean> devicecondition,
+	private void logDeviceFaultRound(Map<Integer, Short> devicecondition,
 			Map<Integer, Integer> devicefaultround, int packid) {
 		Set<Integer> key2 = devicecondition.keySet();
 		Iterator<Integer> iterator2 = key2.iterator();
 		while(iterator2.hasNext()){
 			int nodeid = iterator2.next();
-			if(devicecondition.get(nodeid) == false && devicefaultround.get(nodeid) == null){
+			if(devicecondition.get(nodeid) == FT && devicefaultround.get(nodeid) == null){
 				devicefaultround.put(nodeid, packid);
 			}
 		}
@@ -209,13 +211,13 @@ public class IntegratedTest extends TestCase {
 		System.out.println();
 	}
 
-	private void outPutDeviceCondition(Map<Integer, Boolean> devicecondition) {
+	private void outPutDeviceCondition(Map<Integer, Short> devicecondition) {
 		System.out.println("Device Condition : ");
 		Set<Integer> key = devicecondition.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		while(iterator.hasNext()){
 			int nodeid = iterator.next();
-			System.out.print("[" + nodeid + "] " +devicecondition.get(nodeid) + " ");
+			System.out.print("[" + nodeid + "] " + faultcondition[devicecondition.get(nodeid)] + " ");
 		}
 		System.out.println();
 		System.out.println();
@@ -273,19 +275,31 @@ public class IntegratedTest extends TestCase {
 		return readingfaultcondition;
 	}
 	
-	private Map<Integer, Map<Integer, Double>> setupReadingPack(double noise, double error ,double errorround, double newnoderound, double readingbaseline, long round, int nodenumber){
+	private Map<Integer, Map<Integer, Double>> setupReadingPack(double noise, int errornodeid, double error ,double errorround, double newnoderound, double readingbaseline, long round, int newnodeid){
 		Map<Integer, Map<Integer, Double>> readingpack = new HashMap<Integer, Map<Integer, Double>>();
 
 		for(int i = 0 ; i < round ; i++){
 			Map<Integer, Double> readingpackentry = new HashMap<Integer, Double>();
-			for(int j = 0 ; j < nodenumber ; j++){
-				readingpackentry.put(j, (readingbaseline + (readingbaseline * noise * Math.random())));
+			for(int j = 0 ; j < newnodeid ; j++){
+				if(Math.random() < 0.5){
+					readingpackentry.put(j, (readingbaseline + (readingbaseline * noise * Math.random())));
+				}
+				else{
+					readingpackentry.put(j, (readingbaseline - (readingbaseline * noise * Math.random())));
+				}
+				
 			}
 			if(i > errorround){
-				readingpackentry.put(4, readingbaseline + (readingbaseline * error * Math.random()));
+				if(Math.random() < 0.5){
+					readingpackentry.put(errornodeid, readingbaseline + (readingbaseline * error * Math.random()));
+				}
+				else{
+					readingpackentry.put(errornodeid, readingbaseline - (readingbaseline * error * Math.random()));
+				}
+				
 			}
 			if(i > newnoderound){
-				readingpackentry.put(nodenumber, (readingbaseline + (readingbaseline * noise * Math.random())));
+				readingpackentry.put(newnodeid, (readingbaseline + (readingbaseline * noise * Math.random())));
 			}
 			readingpack.put(i, readingpackentry);
 

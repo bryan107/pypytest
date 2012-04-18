@@ -47,7 +47,7 @@ public final class DFDEngine {
 	public void updateThreshold(double threshold){
 		this.threshold = threshold;
 	}
-	public Map<Integer, Short> faultConditionalMarking(Map<Integer, Map<Integer, Double>> correlationstrengthtable, Map<Integer, Boolean> devicecondition){
+	public Map<Integer, Short> faultConditionalMarking(Map<Integer, Map<Integer, Double>> correlationstrengthtable, Map<Integer, Short> devicecondition){
 		
 		setupLocalCorrelationStrengthTable(correlationstrengthtable, devicecondition);
 		firstRoundVoting();
@@ -58,17 +58,17 @@ public final class DFDEngine {
 	//------------------------Private Functions-----------------------
 	private void setupLocalCorrelationStrengthTable(
 			Map<Integer, Map<Integer, Double>> correlationstrengthtable,
-			Map<Integer, Boolean> devicecondition) {
+			Map<Integer, Short> devicecondition) {
 		if(this.correlationstrengthtable.isEmpty() != true){
 			this.correlationstrengthtable.clear();
 		}
-		List<Integer> faultynodeid = new ArrayList<Integer>();
+		List<Integer> nonGDnodelist = new ArrayList<Integer>();
 		Set<Integer> key1 = devicecondition.keySet();
 		Iterator<Integer> iterator1= key1.iterator();
 		while(iterator1.hasNext()){
 			int nodeid = iterator1.next();
-			if(devicecondition.get(nodeid) == false){
-				faultynodeid.add(nodeid);
+			if(devicecondition.get(nodeid) != GD){
+				nonGDnodelist.add(nodeid);
 			}
 		}
 						
@@ -76,8 +76,8 @@ public final class DFDEngine {
 		Iterator<Integer> iterator2= key2.iterator();
 		for(Map<Integer, Double> raw : correlationstrengthtable.values()){
 			int nodeid = iterator2.next();
-			if(devicecondition.get(nodeid) != false){
-				for(int id : faultynodeid){
+			if(devicecondition.get(nodeid) != FT){
+				for(int id : nonGDnodelist){
 					raw.remove(id);
 				}
 				try {

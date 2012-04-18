@@ -40,7 +40,7 @@ public class ProcessManager {
 	// TODO To test the Process
 	public Map<Integer, MarkedReading> MarkReadings(Map<Integer, Double> readingpack) {
 		// Variables
-		Map<Integer, Boolean> devicecondition;
+		Map<Integer, Short> devicecondition;
 		Map<Integer, Map<Integer, Double>> correlationtable;
 		Map<Integer, Map<Integer, Double>> correlationtrendtable;
 		Map<Integer, Map<Integer, Double>> correlationstrengthtable;
@@ -89,7 +89,7 @@ public class ProcessManager {
 			} catch (Exception e) {
 				logger.error("Node [" + nodeid + "] cannot be successfully marked", e);
 			}
-
+		
 		}
 		return markedreadingpack;
 	}

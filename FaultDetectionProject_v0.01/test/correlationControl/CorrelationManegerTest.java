@@ -92,11 +92,11 @@ public class CorrelationManegerTest extends TestCase {
 	}
 	public void testGetDeviceCondition(){
 		testInput();
-		Map<Integer, Boolean> devicecondition = cm1.getDeviceCondition();
+		Map<Integer, Short> devicecondition = cm1.getDeviceCondition();
 		Set<Integer> key = devicecondition.keySet();
 		Iterator<Integer> it = key.iterator();
 		System.out.println("===Device Conditions:");
-		for(boolean i : devicecondition.values()){
+		for(short i : devicecondition.values()){
 			int nodeid = it.next();
 			System.out.println("Node[" + nodeid + "] = " + i);
 		}

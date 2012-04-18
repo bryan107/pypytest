@@ -9,13 +9,19 @@ import faultDetection.correlationControl.DFDEngine;
 import junit.framework.TestCase;
 
 public class DFDTest extends TestCase {
+	
+	private final short FT = 0;
+	private final short LF = 1;
+	private final short LG = 2;
+	private final short GD = 3;
+	
 	public void testgetdata(){
 		Map<Integer, Map<Integer, Double>> correlationstrengthtable= new HashMap<Integer, Map<Integer, Double>>();
 		Map<Integer, Double> temp1 = new HashMap<Integer, Double>();
 		Map<Integer, Double> temp2 = new HashMap<Integer, Double>();
 		Map<Integer, Double> temp3 = new HashMap<Integer, Double>();
 		Map<Integer, Double> temp4 = new HashMap<Integer, Double>();
-		Map<Integer, Boolean> devicecondition = new HashMap<Integer, Boolean>();
+		Map<Integer, Short> devicecondition = new HashMap<Integer, Short>();
 		
 		//Where node 2 is a faulty node
 		temp1.put(2, 0.6);
@@ -38,10 +44,10 @@ public class DFDTest extends TestCase {
 		
 		for(int i = 1 ; i < 5 ; i++){
 			if(i == 3){
-				devicecondition.put(i, false);
+				devicecondition.put(i, FT);
 				continue;
 			}
-			devicecondition.put(i, true);
+			devicecondition.put(i, GD);
 		}
 		
 //		System.out.println("temp size:" + temp.size());

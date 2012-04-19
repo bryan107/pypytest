@@ -18,10 +18,12 @@ public class ProcessManager {
 
 	// --------------------------------------------------------------
 	// ----------------------Constructor-----------------------------
-	public ProcessManager(int samplesize, int eventpower, double maxfaultratio) {
+	public ProcessManager(int samplesize, int eventpower, double maxfaultratio, double DFDthreshold, double cstrcorrelationerrortolerance) {
 		// updateIntervalController(intervalControl);
 		// TODO Temporarily initiate correlation manager manually
 		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio);
+		updateDFDThreshold(DFDthreshold);
+		updateCorrelationStrengthErrorTolerance(cstrcorrelationerrortolerance);
 	}
 
 	// --------------------------------------------------------------
@@ -34,11 +36,14 @@ public class ProcessManager {
 	}
 
 	public void updateDFDThreshold(double threshold) {
-
+		DFDEngine.getInstance().updateThreshold(threshold);
 	}
 
+	public void updateCorrelationStrengthErrorTolerance(double errortolerance){
+		CorrelationStrengthManager.getInstance().updateErrorTolerance(errortolerance);
+	}
 	// TODO To test the Process
-	public Map<Integer, MarkedReading> MarkReadings(Map<Integer, Double> readingpack) {
+	public Map<Integer, MarkedReading> markReadings(Map<Integer, Double> readingpack) {
 		// Variables
 		Map<Integer, Short> devicecondition;
 		Map<Integer, Map<Integer, Double>> correlationtable;
@@ -82,8 +87,10 @@ public class ProcessManager {
 			int nodeid = iterator.next();
 			try {
 				MarkedReading markedreading = new MarkedReading(
+						nodeid,
 						readingpack.get(nodeid),
 						readingtrustworthiness.get(nodeid),
+						readingfaultcondition.get(nodeid),
 						devicecondition.get(nodeid));
 				markedreadingpack.put(nodeid, markedreading);
 			} catch (Exception e) {

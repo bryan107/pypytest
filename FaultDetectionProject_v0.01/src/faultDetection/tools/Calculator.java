@@ -1,12 +1,15 @@
 package faultDetection.tools;
 
 
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+
 import flanagan.analysis.Regression;
 import flanagan.analysis.Stat;
 
 public final class Calculator {
 	private Regression reg;
-//	private static Log logger = LogFactory.getLog(Caculator.class);
+//	private static Log logger = LogFactory.getLog(Calculator.class);
 	
 	private static Calculator self = new Calculator();
 	
@@ -88,6 +91,23 @@ public final class Calculator {
 	}
 	
 
+	public double getTheilSenRegressionSlope(double[] x, double[] y){
+		double[] slopes = new double[(x.length*(x.length-1)/2)]; 
+		int cnt = 0;
+		double xref, yref;
+		for(int i = 0 ; i < (x.length -1) ; i++){
+			xref = x[i];
+			yref = y[i];
+//			logger.info("Xref: " + xref + " Yref: " + yref);
+			for(int j = i + 1 ; j < x.length ; j++){
+				slopes[cnt] = (x[j]-xref)/(y[j]-yref);
+//				logger.info("S: " + slopes[cnt]);
+				cnt++;
+			}
+		}
+		return Stat.median(slopes);
+	}
+	
 	
 //	Statistics------------------------------------------------
 	

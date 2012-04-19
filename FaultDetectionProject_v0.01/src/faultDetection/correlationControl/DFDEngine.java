@@ -91,7 +91,7 @@ public final class DFDEngine {
 	}
 
 	private void firstRoundVoting(){
-		logger.info("Start first voting / size = " + correlationstrengthtable.size());
+//		logger.info("Start first voting / size = " + correlationstrengthtable.size());
 		faultycondition.clear();
 		Set<Integer> key = correlationstrengthtable.keySet();
 		Iterator<Integer> iterator = key.iterator();
@@ -117,11 +117,11 @@ public final class DFDEngine {
 			}
 
 		}
-		logger.info("First voting complete");
+//		logger.info("First voting complete");
 	}
 
 	private void secondRoundVoting(){
-		logger.info("Second voting start");
+//		logger.info("Second voting start");
 		Set<Integer> key = correlationstrengthtable.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		for(Map<Integer, Double> i : correlationstrengthtable.values()){
@@ -169,6 +169,6 @@ public final class DFDEngine {
 			}
 			
 		}
-		logger.info("Second voting Finish");
+//		logger.info("Second voting Finish");
 	}
 }

@@ -12,9 +12,9 @@ import junit.framework.TestCase;
 public class CorrelationStrengthManagerrTest extends TestCase {
 
 	//faulty conditions
-	private final short FT = 0;
-	private final short LF = 1;
-	private final short LG = 2;
+//	private final short FT = 0;
+//	private final short LF = 1;
+//	private final short LG = 2;
 	private final short GD = 3;
 	
 	public void testGetCorrelationStrengthTable() {

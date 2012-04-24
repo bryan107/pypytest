@@ -20,7 +20,7 @@ public class CorrelationTest extends TestCase {
 		}
 		System.out.println("Correlation = " + co1.getCorrelation());
 		System.out.println("Error = " + co1.getCorrelationError());
-		double[][] updatedpair1 = co1.getPair();
+//		double[][] updatedpair1 = co1.getPair();
 		
 		double test = Calculator.getInstance().correlationStrength(Calculator.getInstance().generateCorrelation(30, 19), co1.getCorrelation(), 1.8);
 		System.out.println("New pair Strength = " + test);

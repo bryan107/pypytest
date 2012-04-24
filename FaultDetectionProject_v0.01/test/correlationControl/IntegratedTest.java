@@ -6,12 +6,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import faultDetection.correlationControl.CorrelationManager;
-import faultDetection.correlationControl.CorrelationStrengthManager;
-import faultDetection.correlationControl.DFDEngine;
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
+//
+//import faultDetection.correlationControl.CorrelationManager;
+//import faultDetection.correlationControl.CorrelationStrengthManager;
+//import faultDetection.correlationControl.DFDEngine;
 import faultDetection.correlationControl.MarkedReading;
 import faultDetection.correlationControl.ProcessManager;
 import junit.framework.TestCase;
@@ -23,7 +23,7 @@ public class IntegratedTest extends TestCase {
 	private final short GD = 3;
 	private final String[] faultcondition = { "FT", "LF", "LG", "GD", "UNKNOWN" };
 
-	private static Log logger = LogFactory.getLog(IntegratedTest.class);
+//	private static Log logger = LogFactory.getLog(IntegratedTest.class);
 
 	private Map<Integer, Map<Integer, Double>> readingpack;
 

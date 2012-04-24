@@ -53,6 +53,11 @@ public class FileAccessAgent {
 		return new String();
 	}
 	
+	public String readLineFromFile(String fileaddress){
+		this.readingpath = fileaddress;
+		return readLineFromFile();
+	}
+	
 	public boolean closeFileReader(){
 		try {
 			in.close();
@@ -64,15 +69,20 @@ public class FileAccessAgent {
 		return false;
 	}
 	
-	public boolean writeToFile(String outputstring) {
+	public boolean writeLineToFile(String outputstring) {
 		try {
-			FileWriter writer = new FileWriter(writingpath);
-			writer.write(outputstring);
+			FileWriter writer = new FileWriter(writingpath, true);
+			writer.write(outputstring + "\n");
 			writer.close();
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public boolean writeLineToFile(String outputstring, String fileaddress){
+		this.writingpath = fileaddress;
+		return writeLineToFile(outputstring);
 	}
 }

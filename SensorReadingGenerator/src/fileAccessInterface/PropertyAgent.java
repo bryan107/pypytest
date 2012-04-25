@@ -14,18 +14,18 @@ public final class PropertyAgent {
     private Log logger = LogFactory.getLog(PropertyAgent.class);
     private File currentPath;
     private Properties eventprop = new Properties();
-    private static PropertyAgent self2 = new PropertyAgent("conf");
+    private static PropertyAgent self3 = new PropertyAgent("conf");
 
 //    public PropertyAgent(Object ...args) {
 //    	for (Object object : args) {
 //    		System.out.println(object);
 //		}
-//		// TODO Auto-generated constructor stub
+//		
 //	}
 //    
     
     public static PropertyAgent getInstance(){
-    	return self2;
+    	return self3;
     }
     
     private PropertyAgent(String currentPath) {

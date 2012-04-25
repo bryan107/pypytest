@@ -5,14 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class FileAccessAgent {
 	String writingpath;
 	String readingpath;
 	BufferedReader in;
-//	private static Log logger = LogFactory.getLog(FileAccessAgent.class);
+	private static Log logger = LogFactory.getLog(FileAccessAgent.class);
 	
 	public FileAccessAgent(String writingpath, String readingpath){
 		updatereadingpath(readingpath);
@@ -31,7 +31,7 @@ public class FileAccessAgent {
 			in = new BufferedReader(new FileReader(readingpath));
 			return true;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			logger.error("File " + readingpath + " not found");
 			e.printStackTrace();
 		}
 		return false;
@@ -44,10 +44,10 @@ public class FileAccessAgent {
 				return str;
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			logger.error("File " + readingpath + " not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			logger.error("IO failure when read line from " + readingpath);
 			e.printStackTrace();
 		}
 		return new String();
@@ -63,7 +63,7 @@ public class FileAccessAgent {
 			in.close();
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			logger.error("IO failure when close file " + readingpath);
 			e.printStackTrace();
 		}
 		return false;

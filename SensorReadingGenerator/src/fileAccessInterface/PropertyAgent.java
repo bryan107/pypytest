@@ -14,6 +14,8 @@ public final class PropertyAgent {
     private Log logger = LogFactory.getLog(PropertyAgent.class);
     private File currentPath;
     private Properties eventprop = new Properties();
+    private Properties mapprop = new Properties();
+    private Properties faultprop = new Properties();
     private static PropertyAgent self3 = new PropertyAgent("conf");
 
 //    public PropertyAgent(Object ...args) {
@@ -37,15 +39,17 @@ public final class PropertyAgent {
 
     private void loadProperties() {
         loadProperties(eventprop, "event.properties");
+        loadProperties(mapprop, "map.properties");
+        loadProperties(faultprop, "fault.properties");
     }
 
     public String getProperties(String filename, String key) {
         if (filename.equals("event") || filename.equals("Event"))
             return eventprop.getProperty(key, null);
-//        else if (filename.equals("actuator") || filename.equals("Actuator"))
-//            return actuatorprop.getProperty(key, null);
-//        else if (filename.equals("location") || filename.equals("Location"))
-//            return locationprop.getProperty(key, null);
+        else if (filename.equals("map") || filename.equals("Map"))
+            return mapprop.getProperty(key, null);
+        else if (filename.equals("fault") || filename.equals("Fault"))
+            return faultprop.getProperty(key, null);
 //        else if (filename.equals("config") || filename.equals("Config"))
 //        	return confprop.getProperty(key, null);
         else {
@@ -84,9 +88,12 @@ public final class PropertyAgent {
         if (filename.equals("event") || filename.equals("Event")) {
             eventprop.setProperty(key, value);
             // do save
-//        } else if (filename.equals("actuator")) {
-//            actuatorprop.setProperty(key, value);
-//            // do save
+        } else if (filename.equals("map") || filename.equals("Map")) {
+            mapprop.setProperty(key, value);
+            // do save
+        } else if (filename.equals("fault") || filename.equals("Fault")) {
+            faultprop.setProperty(key, value);
+            // do save
 //        } else if (filename.equals("location")) {
 //            locationprop.setProperty(key, value);
 //            ret = doStore(locationprop, "location.properties");
@@ -101,10 +108,10 @@ public final class PropertyAgent {
     public void listProperties(String filename) {
         if (filename.equals("event") || filename.equals("Event"))
             eventprop.list(System.out);
-//        else if (filename.equals("actuator") || filename.equals("Actuator"))
-//            actuatorprop.list(System.out);
-//        else if (filename.equals("location") || filename.equals("Location"))
-//            locationprop.list(System.out);
+        else if (filename.equals("map") || filename.equals("Map"))
+            mapprop.list(System.out);
+        else if (filename.equals("fault") || filename.equals("Fault"))
+            faultprop.list(System.out);
         else {
             logger.warn("Property Agent Null File Warning");
         }

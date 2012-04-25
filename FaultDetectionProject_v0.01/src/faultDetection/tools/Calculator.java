@@ -13,7 +13,7 @@ public final class Calculator {
 	
 	private static Calculator self = new Calculator();
 	
-	public Calculator(){
+	private Calculator(){
 
 	}
 	
@@ -60,7 +60,6 @@ public final class Calculator {
 		return (y/x);
 	}
 	
-	//TODO implement Theil-Sen estimator regression
 //	Regression----------------------------------------------------
 	
 	private void regressionSetup(double[] x, double[] y){

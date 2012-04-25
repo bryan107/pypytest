@@ -22,7 +22,7 @@ public final class CorrelationStrengthManager {
 	
 	private static Log logger = LogFactory.getLog(CorrelationStrengthManager.class);
 	//--------------------Constructor-------------------------
-	public CorrelationStrengthManager(double errortolerance){
+	private CorrelationStrengthManager(double errortolerance){
 		updateErrorTolerance(errortolerance);
 	}
 	

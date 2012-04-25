@@ -9,15 +9,14 @@ public class CaculatorTest extends TestCase {
 	double[] y = {20.3,20.8,20.6,20.7,20.1};
 	
 	public void testCaculatorRegression(){
-		Calculator calc = new Calculator();
 	
 		Regression reg = new Regression(x, y);
 		reg.linearGeneral();
 		System.out.println("Regression Test:");
-		assertEquals(calc.getRegressionSlope(x, y), reg.getBestEstimates()[0]);
-		System.out.println("Slope: " + calc.getRegressionSlope(x, y));
-		assertEquals(calc.getRegressionError(x, y), reg.getBestEstimatesErrors()[0]);
-		System.out.println("Error: " + calc.getRegressionError(x, y));
+		assertEquals(Calculator.getInstance().getRegressionSlope(x, y), reg.getBestEstimates()[0]);
+		System.out.println("Slope: " + Calculator.getInstance().getRegressionSlope(x, y));
+		assertEquals(Calculator.getInstance().getRegressionError(x, y), reg.getBestEstimatesErrors()[0]);
+		System.out.println("Error: " + Calculator.getInstance().getRegressionError(x, y));
 		
 		System.out.println("Theil-Sen Regression Test:");
 		System.out.println("Slope:" + Calculator.getInstance().getTheilSenRegressionSlope(x, y));

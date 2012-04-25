@@ -32,7 +32,7 @@ public final class DFDEngine {
 	private static Log logger = LogFactory.getLog(DFDEngine.class);
 	//---------------------------------------------------------------
 	//-------------------------Constructor---------------------------
-	public DFDEngine(double threshold, double leastLGnumber){
+	private DFDEngine(double threshold, double leastLGnumber){
 		updateThreshold(threshold);
 		updateLeastLGNumber(leastLGnumber);
 	}

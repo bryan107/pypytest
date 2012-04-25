@@ -42,7 +42,7 @@ public class ProcessManager {
 	public void updateCorrelationStrengthErrorTolerance(double errortolerance){
 		CorrelationStrengthManager.getInstance().updateErrorTolerance(errortolerance);
 	}
-	// TODO To test the Process
+	
 	public Map<Integer, MarkedReading> markReadings(Map<Integer, Double> readingpack) {
 		// Variables
 		Map<Integer, Short> devicecondition;

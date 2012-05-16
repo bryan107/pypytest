@@ -99,9 +99,12 @@ public final class Calculator {
 			yref = y[i];
 //			logger.info("Xref: " + xref + " Yref: " + yref);
 			for(int j = i + 1 ; j < x.length ; j++){
-				slopes[cnt] = (x[j]-xref)/(y[j]-yref);
+				double value = (x[j]-xref)/(y[j]-yref);
+				if(value > 0){								//Make sure no minus slope
+					slopes[cnt] = (x[j]-xref)/(y[j]-yref);
 //				logger.info("S: " + slopes[cnt]);
 				cnt++;
+				}
 			}
 		}
 		return Stat.median(slopes);

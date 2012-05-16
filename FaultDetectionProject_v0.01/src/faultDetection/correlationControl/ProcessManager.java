@@ -8,6 +8,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import fileAccessInterface.PropertyAgent;
+
 public class ProcessManager {
 	// ---------------------Private variables------------------------
 	private ReadingBuffer readingbuffer = new ReadingBuffer();
@@ -18,12 +20,18 @@ public class ProcessManager {
 
 	// --------------------------------------------------------------
 	// ----------------------Constructor-----------------------------
-	public ProcessManager(int samplesize, int eventpower, double maxfaultratio, double DFDthreshold, double cstrcorrelationerrortolerance) {
+	public ProcessManager() {
 		// updateIntervalController(intervalControl);
 		// TODO Temporarily initiate correlation manager manually
+		// TODO Set variables with Property Agent in the entire project
+		int samplesize = Integer.valueOf(PropertyAgent.getInstance().getProperties("FDC", "SampleSize"));
+		int eventpower = Integer.valueOf(PropertyAgent.getInstance().getProperties("FDC", "EventPower"));
+		double maxfaultratio = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "MaxFaultyRatio"));
+		double DFDthreshold = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "DFDThreshold"));
+		double CSerrortolerance = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "CSErrorTolerance"));
 		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio);
 		updateDFDThreshold(DFDthreshold);
-		updateCorrelationStrengthErrorTolerance(cstrcorrelationerrortolerance);
+		updateCorrelationStrengthErrorTolerance(CSerrortolerance);
 	}
 
 	// --------------------------------------------------------------

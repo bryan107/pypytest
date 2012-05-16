@@ -3,6 +3,7 @@ package faultDetection.correlationControl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import faultDetection.tools.Calculator;
+import fileAccessInterface.PropertyAgent;
 
 public class Correlation {
 	private double[][] pair;
@@ -56,13 +57,17 @@ public class Correlation {
 	
 	public double getCorrelation(){
 		if(mapenable == true){
-			//Use Theil-Sen estimator based Linear Regression
-//			return Calculator.getInstance().getTheilSenRegressionSlope(pair[0], pair[1]);
-			//Use General Linear Regression
-			return Calculator.getInstance().getRegressionSlope(pair[0], pair[1]);
+			int regressiontype = Integer.valueOf(PropertyAgent.getInstance().getProperties("FDCservice", "RegressionType"));
+			if(regressiontype == 0)//Use General Linear Regression
+				return Calculator.getInstance().getRegressionSlope(pair[0], pair[1]);
+			else if(regressiontype == 1)//Use Theil-Sen estimator based Linear Regression			
+				return Calculator.getInstance().getTheilSenRegressionSlope(pair[0], pair[1]);	
+			else
+				logger.error("Invalid Regression Type");
+				return 0;
 		}
 		else{
-//			logger.warn("Not enough inputs for getCorrelation");
+			logger.warn("Not enough inputs for getCorrelation");
 			return 0;
 		}
 		

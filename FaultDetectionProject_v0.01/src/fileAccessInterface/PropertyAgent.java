@@ -13,10 +13,10 @@ import org.apache.commons.logging.LogFactory;
 public final class PropertyAgent {
     private Log logger = LogFactory.getLog(PropertyAgent.class);
     private File currentPath;
-    private Properties sensorprop = new Properties();
-    private Properties locationprop = new Properties();
-    private Properties actuatorprop = new Properties();
-    private Properties confprop = new Properties();
+//    private Properties sensorprop = new Properties();
+//    private Properties locationprop = new Properties();
+//    private Properties actuatorprop = new Properties();
+    private Properties FDCserviceprop = new Properties();
     private static PropertyAgent self2 = new PropertyAgent("conf");
 
 //    public PropertyAgent(Object ...args) {
@@ -40,21 +40,21 @@ public final class PropertyAgent {
     }
 
     private void loadProperties() {
-        loadProperties(sensorprop, "sensor.properties");
-        loadProperties(locationprop, "location.properties");
-        loadProperties(actuatorprop, "actuator.properties");
-        loadProperties(confprop, "config.properties");
+//        loadProperties(sensorprop, "sensor.properties");
+//        loadProperties(locationprop, "location.properties");
+//        loadProperties(actuatorprop, "actuator.properties");
+        loadProperties(FDCserviceprop, "config.properties");
     }
 
     public String getProperties(String filename, String key) {
-        if (filename.equals("sensor") || filename.equals("Sensor"))
-            return sensorprop.getProperty(key, null);
-        else if (filename.equals("actuator") || filename.equals("Actuator"))
-            return actuatorprop.getProperty(key, null);
-        else if (filename.equals("location") || filename.equals("Location"))
-            return locationprop.getProperty(key, null);
-        else if (filename.equals("config") || filename.equals("Config"))
-        	return confprop.getProperty(key, null);
+        if (filename.equals("FDCservice") || filename.equals("FDCService"))
+            return FDCserviceprop.getProperty(key, null);
+//        else if (filename.equals("actuator") || filename.equals("Actuator"))
+//            return actuatorprop.getProperty(key, null);
+//        else if (filename.equals("location") || filename.equals("Location"))
+//            return locationprop.getProperty(key, null);
+//        else if (filename.equals("config") || filename.equals("Config"))
+//        	return confprop.getProperty(key, null);
         else {
             logger.warn("Property Agent Null File Warning");
             return null;
@@ -88,17 +88,17 @@ public final class PropertyAgent {
 
     public boolean setProperties(String filename, String key, String value) {
         boolean ret = false;
-        if (filename.equals("sensor")) {
-            sensorprop.setProperty(key, value);
+        if (filename.equals("FDCservice") || filename.equals("FDC")) {
+            FDCserviceprop.setProperty(key, value);
             // do save
-        } else if (filename.equals("actuator")) {
-            actuatorprop.setProperty(key, value);
-            // do save
-        } else if (filename.equals("location")) {
-            locationprop.setProperty(key, value);
-            ret = doStore(locationprop, "location.properties");
-            // do save
-        } else {
+//        } else if (filename.equals("actuator")) {
+//            actuatorprop.setProperty(key, value);
+//            // do save
+//        } else if (filename.equals("location")) {
+//            locationprop.setProperty(key, value);
+//            ret = doStore(locationprop, "location.properties");
+//            // do save
+//        } else {
             logger.warn("Property Agent Null File Warning");
             ret = false;
         }
@@ -106,12 +106,12 @@ public final class PropertyAgent {
     }
 
     public void listProperties(String filename) {
-        if (filename.equals("sensor") || filename.equals("Sensor"))
-            sensorprop.list(System.out);
-        else if (filename.equals("actuator") || filename.equals("Actuator"))
-            actuatorprop.list(System.out);
-        else if (filename.equals("location") || filename.equals("Location"))
-            locationprop.list(System.out);
+        if (filename.equals("FDCservice") || filename.equals("FDC"))
+            FDCserviceprop.list(System.out);
+//        else if (filename.equals("actuator") || filename.equals("Actuator"))
+//            actuatorprop.list(System.out);
+//        else if (filename.equals("location") || filename.equals("Location"))
+//            locationprop.list(System.out);
         else {
             logger.warn("Property Agent Null File Warning");
         }

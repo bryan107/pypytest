@@ -145,24 +145,27 @@ public class IntegratedTest extends TestCase {
 		double readingbaseline = 25;
 		int nodenumber = 4;
 
-		ProcessManager processmanager = new ProcessManager(samplesize,
-				eventpower, maxfaultratio, DFDtreshold,
-				cstrcorrelationerrortolerance);
-		readingpack = setupReadingPack(noise, errornodeid, error, errorround,
-				newnoderound, readingbaseline, readingpacksize, nodenumber);
-
-		Set<Integer> key = readingpack.keySet();
-		Iterator<Integer> iterator = key.iterator();
-		while (iterator.hasNext()) {
-			int packid = iterator.next();
-			Map<Integer, MarkedReading> markedreadigpack = processmanager
-					.markReadings(readingpack.get(packid));
-			System.out.println("Round: " + packid);
-			Set<Integer> key2 = markedreadigpack.keySet();
-			Iterator<Integer> iterator2 = key2.iterator();
-			while (iterator2.hasNext()) {
-				int nodeid = iterator2.next();
-				System.out.println(markedreadigpack.get(nodeid).toSrting());
+//		ProcessManager processmanager = new ProcessManager(samplesize,
+//				eventpower, maxfaultratio, DFDtreshold,
+//				cstrcorrelationerrortolerance);
+//		readingpack = setupReadingPack(noise, errornodeid, error, errorround,
+//				newnoderound, readingbaseline, readingpacksize, nodenumber);
+//
+//		Set<Integer> key = readingpack.keySet();
+//		Iterator<Integer> iterator = key.iterator();
+//		while (iterator.hasNext()) {
+//			int packid = iterator.next();
+//			Map<Integer, MarkedReading> markedreadigpack = processmanager
+//					.markReadings(readingpack.get(packid));
+//			System.out.println("Round: " + packid);
+//			Set<Integer> key2 = markedreadigpack.keySet();
+//			Iterator<Integer> iterator2 = key2.iterator();
+//			while (iterator2.hasNext()) {
+//				int nodeid = iterator2.next();
+//				System.out.println(markedreadigpack.get(nodeid).toSrting());
+		
+		
+		
 //				DecimalFormat df = new DecimalFormat("00.00");
 //				System.out.print(" ["
 //						+ nodeid
@@ -174,11 +177,13 @@ public class IntegratedTest extends TestCase {
 //						+ faultcondition[markedreadigpack.get(nodeid)
 //								.readingContidion()] + " DF:"
 //						+ markedreadigpack.get(nodeid).nodeIsFaulty());
-			}
-			System.out.println();
 
-		}
-
+		
+//			}
+//			System.out.println();
+//
+//		}
+//
 	}
 
 	private void outPutDeviceFaulyRound(Map<Integer, Integer> devicefaultround) {

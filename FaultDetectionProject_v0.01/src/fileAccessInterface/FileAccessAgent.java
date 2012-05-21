@@ -50,7 +50,7 @@ public class FileAccessAgent {
 			logger.error("IO failure when read line from " + readingpath);
 			e.printStackTrace();
 		}
-		return new String();
+		return null;
 	}
 	
 	public String readLineFromFile(String fileaddress){

@@ -43,11 +43,11 @@ public final class PropertyAgent {
 //        loadProperties(sensorprop, "sensor.properties");
 //        loadProperties(locationprop, "location.properties");
 //        loadProperties(actuatorprop, "actuator.properties");
-        loadProperties(FDCserviceprop, "config.properties");
+        loadProperties(FDCserviceprop, "FDCservice.properties");
     }
 
     public String getProperties(String filename, String key) {
-        if (filename.equals("FDCservice") || filename.equals("FDCService"))
+        if (filename.equals("FDCservice") || filename.equals("FDC"))
             return FDCserviceprop.getProperty(key, null);
 //        else if (filename.equals("actuator") || filename.equals("Actuator"))
 //            return actuatorprop.getProperty(key, null);

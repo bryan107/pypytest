@@ -26,7 +26,7 @@ public class ProcessManager {
 		// TODO Set variables with Property Agent in the entire project
 		int samplesize = Integer.valueOf(PropertyAgent.getInstance().getProperties("FDC", "SampleSize"));
 		int eventpower = Integer.valueOf(PropertyAgent.getInstance().getProperties("FDC", "EventPower"));
-		double maxfaultratio = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "MaxFaultyRatio"));
+		double maxfaultratio = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "MaxFaultRatio"));
 		double DFDthreshold = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "DFDThreshold"));
 		double CSerrortolerance = Double.valueOf(PropertyAgent.getInstance().getProperties("FDC", "CSErrorTolerance"));
 		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio);

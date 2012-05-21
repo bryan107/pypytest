@@ -23,6 +23,10 @@ public class MarkedReading {
 		this.readingcondition = readingcondition;
 	}
 	
+	public int id(){
+		return nodeid;
+	}
+	
 	public double value(){
 		return reading;
 	}
@@ -37,25 +41,26 @@ public class MarkedReading {
 	public short readingContidion(){
 		return readingcondition;
 	}
-	public boolean nodeIsFaulty(){
-		switch(devicecondition){
-		case FT:
-			return true;
-		case GD:
-		case UNKNOWN:
-		default:
-			return false;
-		}
+	public short deviceCondition(){
+		return devicecondition;
+//		switch(devicecondition){
+//		case FT:
+//			return false;
+//		case GD:
+//		case UNKNOWN:
+//		default:
+//			return true;
+//		}
 	}
 	
-	public String toSrting(){
+	public String toFormat(){
 		DecimalFormat df = new DecimalFormat("00.00");
-		String reading = (" ["
+		String reading = ("["
 				+ nodeid
 				+ "] R:"+ df.format(reading())
 				+ " T:"+ df.format(trustworthiness()*100)
-				+ "% FC:"+ faultcondition[readingContidion()] 
-				+ " DF:"+ nodeIsFaulty());
+				+ "% RC:"+ faultcondition[readingContidion()] 
+				+ " DC:"+ faultcondition[deviceCondition()]);
 		return reading;
 	}
 	

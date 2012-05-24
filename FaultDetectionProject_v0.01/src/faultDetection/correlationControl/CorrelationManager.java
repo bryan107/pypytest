@@ -33,8 +33,8 @@ public class CorrelationManager {
 	private ReadingBuffer buffer = new ReadingBuffer();
 	// Definition of reading conditions
 	private final short FT = 0;
-//	private final short LF = 1;
-//	private final short LG = 2;
+	// private final short LF = 1;
+	// private final short LG = 2;
 	private final short GD = 3;
 	private final short UNKNOWN = 4;
 	private final Short devicedefaultcondition = UNKNOWN;
@@ -75,14 +75,15 @@ public class CorrelationManager {
 		}
 	}
 
-	//TODO setup boundaries for these updates
+	// TODO setup boundaries for these updates
 	public void updateSampleSize(int samplesize) {
 		this.samplesize = samplesize;
 	}
 
 	public void updateCorrelationPower(int correlationpower) {
-		if(correlationpower == 0){
-			logger.error("Correlation Power cannot be " + correlationpower + "and has been set as 1");
+		if (correlationpower == 0) {
+			logger.error("Correlation Power cannot be " + correlationpower
+					+ "and has been set as 1");
 			this.correlationpower = 1;
 			return;
 		}
@@ -100,10 +101,11 @@ public class CorrelationManager {
 	public void putReading(Map<Integer, Double> reading) {
 		Set<Integer> key = reading.keySet();
 		Iterator<Integer> iterator = key.iterator();
-		for (double i : reading.values()) {
+		while (iterator.hasNext()) {
 			int nodeid = iterator.next();
-			putReadingProcess(nodeid, i);
+			putReadingProcess(nodeid, reading.get(nodeid));
 		}
+
 	}
 
 	public void removeNode(int nodeid) {
@@ -117,16 +119,15 @@ public class CorrelationManager {
 		Map<Integer, Double> reading = buffer.getBufferData();
 		Set<Integer> key = reading.keySet();
 		Iterator<Integer> iterator = key.iterator();
-		for (double i : reading.values()) {
+		while (iterator.hasNext()) {
 			int nodei = iterator.next();
 			Set<Integer> key2 = reading.keySet();
 			Iterator<Integer> iterator2 = key2.iterator();
 			Map<Integer, Double> temp = new HashMap<Integer, Double>();
-			for (double j : reading.values()) {
+			while (iterator2.hasNext()) {
 				int nodej = iterator2.next();
-
 				if (nodei != nodej) {
-					temp.put(nodej, (j / i));
+					temp.put(nodej, (reading.get(nodej) / reading.get(nodei)));
 				}
 			}
 			correlationtable.put(nodei, temp);
@@ -149,17 +150,18 @@ public class CorrelationManager {
 	}
 
 	public void updateCorrelations(Map<Integer, Short> readingfaultcondition) {
-//		Map<Integer, Boolean> devicefaultcondition = new HashMap<Integer, Boolean>();
-//		Set<Integer> key = readingfaultcondition.keySet();
-//		Iterator<Integer> iterator = key.iterator();
-//		while (iterator.hasNext()) {
-//			int nodeid = iterator.next();
-//			if (readingfaultcondition.get(nodeid) == FT) {
-//				devicefaultcondition.put(nodeid, false);
-//			} else {
-//				devicefaultcondition.put(nodeid, true);
-//			}
-//		}
+		// Map<Integer, Boolean> devicefaultcondition = new HashMap<Integer,
+		// Boolean>();
+		// Set<Integer> key = readingfaultcondition.keySet();
+		// Iterator<Integer> iterator = key.iterator();
+		// while (iterator.hasNext()) {
+		// int nodeid = iterator.next();
+		// if (readingfaultcondition.get(nodeid) == FT) {
+		// devicefaultcondition.put(nodeid, false);
+		// } else {
+		// devicefaultcondition.put(nodeid, true);
+		// }
+		// }
 		checkDeviceCondition(readingfaultcondition); // Update node condition
 		bufferToCorrelation(); // buffer to correlation if node condition is
 								// normal.
@@ -178,8 +180,10 @@ public class CorrelationManager {
 	private void putReadingProcess(int nodeid, double reading) {
 		for (int i : nodeindex) {
 			if (i == nodeid) {
-//				logger.info("GetData=> Node: " + nodeid + " Reading:" + reading);
-				buffer.putBufferData(nodeid, Math.pow(reading, (1.0 / correlationpower)));
+				// logger.info("GetData=> Node: " + nodeid + " Reading:" +
+				// reading);
+				buffer.putBufferData(nodeid,
+						Math.pow(reading, (1.0 / correlationpower)));
 				// logger.info("Node[" + nodeid + "] has been update");
 				return;
 			}
@@ -194,15 +198,17 @@ public class CorrelationManager {
 				Math.pow(reading, (1.0 / correlationpower)));
 	}
 
-	private void checkDeviceCondition(
-			Map<Integer, Short> readingfaultcondition) {
+	private void checkDeviceCondition(Map<Integer, Short> readingfaultcondition) {
 		Set<Integer> key = readingfaultcondition.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		for (Short condition : readingfaultcondition.values()) {
 			int nodeid = iterator.next();
 			try {
 				if (deviceconditioncount.get(nodeid).size() < samplesize) {
-					deviceconditioncount.get(nodeid).add(GD);//Assume new node are normal in the learning stage.
+					deviceconditioncount.get(nodeid).add(GD);// Assume new node
+																// are normal in
+																// the learning
+																// stage.
 					if (deviceconditioncount.get(nodeid).size() == samplesize) {
 						updateDeviceCondition(nodeid);
 					}
@@ -222,14 +228,16 @@ public class CorrelationManager {
 	private void updateDeviceCondition(int nodeid) {
 		int count = 0;
 		try {
-			
+
 			for (Short condition : deviceconditioncount.get(nodeid)) {
 				if (condition == FT) {
 					count++;
 				}
 			}
-//			logger.info("[" + nodeid + "] samplesize = " + samplesize + " errorcount:" + count);
-//			logger.info("[" + nodeid + "]fault ratio:" +  (double)count / samplesize + " max:" + maxfaultratio);
+			// logger.info("[" + nodeid + "] samplesize = " + samplesize +
+			// " errorcount:" + count);
+			// logger.info("[" + nodeid + "]fault ratio:" + (double)count /
+			// samplesize + " max:" + maxfaultratio);
 			if ((double) count / samplesize >= maxfaultratio) {
 				logger.info("device fault");
 				devicecondition.put(nodeid, FT);
@@ -237,7 +245,7 @@ public class CorrelationManager {
 				devicecondition.put(nodeid, GD);
 			}
 		} catch (Exception e) {
-			logger.error("The Node[" + nodeid + "] does not exist!!");
+			logger.error("The Node[" + nodeid + "] does not exist!!" + e);
 		}
 
 	}
@@ -248,9 +256,9 @@ public class CorrelationManager {
 				try {
 					if (j != i && devicecondition.get(i) != FT
 							&& devicecondition.get(j) != FT) {
-//						logger.info("readfrombuffer: "
-//								+ buffer.getBufferData(i) + " "
-//								+ buffer.getBufferData(j));
+						// logger.info("readfrombuffer: "
+						// + buffer.getBufferData(i) + " "
+						// + buffer.getBufferData(j));
 						correlationmap
 								.get(i)
 								.get(j)

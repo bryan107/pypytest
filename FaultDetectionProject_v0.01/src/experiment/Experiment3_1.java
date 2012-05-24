@@ -3,67 +3,48 @@ package experiment;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.jmx.Agent;
-
 import faultDetection.correlationControl.MarkedReading;
 import faultDetection.correlationControl.ProcessManager;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
 
-public class Experiment {
-	private static Log logger = LogFactory.getLog(Experiment.class);
-	private static FileAccessAgent agent = new FileAccessAgent(
-			"C:\\TEST\\NULL.txt", "C:\\TEST\\NULL.txt");
-
+public class Experiment3_1 {
+	private static Log logger = LogFactory.getLog(Experiment3_1.class);
 	private static int round = 10800;
 	private static int count = 0;
 	private static int totalfaultcount = 0;
 	private static Map<Integer, Short> DC = new HashMap<Integer, Short>();
 	private static Map<Integer, Integer> DCFaultround = new HashMap<Integer, Integer>();
+	private static Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+	private static String regressiontype = "";
 	private static double noise = 0.03;
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		// ProcessManager manager = new ProcessManager();
-		agent.setFileReader();
-		Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
-		String regressiontype = "";
-		runSets(readingpack, regressiontype);
-		// PropertyAgent.getInstance().setProperties("FDC","RegressionType", 1 +
-		// "");
-		// regressiontype = "TS";
+		// agent.setFileReader();
+
 		// runSets(readingpack , regressiontype);
+
+		noise = 0.03;
+		runSet(5, 0.15, 0.20);
+		noise = 0.01;
+		runSet(5, 0.04, 0.10);
 
 	}
 
-	private static void runSets(Map<Integer, Double> readingpack,
-			String regressiontype) {
-		int num = 5;
-		for (double CSErrorTolerance = 0.07; CSErrorTolerance <= 0.12; CSErrorTolerance = CSErrorTolerance + 0.005) {
-			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
-		}
-		num = 7;
-		for (double CSErrorTolerance = 0.07; CSErrorTolerance <= 0.12; CSErrorTolerance = CSErrorTolerance + 0.005) {
-			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
-		}
-		num = 10;
-		for (double CSErrorTolerance = 0.07; CSErrorTolerance < 0.12; CSErrorTolerance = CSErrorTolerance + 0.005) {
-			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
-		}
-		num = 15;
-		for (double CSErrorTolerance = 0.07; CSErrorTolerance < 0.12; CSErrorTolerance = CSErrorTolerance + 0.005) {
-			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
-		}
-		num = 20;
-		for (double CSErrorTolerance = 0.07; CSErrorTolerance < 0.12; CSErrorTolerance = CSErrorTolerance + 0.005) {
+	private static void runSet(int num, double lowerbound, double upperbound) {
+		for (double CSErrorTolerance = lowerbound; CSErrorTolerance < (upperbound + 0.004); CSErrorTolerance += 0.005) {
 			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
 		}
 	}
@@ -71,10 +52,11 @@ public class Experiment {
 	private static void runRoundSet(Map<Integer, Double> readingpack, int num,
 			double CSErrorTolerance, String regressiontype) {
 		DecimalFormat df = new DecimalFormat("0.000");
-		agent.updatewritingpath("C:\\TEST\\Result_1_" + regressiontype + "__"
-				+ noise + "__NUM_" + num + "__CSET_"
-				+ df.format(CSErrorTolerance) + ".txt");
+		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\Result_1_"
+				+ regressiontype + "__" + noise + "__NUM_" + num + "__CSET_"
+				+ df.format(CSErrorTolerance) + ".txt", "C:\\TEST\\NULL.txt");
 		agent.writeLineToFile("CSET = " + CSErrorTolerance);
+		System.out.println(num);
 		totalfaultcount = 0;
 		for (int x = 0; x < 30; x++) {
 			// ---------------Round Setup-------------------
@@ -82,8 +64,9 @@ public class Experiment {
 			DC.clear();
 			DCFaultround.clear();
 			ProcessManager manager = new ProcessManager();
+
 			manager.updateCSErrorTolerance(CSErrorTolerance);
-			String readingpath = "C:\\TEST\\source_1__0.03__NUM_" + num + "__"
+			String readingpath = "C:\\TEST\\source_1__" + noise + "__NUM_" + num + "__"
 					+ x + ".txt";
 			agent.updatereadingpath(readingpath);
 			agent.setFileReader();
@@ -94,16 +77,17 @@ public class Experiment {
 				logger.info(line);
 				line = agent.readLineFromFile();
 			}
+
 			while (true) {
 				line = agent.readLineFromFile();
 				if (line != null) {
 					proceedLine(readingpack, line, manager);
+					count++;
 				} else
 					break;
-				count++;
-				// System.out.println("Round[" + x + "] proceding: "
-				// + df.format((double) count * 100 / round) + "%");
 			}
+
+
 			Set<Integer> key = DCFaultround.keySet();
 			Iterator<Integer> iterator = key.iterator();
 			agent.writeLineToFile("Device Fault Round:");
@@ -113,8 +97,11 @@ public class Experiment {
 						+ DCFaultround.get(nodeid));
 			}
 			totalfaultcount += DCFaultround.size();
-			System.out.println("Round[" + x + "] proceding: "
-					+ df.format((double) x * 100 / 30) + "%");
+			System.out
+					.println("Num[" + num + "] at Round[" + x
+							+ "] procceding: "
+							+ df.format((double) x * 100 / 30) + "%");
+
 		}
 		agent.writeLineToFile("Total Fault Ratio:" + (double) totalfaultcount
 				* 100 / (num * 30) + "%");

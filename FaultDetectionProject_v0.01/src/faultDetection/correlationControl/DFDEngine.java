@@ -10,11 +10,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 public final class DFDEngine {
-	// Predefined variable
-	private final static double predefinedthreshold = 0.8;
-	private final static double predefinedleastLGnumber = 0.5;
-	// Set up final Instance
-	private static DFDEngine self = new DFDEngine(predefinedthreshold, predefinedleastLGnumber);
 	//---------------------Private variables--------------------------
 	//faulty conditions
 	private final short FT = 0;
@@ -32,15 +27,13 @@ public final class DFDEngine {
 	private static Log logger = LogFactory.getLog(DFDEngine.class);
 	//---------------------------------------------------------------
 	//-------------------------Constructor---------------------------
-	private DFDEngine(double threshold, double leastLGnumber){
+	public DFDEngine(double threshold, double leastLGnumber){
 		updateThreshold(threshold);
 		updateLeastLGNumber(leastLGnumber);
 	}
 	//---------------------------------------------------------------
 	//------------------------Public Functions-----------------------
-	public static DFDEngine getInstance(){
-		return self;
-	}
+
 	public void updateLeastLGNumber(double leastLGnumber){
 		this.leastLGnumber = leastLGnumber;
 	}

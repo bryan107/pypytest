@@ -14,20 +14,14 @@ public final class CorrelationStrengthManager {
 	//-------------------Defined Values-----------------------
 	//faulty conditions
 	private final short FT = 0;
-	private static final double predefinederrortolerance = 0.2;
-	//----------------Static Self Object----------------------
-	private static CorrelationStrengthManager self = new CorrelationStrengthManager(predefinederrortolerance); 
+
 	//------------------Private Variables---------------------
 	private double errortolerance;
 	
 	private static Log logger = LogFactory.getLog(CorrelationStrengthManager.class);
 	//--------------------Constructor-------------------------
-	private CorrelationStrengthManager(double errortolerance){
+	public CorrelationStrengthManager(double errortolerance){
 		updateErrorTolerance(errortolerance);
-	}
-	
-	public static CorrelationStrengthManager getInstance(){
-		return self;
 	}
 	
 	public void updateErrorTolerance(double errortolerance){

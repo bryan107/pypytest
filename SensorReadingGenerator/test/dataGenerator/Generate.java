@@ -12,17 +12,26 @@ import fileAccessInterface.PropertyAgent;
 import junit.framework.TestCase;
 
 public class Generate extends TestCase {
-	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\source_1__NUM_10__0.txt", "E:\\test.txt");
+	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt", "E:\\test.txt");
 	private int sourceid = 1;
 	public void test(){
+		double noise = 0.01;
+		
+		creatSet(5, noise);
+		creatSet(7, noise);
+		creatSet(10, noise);
+		creatSet(15, noise);
+		creatSet(20, noise);
+		
+	}
+
+	private void creatSet(int number, double noise) {
 		EventSourceManager esmanager = new EventSourceManager();
 		SensorManager smanager = new SensorManager();
-		int number = 7;
-		double noise = 0.02;
-		
+		DeployMap.getInstance().clear();
 		nodeSetup(smanager, number, noise);
 		for(int r = 0 ; r < 30 ; r++){
-			f.updatewritingpath("C:\\TEST\\source_1__NUM_"+ number +"__"+ r +".txt");
+			f.updatewritingpath("C:\\TEST\\source_1__"+ noise +"__NUM_"+ number +"__"+ r +".txt");
 //			for(int i = 0 ; i < number ; i++){
 //				for(int j = 0 ; j < number ; j++){
 //					smanager.addNewSensor(i*20/(number-1), j*20/(number-1), 0.01);
@@ -51,7 +60,6 @@ public class Generate extends TestCase {
 				System.out.println("Finished: " + df.format((double)i*100/round) + "%");
 			}
 		}
-		
 	}
 
 	private void nodeSetup(SensorManager smanager, int number, double noise) {

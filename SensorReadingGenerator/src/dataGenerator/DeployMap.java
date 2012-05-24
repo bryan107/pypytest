@@ -24,6 +24,11 @@ public final class DeployMap {
 		reloadMap();
 	}
 	
+	public void clear(){
+		sensorlocation.clear();
+		eventsourcelocation.clear();
+	}
+	
 	public void reloadMap(){
 		xmax = Integer.valueOf(PropertyAgent.getInstance().getProperties("Map", "X_Max"));
 		ymax = Integer.valueOf(PropertyAgent.getInstance().getProperties("Map", "Y_Max"));

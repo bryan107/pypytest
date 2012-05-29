@@ -103,9 +103,9 @@ public class Experiment_TCD {
 
 		}
 		
-		agent.writeLineToFile("Total Fault Count:" + (totalfaultcount) + " Normalseccount: "+ normalsectioncount);
+//		agent.writeLineToFile("Total Fault Count:" + (totalfaultcount) + " Normalseccount: "+ normalsectioncount);
 		agent.writeLineToFile("Total Fault Ratio:" + (double)(totalfaultcount)
-				* 100 / num * normalsectioncount + "%");
+				* 100 / (num * 30) + "%");
 		agent.writeLineToFile("Total Event Ratio:" + (double)(eventcount)
 				* 100 / normalcount + "%");
 	}

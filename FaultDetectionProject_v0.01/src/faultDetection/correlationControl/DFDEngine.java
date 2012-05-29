@@ -82,7 +82,7 @@ public final class DFDEngine {
 			}
 		}
 	}
-
+//TODO DFDEngine may return reading conditions of FT devices
 	private void firstRoundVoting(){
 //		logger.info("Start first voting / size = " + correlationstrengthtable.size());
 		faultycondition.clear();

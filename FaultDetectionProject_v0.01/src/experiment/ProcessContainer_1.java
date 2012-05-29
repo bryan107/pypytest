@@ -10,11 +10,22 @@ public class ProcessContainer_1 {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Experiment_TCD e = new Experiment_TCD("");
-		e.runSet(5, 0.020, 0.05, 0.005);
-		e.runSet(7, 0.020, 0.05, 0.005);
-		e.runSet(10, 0.020, 0.05, 0.005);
+		Experiment_TCD e = new Experiment_TCD("TCD\\");
+		e.runSet(5, 0.015, 0.05, 0.005);
+		e.runSet(7, 0.015, 0.05, 0.005);
+		e.runSet(10, 0.015, 0.05, 0.005);
 		
+		e.runSet(5, 0.04, 0.10, 0.01);
+		e.runSet(7, 0.04, 0.10, 0.01);
+		e.runSet(10, 0.04, 0.10, 0.01);
+		
+		e.runSet(5, 0.10, 0.15, 0.02);
+		e.runSet(7, 0.10, 0.15, 0.02);
+		e.runSet(10, 0.10, 0.15, 0.02);
+		
+		e.runSet(5, 0.15, 0.20, 0.03);
+		e.runSet(7, 0.15, 0.20, 0.03);
+		e.runSet(10, 0.15, 0.20, 0.03);
 		
 //		Experiment_Events e = new Experiment_Events("EventChange\\");
 //		for(double i = 0.03 ; i < 0.1 ; i += 0.03){

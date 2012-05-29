@@ -69,28 +69,29 @@ public class CorrelationManager {
 		int id = 333;
 		try {
 			Map<Integer, Correlation> nodeicolumn = correlationmap.get(nodeid);
-		for (Correlation i : nodeicolumn.values()) {
-			i.resetCorrelation(samplesize);
-		}
-		// Reset node in raws
-		for (int key : nodeindex) {
-			id = key;
-			if (key != nodeid) {
-					correlationmap.get(key).get(nodeid).resetCorrelation(samplesize);
+			for (Correlation i : nodeicolumn.values()) {
+				i.resetCorrelation(samplesize);
 			}
-		}
+			// Reset node in raws
+			for (int key : nodeindex) {
+				id = key;
+				if (key != nodeid) {
+					correlationmap.get(key).get(nodeid)
+							.resetCorrelation(samplesize);
+				}
+			}
 		} catch (Exception e) {
-			logger.warn("Node ID:"+ nodeid + "  Key ID:" + id + e);
+			logger.warn("Node ID:" + nodeid + "  Key ID:" + id + e);
 		}
-		
+
 	}
 
 	// TODO setup boundaries for these updates
-	
-	public void updateEventLFRatio(double eventLFratio){
+
+	public void updateEventLFRatio(double eventLFratio) {
 		this.eventLFratio = eventLFratio;
 	}
-	
+
 	public void updateSampleSize(int samplesize) {
 		this.samplesize = samplesize;
 	}
@@ -177,20 +178,19 @@ public class CorrelationManager {
 		// devicefaultcondition.put(nodeid, true);
 		// }
 		// }
-		
-		if(samplecount< samplesize){
+
+		if (samplecount < samplesize) {
 			samplecount++;
+		} else {
+			checkEventOccurence(readingfaultcondition);// Check if an new event
+														// occurs. Yes, reset
+														// CT.
 		}
-		else{
-			checkEventOccurence(readingfaultcondition);//Check if an new event occurs. Yes, reset CT.
-		}
-		
+
 		checkDeviceCondition(readingfaultcondition); // Update node condition
 		bufferToCorrelation(); // buffer to correlation if node condition is
 								// normal.
 	}
-
-
 
 	public Map<Integer, Short> getDeviceCondition() {
 		return devicecondition;
@@ -225,36 +225,43 @@ public class CorrelationManager {
 
 	private void checkEventOccurence(Map<Integer, Short> readingfaultcondition) {
 		int LFcount = 0;
-		//-----TODO TEST CODE----
-//		Set<Integer> k = readingfaultcondition.keySet();
-//		Iterator<Integer> i = k.iterator();
-//		while(i.hasNext()){
-//			int id = i.next();
-//			System.out.print("[" + id + "] RC: " + readingfaultcondition.get(id) + " ");
-//		}
-//		System.out.println();
-		//-----------------------
-		for(short condition : readingfaultcondition.values()){
-			if(condition == LF){
+		// -----TODO TEST CODE----
+		// Set<Integer> k = readingfaultcondition.keySet();
+		// Iterator<Integer> i = k.iterator();
+		// while(i.hasNext()){
+		// int id = i.next();
+		// System.out.print("[" + id + "] RC: " + readingfaultcondition.get(id)
+		// + " ");
+		// }
+		// System.out.println();
+		// -----------------------
+		for (short condition : readingfaultcondition.values()) {
+			if (condition == LF) {
 				LFcount++;
 			}
 		}
-		if(((double)LFcount / readingfaultcondition.size()) > eventLFrate){
+		if (((double) LFcount / readingfaultcondition.size()) > eventLFrate) {
 			eventLFcount++;
 		}
-		if(((double)eventLFcount / samplesize) > eventLFratio){
+		if (((double) eventLFcount / samplesize) > eventLFratio) {
 			logger.warn("New event occurs! Correlation reseting");
 			eventLFcount = 0;
 			samplecount = 0;
+			// TODO should get key set from readingfaultcondition -> nodeindex
+			// whose DC is not FT readinfaultcnodition should only contain the
+			// RC of non FT sensors; however, it seems that there is something wrong
+			// FT devices are still reset in the process by using readingfaultcondition as references
 			Set<Integer> key = readingfaultcondition.keySet();
 			Iterator<Integer> it = key.iterator();
-			while(it.hasNext()){//Only GD devices will be reset
+			while (it.hasNext()) {// Only GD devices will be reset
 				int nodeid = it.next();
-				resetNodeCondition(nodeid);
+				if (devicecondition.get(nodeid) != FT)// To make sure only
+														// non-FT can be reset
+					resetNodeCondition(nodeid);
 			}
 		}
 	}
-	
+
 	private void checkDeviceCondition(Map<Integer, Short> readingfaultcondition) {
 		Set<Integer> key = readingfaultcondition.keySet();
 		Iterator<Integer> iterator = key.iterator();

@@ -1,4 +1,4 @@
-package experiment;
+package experiment_archives;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import faultDetection.correlationControl.ProcessManager;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
 
-public class Experiment3_1 {
-	private static Log logger = LogFactory.getLog(Experiment3_1.class);
+public class Experiment3_6 {
+	private static Log logger = LogFactory.getLog(Experiment3_6.class);
 	private static int round = 10800;
 	private static int count = 0;
 	private static int totalfaultcount = 0;
@@ -36,10 +36,11 @@ public class Experiment3_1 {
 
 		// runSets(readingpack , regressiontype);
 
-		noise = 0.03;
-		runSet(5, 0.15, 0.20);
-		noise = 0.01;
-		runSet(5, 0.04, 0.10);
+
+		noise = 0.02;
+		runSet(20, 0.10, 0.15);
+
+
 
 	}
 
@@ -86,7 +87,6 @@ public class Experiment3_1 {
 				} else
 					break;
 			}
-
 
 			Set<Integer> key = DCFaultround.keySet();
 			Iterator<Integer> iterator = key.iterator();

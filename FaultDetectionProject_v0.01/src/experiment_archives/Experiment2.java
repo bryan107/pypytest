@@ -1,11 +1,9 @@
-package experiment;
+package experiment_archives;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -15,16 +13,15 @@ import faultDetection.correlationControl.ProcessManager;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
 
-public class Experiment3_5 {
-	private static Log logger = LogFactory.getLog(Experiment3_5.class);
+public class Experiment2 {
+	private static Log logger = LogFactory.getLog(Experiment2.class);
 	private static int round = 10800;
 	private static int count = 0;
 	private static int totalfaultcount = 0;
 	private static Map<Integer, Short> DC = new HashMap<Integer, Short>();
 	private static Map<Integer, Integer> DCFaultround = new HashMap<Integer, Integer>();
-	private static Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
 	private static String regressiontype = "";
-	private static double noise;
+	private static double noise = 0.03;
 
 	/**
 	 * @param args
@@ -35,15 +32,51 @@ public class Experiment3_5 {
 		// agent.setFileReader();
 
 		// runSets(readingpack , regressiontype);
-		noise = 0.03;
-		runSet(20);
-		noise = 0.01;
-		runSet(20);
 
+		Thread t1 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+				runSet(5, readingpack);
+			}
+		});
+		Thread t2 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+				runSet(7, readingpack);
+			}
+		});
+		Thread t3 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+				runSet(10, readingpack);
+			}
+		});
+		Thread t4 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+				runSet(15, readingpack);
+			}
+		});
+		Thread t5 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+				runSet(20, readingpack);
+			}
+		});
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+		t5.start();
 
 	}
 
-	private static void runSet(int num) {
+	private static void runSet(int num, Map<Integer, Double> readingpack) {
 		for (double CSErrorTolerance = 0.10; CSErrorTolerance <= 0.151; CSErrorTolerance += 0.005) {
 			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
 		}
@@ -66,7 +99,7 @@ public class Experiment3_5 {
 			ProcessManager manager = new ProcessManager();
 
 			manager.updateCSErrorTolerance(CSErrorTolerance);
-			String readingpath = "C:\\TEST\\source_1__"+ noise +"__NUM_" + num + "__"
+			String readingpath = "C:\\TEST\\source_1__0.03__NUM_" + num + "__"
 					+ x + ".txt";
 			agent.updatereadingpath(readingpath);
 			agent.setFileReader();
@@ -77,17 +110,17 @@ public class Experiment3_5 {
 				logger.info(line);
 				line = agent.readLineFromFile();
 			}
-
 			while (true) {
 				line = agent.readLineFromFile();
 				if (line != null) {
 					proceedLine(readingpack, line, manager);
-					count++;
 				} else
 					break;
+				count++;
+				// System.out.println("Num[" + num + "] at Round[" + x
+				// + "] procceding: "
+				// + df.format((double) count * 100 / round) + "%");
 			}
-
-
 			Set<Integer> key = DCFaultround.keySet();
 			Iterator<Integer> iterator = key.iterator();
 			agent.writeLineToFile("Device Fault Round:");

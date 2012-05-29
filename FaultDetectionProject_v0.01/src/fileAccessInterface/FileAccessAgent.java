@@ -17,6 +17,7 @@ public class FileAccessAgent {
 	public FileAccessAgent(String writingpath, String readingpath){
 		updatereadingpath(readingpath);
 		updatewritingpath(writingpath);
+		setFileReader();
 	}
 	
 	public void updatereadingpath(String readingpath){

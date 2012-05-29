@@ -9,7 +9,7 @@ import faultDetection.correlationControl.CorrelationManager;
 import junit.framework.TestCase;
 
 public class CorrelationManegerTest extends TestCase {
-	CorrelationManager cm1 = new CorrelationManager(3,2,0.5);
+	CorrelationManager cm1 = new CorrelationManager(3,2,0.5, 0.1);
 	Map<Integer, Boolean> condition = new HashMap<Integer, Boolean>();
 	private void testInput(){
 //		cm1.putReading(1, 1);

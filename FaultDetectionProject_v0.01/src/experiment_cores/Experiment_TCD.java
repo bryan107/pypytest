@@ -1,4 +1,4 @@
-package experiment;
+package experiment_cores;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -15,45 +15,43 @@ import faultDetection.correlationControl.ProcessManager;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
 
-public class Experiment3_3 {
-	private static Log logger = LogFactory.getLog(Experiment3_3.class);
-	private static int round = 10800;
-	private static int count = 0;
-	private static int totalfaultcount = 0;
-	private static Map<Integer, Short> DC = new HashMap<Integer, Short>();
-	private static Map<Integer, Integer> DCFaultround = new HashMap<Integer, Integer>();
-	private static Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
-	private static String regressiontype = "";
-	private static double noise = 0.03;
+public class Experiment_TCD {
+	private Log logger = LogFactory.getLog(Experiment_TCD.class);
+	private int round = 10800;
+	private int count = 0;
+	private int eventcount = 0;
+	private int LFcount = 0;
+	private int totalfaultcount = 0;
+	private int normalcount = 0;
+	private int normalsectioncount = 1;
+	private int renewcountdown = 0;
+	private Map<Integer, Short> DC = new HashMap<Integer, Short>();
+	private Map<Integer, Integer> DCFaultround = new HashMap<Integer, Integer>();
+	private Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
+	private String regressiontype = "";
+	private double noise;
+	private String filename;
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-		// agent.setFileReader();
-
-		// runSets(readingpack , regressiontype);
-
-		noise = 0.03;
-		runSet(20, 0.15, 0.20);
-//		noise = 0.01;
-//		runSet(20, 0.04, 0.10);
-
-
+	public Experiment_TCD(String filename){
+		updatefileLocation(filename);
 	}
 
-	private static void runSet(int num, double lowerbound, double upperbound) {
+	public void updatefileLocation(String filename){
+		this.filename = filename;
+	}
+
+
+	public void runSet(int num, double lowerbound, double upperbound, double noise) {
+		this.noise = noise;
 		for (double CSErrorTolerance = lowerbound; CSErrorTolerance < (upperbound + 0.004); CSErrorTolerance += 0.005) {
 			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
 		}
 	}
 
-	private static void runRoundSet(Map<Integer, Double> readingpack, int num,
+	private void runRoundSet(Map<Integer, Double> readingpack, int num,
 			double CSErrorTolerance, String regressiontype) {
 		DecimalFormat df = new DecimalFormat("0.000");
-		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\Result_1_"
+		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\"+ filename +"Result_1_"
 				+ regressiontype + "__" + noise + "__NUM_" + num + "__CSET_"
 				+ df.format(CSErrorTolerance) + ".txt", "C:\\TEST\\NULL.txt");
 		agent.writeLineToFile("CSET = " + CSErrorTolerance);
@@ -61,13 +59,14 @@ public class Experiment3_3 {
 		totalfaultcount = 0;
 		for (int x = 0; x < 30; x++) {
 			// ---------------Round Setup-------------------
+			renewcountdown = 30;
 			count = 0;
 			DC.clear();
 			DCFaultround.clear();
 			ProcessManager manager = new ProcessManager();
 
 			manager.updateCSErrorTolerance(CSErrorTolerance);
-			String readingpath = "C:\\TEST\\source_1__" + noise + "__NUM_" + num + "__"
+			String readingpath = "C:\\TEST\\" + filename + "source_1__" + noise + "__NUM_" + num + "__"
 					+ x + ".txt";
 			agent.updatereadingpath(readingpath);
 			agent.setFileReader();
@@ -103,11 +102,15 @@ public class Experiment3_3 {
 							+ df.format((double) x * 100 / 30) + "%");
 
 		}
-		agent.writeLineToFile("Total Fault Ratio:" + (double) totalfaultcount
-				* 100 / (num * 30) + "%");
+		
+		agent.writeLineToFile("Total Fault Count:" + (totalfaultcount) + " Normalseccount: "+ normalsectioncount);
+		agent.writeLineToFile("Total Fault Ratio:" + (double)(totalfaultcount)
+				* 100 / num * normalsectioncount + "%");
+		agent.writeLineToFile("Total Event Ratio:" + (double)(eventcount)
+				* 100 / normalcount + "%");
 	}
 
-	private static void proceedLine(Map<Integer, Double> readingpack,
+	private void proceedLine(Map<Integer, Double> readingpack,
 			String line, ProcessManager manager) {
 		String[] readingstringpack = line.split("\t");
 		for (int i = 0; i < readingstringpack.length; i++) {
@@ -127,15 +130,32 @@ public class Experiment3_3 {
 		// Iterator<Integer> iterator = key.iterator();
 		for (MarkedReading message : markedreading.values()) {
 			try {
-				if (message.deviceCondition() != DC.get(message.id())
+				if (message.deviceCondition() == 0
 						&& DC.get(message.id()) == 3) {
 					DCFaultround.put(message.id(), count);
+				}
+				else if(message.deviceCondition() == 4 && DC.get(markedreading.get(message.id()).id()) == 3){
+					LFcount++;
 				}
 			} catch (Exception e) {
 			}
 			DC.put(message.id(), message.deviceCondition());
 			// agent.writeLineToFile(message.toFormat());
 		}
+		if(LFcount > (double)markedreading.size()/2){
+			eventcount++;
+			renewcountdown = 30;
+		}
+		else if(renewcountdown == 0){
+			normalcount++;
+		}
+		else{
+			renewcountdown--;
+			if(renewcountdown == 0){
+				normalsectioncount++;
+			}
+		}
+		LFcount = 0;
 		// agent.writeLineToFile("\n");
 		readingpack.clear();
 	}

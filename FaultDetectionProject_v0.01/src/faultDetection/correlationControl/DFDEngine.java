@@ -18,7 +18,7 @@ public final class DFDEngine {
 	private final short GD = 3;
 	//
 	private double threshold; 
-	private double leastLGnumber;
+	private double leastLGratio;
 	private double faultneighbourthreshold = 0.5;
 	private Map<Integer, Map<Integer, Double>> correlationstrengthtable = new HashMap<Integer, Map<Integer, Double>>();
 	private Map<Integer, Short> faultycondition = new HashMap<Integer, Short>();
@@ -35,7 +35,7 @@ public final class DFDEngine {
 	//------------------------Public Functions-----------------------
 
 	public void updateLeastLGNumber(double leastLGnumber){
-		this.leastLGnumber = leastLGnumber;
+		this.leastLGratio = leastLGnumber;
 	}
 	public void updateThreshold(double threshold){
 		this.threshold = threshold;
@@ -91,7 +91,7 @@ public final class DFDEngine {
 		for(Map<Integer, Double> i : correlationstrengthtable.values()){;
 			int totalneighbournumber = 0;
 			int goodneighbournumber = 0;
-			//Count good neighbour number through all its correlation strength
+			//Count good neighbor number through all its correlation strength
 			for(double j : i.values()){
 				totalneighbournumber++;
 				if(j >= threshold){
@@ -129,7 +129,6 @@ public final class DFDEngine {
 				totalneighbournumber++;
 				int neighbour = iterator2.next();
 				try {
-					
 					if (faultycondition.get(neighbour) == LG) { 
 						LGneighbournumber++;
 						if (j >= threshold) {
@@ -143,19 +142,19 @@ public final class DFDEngine {
 			}
 			//setup up second voting result
 			try {
-				if ((double)goodneighbournumber / (double)totalneighbournumber >= faultneighbourthreshold) {														
-					if (LGneighbournumber >= leastLGnumber) {
+				if ((double)LGneighbournumber / (double)totalneighbournumber >= leastLGratio) {														
+					if ((double)goodneighbournumber/(double)LGneighbournumber >= faultneighbourthreshold) {
 						finalfaultycondition.put(iteratenumber, GD);
 					} else {
-						finalfaultycondition.put(iteratenumber, LG);
+						finalfaultycondition.put(iteratenumber, FT);
 					}
 				} 
 				else {
-					if (LGneighbournumber >= leastLGnumber) {
-						finalfaultycondition.put(iteratenumber, FT);
-					} else {
+//					if (LGneighbournumber >= leastLGratio) {
+//						finalfaultycondition.put(iteratenumber, FT);
+//					} else {
 						finalfaultycondition.put(iteratenumber, LF);
-					}
+//					}
 				}
 			} catch (Exception e) {
 				logger.error("Error: divide zero error");

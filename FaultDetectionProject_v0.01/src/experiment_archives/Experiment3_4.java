@@ -1,4 +1,4 @@
-package experiment;
+package experiment_archives;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -35,10 +35,12 @@ public class Experiment3_4 {
 		// agent.setFileReader();
 
 		// runSets(readingpack , regressiontype);
-		noise = 0.03;
-		runSet(15, 0.155, 0.20);
 		noise = 0.01;
 		runSet(15, 0.04, 0.10);
+		noise = 0.02;
+		runSet(15, 0.10, 0.15);
+		noise = 0.03;
+		runSet(15, 0.15, 0.20);
 
 
 	}

@@ -35,11 +35,14 @@ public class ProcessManager {
 				"EventPower"));
 		double maxfaultratio = Double.valueOf(propagent.getProperties("FDC",
 				"MaxFaultRatio"));
+		double eventLFratio = Double.valueOf(propagent.getProperties("FDC",
+				"EventLFRatio"));
 		double DFDthreshold = Double.valueOf(propagent.getProperties("FDC",
 				"DFDThreshold"));
 		double CSerrortolerance = Double.valueOf(propagent.getProperties("FDC",
 				"CSErrorTolerance"));
-		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio);
+		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio,
+				eventLFratio);
 		updateDFDThreshold(DFDthreshold);
 		updateCSErrorTolerance(CSerrortolerance);
 	}
@@ -49,6 +52,14 @@ public class ProcessManager {
 	// public void updateIntervalController(IntervalControl intervalControl){
 	// this.intervalcontrol = intervalControl;
 	// }
+
+	public void updateEventLFRatio(double eventLFratio){
+		manager.updateEventLFRatio(eventLFratio);
+	}
+	
+	public void updateEventPower(int power) {
+		manager.updateCorrelationPower(power);
+	}
 
 	public void updateCorrelationSampleSize(int size) {
 		manager.updateSampleSize(size);

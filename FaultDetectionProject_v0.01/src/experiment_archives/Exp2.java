@@ -1,4 +1,4 @@
-package experiment;
+package experiment_archives;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;

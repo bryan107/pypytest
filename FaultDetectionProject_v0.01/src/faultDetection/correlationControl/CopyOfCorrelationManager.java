@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class CorrelationManager {
+public class CopyOfCorrelationManager {
 	// ------------------------Private Variables------------------------------
 	private Map<Integer, Map<Integer, Correlation>> correlationmap = new HashMap<Integer, Map<Integer, Correlation>>();
 	private List<Integer> nodeindex = new ArrayList<Integer>();
@@ -28,37 +28,32 @@ public class CorrelationManager {
 	// Correlation Table is the correlation between readings in the reading
 	// buffer
 	private int samplesize;
-	private int samplecount = 0;
 	private int correlationpower;
 	private double maxfaultratio;
 	private ReadingBuffer buffer = new ReadingBuffer();
 	// Definition of reading conditions
 	private final short FT = 0;
-	private final short LF = 1;
+	// private final short LF = 1;
 	// private final short LG = 2;
 	private final short GD = 3;
 	private final short UNKNOWN = 4;
-	private final double eventLFrate = 0.5;
-	private int eventLFcount = 0;
-	private double eventLFratio;
 	private final Short devicedefaultcondition = UNKNOWN;
-	private static Log logger = LogFactory.getLog(CorrelationManager.class);
+	private static Log logger = LogFactory.getLog(CopyOfCorrelationManager.class);
 
 	// ----------------------------------------------------------------------
 
 	// ----------------------------Constructor-------------------------------
-	public CorrelationManager(int samplesize, int correlationpower,
-			double maxfaultratio, double eventLFratio) {
+	public CopyOfCorrelationManager(int samplesize, int correlationpower,
+			double maxfaultratio) {
 		updateSampleSize(samplesize);
 		updateCorrelationPower(correlationpower);
 		updateMaxFaultTimes(maxfaultratio);
-		updateEventLFRatio(eventLFratio);
 	}
 
 	// ----------------------------------------------------------------------
 	// --------------------------Public Functions----------------------------
 	public void resetNodeCondition(int nodeid) {
-		devicecondition.put(nodeid, devicedefaultcondition);
+		devicecondition.put(nodeid, UNKNOWN);
 		deviceconditioncount.get(nodeid).clear();
 		resetCorrelation(nodeid);
 		logger.info("Node [" + nodeid + "] Condition has been reset");
@@ -66,31 +61,21 @@ public class CorrelationManager {
 
 	private void resetCorrelation(int nodeid) {
 		// Reset node in column
-		int id = 333;
-		try {
-			Map<Integer, Correlation> nodeicolumn = correlationmap.get(nodeid);
+		Map<Integer, Correlation> nodeicolumn = correlationmap.get(nodeid);
 		for (Correlation i : nodeicolumn.values()) {
 			i.resetCorrelation(samplesize);
 		}
 		// Reset node in raws
 		for (int key : nodeindex) {
-			id = key;
 			if (key != nodeid) {
-					correlationmap.get(key).get(nodeid).resetCorrelation(samplesize);
+				for (Map<Integer, Correlation> raw : correlationmap.values()) {
+					raw.get(nodeid).resetCorrelation(samplesize);
+				}
 			}
 		}
-		} catch (Exception e) {
-			logger.warn("Node ID:"+ nodeid + "  Key ID:" + id + e);
-		}
-		
 	}
 
 	// TODO setup boundaries for these updates
-	
-	public void updateEventLFRatio(double eventLFratio){
-		this.eventLFratio = eventLFratio;
-	}
-	
 	public void updateSampleSize(int samplesize) {
 		this.samplesize = samplesize;
 	}
@@ -178,19 +163,10 @@ public class CorrelationManager {
 		// }
 		// }
 		
-		if(samplecount< samplesize){
-			samplecount++;
-		}
-		else{
-			checkEventOccurence(readingfaultcondition);//Check if an new event occurs. Yes, reset CT.
-		}
-		
 		checkDeviceCondition(readingfaultcondition); // Update node condition
 		bufferToCorrelation(); // buffer to correlation if node condition is
 								// normal.
 	}
-
-
 
 	public Map<Integer, Short> getDeviceCondition() {
 		return devicecondition;
@@ -223,38 +199,6 @@ public class CorrelationManager {
 				Math.pow(reading, (1.0 / correlationpower)));
 	}
 
-	private void checkEventOccurence(Map<Integer, Short> readingfaultcondition) {
-		int LFcount = 0;
-		//-----TODO TEST CODE----
-//		Set<Integer> k = readingfaultcondition.keySet();
-//		Iterator<Integer> i = k.iterator();
-//		while(i.hasNext()){
-//			int id = i.next();
-//			System.out.print("[" + id + "] RC: " + readingfaultcondition.get(id) + " ");
-//		}
-//		System.out.println();
-		//-----------------------
-		for(short condition : readingfaultcondition.values()){
-			if(condition == LF){
-				LFcount++;
-			}
-		}
-		if(((double)LFcount / readingfaultcondition.size()) > eventLFrate){
-			eventLFcount++;
-		}
-		if(((double)eventLFcount / samplesize) > eventLFratio){
-			logger.warn("New event occurs! Correlation reseting");
-			eventLFcount = 0;
-			samplecount = 0;
-			Set<Integer> key = readingfaultcondition.keySet();
-			Iterator<Integer> it = key.iterator();
-			while(it.hasNext()){//Only GD devices will be reset
-				int nodeid = it.next();
-				resetNodeCondition(nodeid);
-			}
-		}
-	}
-	
 	private void checkDeviceCondition(Map<Integer, Short> readingfaultcondition) {
 		Set<Integer> key = readingfaultcondition.keySet();
 		Iterator<Integer> iterator = key.iterator();

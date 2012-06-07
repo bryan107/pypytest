@@ -11,11 +11,11 @@ public class ProcessContainer_2 {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Experiment_TCD e = new Experiment_TCD("TCD\\");
-		e.runSet(15, 0.015, 0.05, 0.005);
+		e.runSet(15, 0.005, 0.0051, 0.005);
 		
-		e.runSet(15, 0.04, 0.10, 0.01);
-		
-		e.runSet(15, 0.10, 0.15, 0.02);
+//		e.runSet(15, 0.025, 0.035, 0.01);
+//		
+//		e.runSet(15, 0.075, 0.095, 0.02);
 
 
 		

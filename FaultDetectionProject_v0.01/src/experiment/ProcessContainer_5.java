@@ -12,8 +12,8 @@ public class ProcessContainer_5 {
 		// TODO Auto-generated method stub
 
 		Experiment_TCD e = new Experiment_TCD("TCD\\");
-		e.runSet(15, 0.18, 0.19, 0.03);
-		e.runSet(20, 0.04, 0.10, 0.01);
+		e.runSet(15, 0.145, 0.146, 0.03);
+		e.runSet(20, 0.025, 0.035, 0.01);
 		
 		
 //		Experiment_Events e = new Experiment_Events("EventChange\\");

@@ -142,17 +142,19 @@ public class Experiment_TCD {
 			DC.put(message.id(), message.deviceCondition());
 			// agent.writeLineToFile(message.toFormat());
 		}
-		if(LFcount > (double)markedreading.size()/2){
-			eventcount++;
-			renewcountdown = 30;
-		}
-		else if(renewcountdown == 0){
-			normalcount++;
-		}
-		else{
-			renewcountdown--;
-			if(renewcountdown == 0){
-				normalsectioncount++;
+		if(count > 30){
+			if(LFcount > (double)markedreading.size()/2){
+				eventcount++;
+				renewcountdown = 30;
+			}
+			else if(renewcountdown == 0){
+				normalcount++;
+			}
+			else{
+				renewcountdown--;
+				if(renewcountdown == 0){
+					normalsectioncount++;
+				}
 			}
 		}
 		LFcount = 0;

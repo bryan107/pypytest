@@ -1,9 +1,13 @@
-package dataGenerator;
+package experiments;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import dataGenerator.DeployMap;
+import dataGenerator.EventSourceManager;
+import dataGenerator.SensorManager;
 
 import faultSymptom.DeviationReadingFault;
 import fileAccessInterface.FileAccessAgent;
@@ -15,7 +19,7 @@ public class Generate extends TestCase {
 	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt", "E:\\test.txt");
 	private int sourceid = 1;
 	public void test(){
-		double noise = 0.01;
+		double noise = 0.005;
 		
 		creatSet(5, noise);
 		creatSet(7, noise);
@@ -86,12 +90,12 @@ public class Generate extends TestCase {
 				nodelocation[i][1] = y;
 				smanager.addNewSensor(x, y, noise);
 			}
-			String nodeinfo = "";
-			for(int i = 0 ; i < number ; i++){
-				nodeinfo = nodeinfo + "[" + i + "] X:" + nodelocation[i][0]+ " Y:" + nodelocation[i][1]; 
-			}	
-			f.writeLineToFile("Node location:");
-			f.writeLineToFile(nodeinfo);
+//			String nodeinfo = "";
+//			for(int i = 0 ; i < number ; i++){
+//				nodeinfo = nodeinfo + "[" + i + "] X:" + nodelocation[i][0]+ " Y:" + nodelocation[i][1]; 
+//			}	
+//			f.writeLineToFile("Node location:");
+//			f.writeLineToFile(nodeinfo);
 	}
 	
 	private String tagAccumulation(String string1, String string2){

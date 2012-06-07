@@ -29,6 +29,11 @@ public class SensorManager {
 		DeployMap.getInstance().removeSensor(nodeid);
 	}
 	
+	public void clear(){
+		sensorpack.clear();
+		DeployMap.getInstance().removeSensor();
+	}
+	
 	public void insertFault(int nodeid, FaultSymptom faultsymptom){
 		logger.info(faultsymptom.getKey() + " has been inserted into node[" + nodeid + "]");
 		sensorpack.get(nodeid).insertFault(faultsymptom);

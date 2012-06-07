@@ -52,12 +52,13 @@ public final class DeployMap {
 		}
 	}
 	
+	
 	public boolean addEventSource(int eventsourceid, int x, int y){
-		if(eventsourcelocation.containsKey(eventsourceid)){
-			logger.warn("Map already contains the information of source[" + eventsourceid + "]");
-			return false;
-		}
-		else{
+//		if(eventsourcelocation.containsKey(eventsourceid)){
+//			logger.warn("Map already contains the information of source[" + eventsourceid + "]");
+//			return false;
+//		}
+//		else{
 			if(x <= xmax && y <= ymax){
 				Integer[] location = {x,y};
 				eventsourcelocation.put(eventsourceid, location);
@@ -65,15 +66,21 @@ public final class DeployMap {
 			}
 			logger.warn("source[" + eventsourceid + "] location out of bound");
 			return false;
-		}
+//		}
 	}
 	
 	public void removeSensor(int nodeid){
 		sensorlocation.remove(nodeid);
 	}
+	public void removeSensor(){
+		sensorlocation.clear();
+	}
 	
 	public void removeEventSource(int sourceid){
 		eventsourcelocation.remove(sourceid);
+	}
+	public void removeEventSource(){
+		eventsourcelocation.clear();
 	}
 	
 	public double getDistance(int nodeid, int sourceid){

@@ -52,25 +52,27 @@ public class Correlation {
 
 	}
 
-	public double getCorrelation() {
+	public double getCorrelation(int regressiontype, double maxtolerableerror) {
+		double[] slopes;
+		//TODO Not yet test
 		synchronized (Calculator.getInstance()) {
 			if (mapenable == true) {
-				return Calculator.getInstance().getRegressionSlope(pair[0],
-						pair[1]);
-				// int regressiontype =
-				// Integer.valueOf(PropertyAgent.getInstance().getProperties("FDCservice",
-				// "RegressionType"));
-				// if(regressiontype == 0)//Use General Linear Regression
-				// return Calculator.getInstance().getRegressionSlope(pair[0],
-				// pair[1]);
-				// else if(regressiontype == 1)//Use Theil-Sen estimator based
-				// Linear Regression
-				// return
-				// Calculator.getInstance().getTheilSenRegressionSlope(pair[0],
-				// pair[1]);
-				// else
-				// logger.error("Invalid Regression Type");
-				// return 0;
+				switch(regressiontype){
+				case 0://original linear regression
+					return Calculator.getInstance().getRegressionSlope(pair[0],pair[1]);
+				case 1://quantile regression + Expected value
+					slopes = Calculator.getInstance().getQuantileArray(pair[0], pair[1], maxtolerableerror);
+					return Calculator.getInstance().getaverage(slopes);
+				case 2://quantile regression + Median
+					slopes = Calculator.getInstance().getQuantileArray(pair[0], pair[1], maxtolerableerror);
+					return Calculator.getInstance().getMedian(slopes);
+				case 3://quantile regression + original linear regression
+					//TODO Calculator's quantile + least square regression
+//					return
+				default:
+					logger.error("Invalid Regression Type");
+					return 0;
+				}
 			} else {
 //				logger.warn("Not enough inputs for getCorrelation");
 				return 0;

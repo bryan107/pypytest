@@ -33,6 +33,8 @@ public class ProcessManager {
 				"SampleSize"));
 		int eventpower = Integer.valueOf(propagent.getProperties("FDC",
 				"EventPower"));
+		int regressiontype = Integer.valueOf(propagent.getProperties("FDC",
+				"RegressionType"));
 		double maxfaultratio = Double.valueOf(propagent.getProperties("FDC",
 				"MaxFaultRatio"));
 		double eventLFratio = Double.valueOf(propagent.getProperties("FDC",
@@ -42,7 +44,7 @@ public class ProcessManager {
 		double CSerrortolerance = Double.valueOf(propagent.getProperties("FDC",
 				"CSErrorTolerance"));
 		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio,
-				eventLFratio);
+				eventLFratio, regressiontype);
 		updateDFDThreshold(DFDthreshold);
 		updateCSErrorTolerance(CSerrortolerance);
 	}
@@ -53,10 +55,10 @@ public class ProcessManager {
 	// this.intervalcontrol = intervalControl;
 	// }
 
-	public void updateEventLFRatio(double eventLFratio){
+	public void updateEventLFRatio(double eventLFratio) {
 		manager.updateEventLFRatio(eventLFratio);
 	}
-	
+
 	public void updateEventPower(int power) {
 		manager.updateCorrelationPower(power);
 	}

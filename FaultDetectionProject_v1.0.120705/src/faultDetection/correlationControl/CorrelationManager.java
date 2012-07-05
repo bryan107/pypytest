@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.jmx.Agent;
 
 public class CorrelationManager {
 	// ------------------------Private Variables------------------------------
@@ -31,6 +32,7 @@ public class CorrelationManager {
 	private int samplecount = 0;
 	private int correlationpower;
 	private double maxfaultratio;
+	private int regressiontype;
 	private ReadingBuffer buffer = new ReadingBuffer();
 	// Definition of reading conditions
 	private final short FT = 0;
@@ -48,11 +50,12 @@ public class CorrelationManager {
 
 	// ----------------------------Constructor-------------------------------
 	public CorrelationManager(int samplesize, int correlationpower,
-			double maxfaultratio, double eventLFratio) {
+			double maxfaultratio, double eventLFratio, int regressiontype) {
 		updateSampleSize(samplesize);
 		updateCorrelationPower(correlationpower);
 		updateMaxFaultTimes(maxfaultratio);
 		updateEventLFRatio(eventLFratio);
+		updateRegressionType(regressiontype);
 	}
 
 	// ----------------------------------------------------------------------
@@ -110,6 +113,10 @@ public class CorrelationManager {
 		this.maxfaultratio = maxfaultratio;
 	}
 
+	public void updateRegressionType(int regressiontype){
+		this.regressiontype = regressiontype;
+	}
+	
 	public void putReading(int nodeid, double reading) {
 		putReadingProcess(nodeid, reading);
 	}
@@ -386,7 +393,7 @@ public class CorrelationManager {
 			for (int j : nodeindex) {
 				if (j != i) {
 					double correlation = correlationmap.get(i).get(j)
-							.getCorrelation();
+							.getCorrelation(regressiontype, maxfaultratio);
 					correlationtrendtable.get(i).put(j, correlation);
 					// correlationtable.get(j).put(i, correlation);
 				}

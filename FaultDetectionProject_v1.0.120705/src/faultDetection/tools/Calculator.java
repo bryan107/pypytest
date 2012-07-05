@@ -3,6 +3,8 @@ package faultDetection.tools;
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -117,6 +119,26 @@ public final class Calculator {
 		}
 		return Stat.median(slopes);
 	}
+
+	public double[] getQuantileArray(double[] x, double[] y, double quantiles){
+		//TODO Not yet test
+		try {
+			double[] slopes = new double[x.length];
+			double[] quantileslopes = null;
+			for(int i = 0 ; i < slopes.length ; i++){
+				slopes[i] = y[i] / x[i];
+			}
+			Arrays.sort(slopes);
+			int quantilesize = (int)(slopes.length*quantiles);
+			quantileslopes = Arrays.copyOfRange(slopes, quantilesize, (slopes.length - quantilesize -1));
+			return quantileslopes;
+		} catch (Exception e) {
+			logger.error(e);
+			return null;
+		}
+
+	}
+
 
 	// Statistics------------------------------------------------
 

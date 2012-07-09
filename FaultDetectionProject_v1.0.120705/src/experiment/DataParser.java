@@ -8,7 +8,6 @@ public class DataParser {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		FileAccessAgent agent = new FileAccessAgent(
 				"C:\\TEST\\Berkeley\\Parsed_Data_1_2_31_37.txt",
 				"C:\\TEST\\Berkeley\\data.txt");

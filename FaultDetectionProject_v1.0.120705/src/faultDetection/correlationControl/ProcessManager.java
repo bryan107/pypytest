@@ -8,33 +8,34 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import faultDetection.tools.LeastSquareEstimator;
+import faultDetection.tools.MedianEstimator;
+import faultDetection.tools.QuantilesEEstimator;
+import faultDetection.tools.RegressionEstimator;
 import fileAccessInterface.PropertyAgent;
 
 public class ProcessManager {
 	// ---------------------Private variables------------------------
 	private ReadingBuffer readingbuffer = new ReadingBuffer();
-	// private IntervalControl intervalcontrol;
-	private CorrelationManager manager;
-	// private Map<Integer, double[]> markedreading = new HashMap<Integer,
-	// double[]>();
-	private static Log logger = LogFactory.getLog(ProcessManager.class);
+	private CorrelationManager manager =  new CorrelationManager(30, 2, 0.293,
+			0.03, null);
 	DFDEngine DFDengine = new DFDEngine(0.8, 0.5);
 	CorrelationStrengthManager CSmanager = new CorrelationStrengthManager(0.2);
+	//---------------File Access Interface---------------------
 	private PropertyAgent propagent = new PropertyAgent("conf");
-
+	//----------------------------------------------------------------------------
+	private static Log logger = LogFactory.getLog(ProcessManager.class);
 	// --------------------------------------------------------------
 	// ----------------------Constructor-----------------------------
 	public ProcessManager() {
-		// updateIntervalController(intervalControl);
-		// TODO Temporarily initiate correlation manager manually
-		// TODO Set variables with Property Agent in the entire project
+		updateSettingsFromConfig();
+	}
 
+	private void updateSettingsFromConfig() {
 		int samplesize = Integer.valueOf(propagent.getProperties("FDC",
 				"SampleSize"));
 		int eventpower = Integer.valueOf(propagent.getProperties("FDC",
 				"EventPower"));
-		int regressiontype = Integer.valueOf(propagent.getProperties("FDC",
-				"RegressionType"));
 		double maxfaultratio = Double.valueOf(propagent.getProperties("FDC",
 				"MaxFaultRatio"));
 		double eventLFratio = Double.valueOf(propagent.getProperties("FDC",
@@ -42,9 +43,14 @@ public class ProcessManager {
 		double DFDthreshold = Double.valueOf(propagent.getProperties("FDC",
 				"DFDThreshold"));
 		double CSerrortolerance = Double.valueOf(propagent.getProperties("FDC",
-				"CSErrorTolerance"));
-		manager = new CorrelationManager(samplesize, eventpower, maxfaultratio,
-				eventLFratio, regressiontype);
+				"CSErrorTolerance"));	
+		RegressionEstimator regressionestimator = initailRegressionEstimator();
+		
+		updateCorrelationSampleSize(samplesize);
+		updateEventPower(eventpower);
+		updateMaxFaultRatio(maxfaultratio);
+		updateEventLFRatio(eventLFratio);
+		updateRegressionEstimator(regressionestimator);
 		updateDFDThreshold(DFDthreshold);
 		updateCSErrorTolerance(CSerrortolerance);
 	}
@@ -60,9 +66,13 @@ public class ProcessManager {
 	}
 
 	public void updateEventPower(int power) {
-		manager.updateCorrelationPower(power);
+		manager.updateEventPower(power);
 	}
 
+	public void updateMaxFaultRatio(double maxfaultratio){
+		manager.updateMaxFaultRatio(maxfaultratio);
+	}
+	
 	public void updateCorrelationSampleSize(int size) {
 		manager.updateSampleSize(size);
 	}
@@ -73,6 +83,10 @@ public class ProcessManager {
 
 	public void updateCSErrorTolerance(double errortolerance) {
 		CSmanager.updateErrorTolerance(errortolerance);
+	}
+
+	public void updateRegressionEstimator(RegressionEstimator regressionestimator) {
+		manager.updateRegressionEstimator(regressionestimator);
 	}
 
 	public Map<Integer, MarkedReading> markReadings(
@@ -142,9 +156,6 @@ public class ProcessManager {
 		}
 	}
 	//
-	// public Map<Integer, double[]> getMarkedReading() {
-	// return markedreading;
-	// }
 	//
 	// public double[] getMarkedReading(int nodeid) {
 	// return markedreading.get(nodeid);
@@ -152,6 +163,29 @@ public class ProcessManager {
 
 	// -----------------------------------------------------------------
 	// ----------------------Private Functions--------------------------
+	
+	
+	private RegressionEstimator initailRegressionEstimator() {
+		RegressionEstimator regressionestimator;
+		int regressiontype = Integer.valueOf(propagent.getProperties("FDC",
+				"RegressionType"));
+		switch (regressiontype) {
+		case 0:
+			regressionestimator = new LeastSquareEstimator();
+			break;
+		case 1:
+			regressionestimator = new QuantilesEEstimator();
+			break;
+		case 2:
+			regressionestimator = new MedianEstimator();
+			break;
+		default:
+			regressionestimator = null;
+			logger.error("Non-defined regression type");
+			break;
+		}
+		return regressionestimator;
+	}
 
 	// table updating mechanism & updating rate
 	// private void intervalControl(){

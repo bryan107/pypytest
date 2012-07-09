@@ -3,6 +3,7 @@ package faultDetection.correlationControl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import faultDetection.tools.Calculator;
+import faultDetection.tools.RegressionEstimator;
 import fileAccessInterface.PropertyAgent;
 
 public class Correlation {
@@ -11,11 +12,23 @@ public class Correlation {
 	private int samplesize; // Max number of pairs
 	private boolean mapenable; // Fulfill the requirement
 	private static Log logger = LogFactory.getLog(Correlation.class);
+	private RegressionEstimator regressionestimator;
+	private double maxtolerableerror;
 
-	public Correlation(int samplesize) {
+	public Correlation(int samplesize, RegressionEstimator regressionestimator, double maxtolerableerror) {
 		resetCorrelation(samplesize);
+		updateRegressionEstimator(regressionestimator);
+		updateMaxTolerableError(maxtolerableerror);
 	}
 
+	public void updateMaxTolerableError(double maxtolerableerror){
+		this.maxtolerableerror = maxtolerableerror;
+	}
+	
+	public void updateRegressionEstimator(RegressionEstimator regressionestimator){
+		this.regressionestimator = regressionestimator;
+	}
+	
 	public void resetCorrelation(int samplesize) {
 		mappointer = 0;
 		mapenable = false;
@@ -52,33 +65,15 @@ public class Correlation {
 
 	}
 
-	public double getCorrelation(int regressiontype, double maxtolerableerror) {
-		double[] slopes;
-		//TODO Not yet test
-		synchronized (Calculator.getInstance()) {
-			if (mapenable == true) {
-				switch(regressiontype){
-				case 0://original linear regression
-					return Calculator.getInstance().getRegressionSlope(pair[0],pair[1]);
-				case 1://quantile regression + Expected value
-					slopes = Calculator.getInstance().getQuantileArray(pair[0], pair[1], maxtolerableerror);
-					return Calculator.getInstance().getaverage(slopes);
-				case 2://quantile regression + Median
-					slopes = Calculator.getInstance().getQuantileArray(pair[0], pair[1], maxtolerableerror);
-					return Calculator.getInstance().getMedian(slopes);
-				case 3://quantile regression + original linear regression
-					//TODO Calculator's quantile + least square regression
-//					return
-				default:
-					logger.error("Invalid Regression Type");
-					return 0;
-				}
-			} else {
-//				logger.warn("Not enough inputs for getCorrelation");
-				return 0;
-			}
+	// Original linear regression
+	public double getEstimatedCorrelation() {
+		if (mapenable == true) {
+			return regressionestimator.getEstimatedValue(pair[0], pair[1], maxtolerableerror);
 		}
-
+		else{
+			 logger.warn("Not enough inputs for getCorrelation");
+			return 0;
+		}
 	}
 
 	public double getCorrelationError() {

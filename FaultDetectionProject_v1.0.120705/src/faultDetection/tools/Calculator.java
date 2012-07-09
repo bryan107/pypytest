@@ -121,7 +121,6 @@ public final class Calculator {
 	}
 
 	public double[] getQuantileArray(double[] x, double[] y, double quantiles){
-		//TODO Not yet test
 		try {
 			double[] slopes = new double[x.length];
 			double[] quantileslopes = null;

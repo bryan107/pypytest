@@ -1,5 +1,6 @@
 package faultDetection.correlationControl;
 
+import java.rmi.dgc.Lease;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.jmx.Agent;
 
+import faultDetection.tools.LeastSquareEstimator;
+import faultDetection.tools.RegressionEstimator;
+import flanagan.analysis.Regression;
+
 public class CorrelationManager {
 	// ------------------------Private Variables------------------------------
 	private Map<Integer, Map<Integer, Correlation>> correlationmap = new HashMap<Integer, Map<Integer, Correlation>>();
@@ -22,44 +27,53 @@ public class CorrelationManager {
 	// to be faulty when reaching the threshold.
 	private Map<Integer, Short> devicecondition = new HashMap<Integer, Short>();
 	// Node faulty condition.
+	
+	
+	//---------------------------Correlation Tables---------------------------
 	private Map<Integer, Map<Integer, Double>> correlationtrendtable = new HashMap<Integer, Map<Integer, Double>>();
 	// Correlation Trend Table is the estimate correlation calculated with
 	// regression analysis
 	private Map<Integer, Map<Integer, Double>> correlationtable = new HashMap<Integer, Map<Integer, Double>>();
 	// Correlation Table is the correlation between readings in the reading
 	// buffer
+	
+	//-------------------------Global Variables-----------------------------
+	
 	private int samplesize;
-	private int samplecount = 0;
 	private int correlationpower;
 	private double maxfaultratio;
-	private int regressiontype;
+	private double eventLFratio;
 	private ReadingBuffer buffer = new ReadingBuffer();
-	// Definition of reading conditions
+	private RegressionEstimator regressionestimator;
+
+	// -----------------Definition of reading conditions--------------------
 	private final short FT = 0;
 	private final short LF = 1;
 	// private final short LG = 2;
 	private final short GD = 3;
 	private final short UNKNOWN = 4;
+	
+	//----------------------------------------------------------------------
 	private final double eventLFrate = 0.5;
-	private int eventLFcount = 0;
-	private double eventLFratio;
 	private final Short devicedefaultcondition = UNKNOWN;
+	private int eventLFcount = 0;
+	private int samplecount = 0;
+	//------------------------ Other Objects ------------------------------
 	private static Log logger = LogFactory.getLog(CorrelationManager.class);
-
 	// ----------------------------------------------------------------------
 
 	// ----------------------------Constructor-------------------------------
 	public CorrelationManager(int samplesize, int correlationpower,
-			double maxfaultratio, double eventLFratio, int regressiontype) {
+			double maxfaultratio, double eventLFratio, RegressionEstimator regressionestimator) {
 		updateSampleSize(samplesize);
-		updateCorrelationPower(correlationpower);
-		updateMaxFaultTimes(maxfaultratio);
+		updateEventPower(correlationpower);
+		updateMaxFaultRatio(maxfaultratio);
 		updateEventLFRatio(eventLFratio);
-		updateRegressionType(regressiontype);
+		updateRegressionEstimator(regressionestimator);
 	}
 
 	// ----------------------------------------------------------------------
-	// --------------------------Public Functions----------------------------
+	// --------------------------Variable Setting Functions----------------------------
 	public void resetNodeCondition(int nodeid) {
 		devicecondition.put(nodeid, devicedefaultcondition);
 		deviceconditioncount.get(nodeid).clear();
@@ -89,8 +103,6 @@ public class CorrelationManager {
 
 	}
 
-	// TODO setup boundaries for these updates
-
 	public void updateEventLFRatio(double eventLFratio) {
 		this.eventLFratio = eventLFratio;
 	}
@@ -99,7 +111,7 @@ public class CorrelationManager {
 		this.samplesize = samplesize;
 	}
 
-	public void updateCorrelationPower(int correlationpower) {
+	public void updateEventPower(int correlationpower) {
 		if (correlationpower == 0) {
 			logger.error("Correlation Power cannot be " + correlationpower
 					+ "and has been set as 1");
@@ -109,14 +121,14 @@ public class CorrelationManager {
 		this.correlationpower = correlationpower;
 	}
 
-	public void updateMaxFaultTimes(double maxfaultratio) {
+	public void updateMaxFaultRatio(double maxfaultratio) {
 		this.maxfaultratio = maxfaultratio;
 	}
-
-	public void updateRegressionType(int regressiontype){
-		this.regressiontype = regressiontype;
-	}
 	
+	public void updateRegressionEstimator(RegressionEstimator regressionestimator){
+		this.regressionestimator = regressionestimator;
+	}
+	// --------------------------Public Functions----------------------------
 	public void putReading(int nodeid, double reading) {
 		putReadingProcess(nodeid, reading);
 	}
@@ -358,11 +370,20 @@ public class CorrelationManager {
 	private void newCorrelationMapEntry(int nodeid) {
 		for (int i = 0; i < correlationmap.size(); i++) {
 			correlationmap.get(nodeindex.get(i)).put(nodeid,
-					new Correlation(samplesize));
+					new Correlation(samplesize, regressionestimator, maxfaultratio));
 		}
 		correlationmap.put(nodeid, newCorrelationMapList());
 	}
 
+	private Map<Integer, Correlation> newCorrelationMapList() {
+		Map<Integer, Correlation> newnodecorrelation = new HashMap<Integer, Correlation>();
+		for (int i = 0; i < nodeindex.size(); i++) {
+			newnodecorrelation.put(nodeindex.get(i),
+					new Correlation(samplesize, regressionestimator, maxfaultratio));
+		}
+		return newnodecorrelation;
+	}
+	
 	private void newCorrelationTableEntry(int nodeid) {
 		for (int i = 0; i < correlationtrendtable.size(); i++) {
 			correlationtrendtable.get(nodeindex.get(i)).put(nodeid, (double) 0);
@@ -370,14 +391,7 @@ public class CorrelationManager {
 		correlationtrendtable.put(nodeid, newCorrelationTableList());
 	}
 
-	private Map<Integer, Correlation> newCorrelationMapList() {
-		Map<Integer, Correlation> newnodecorrelation = new HashMap<Integer, Correlation>();
-		for (int i = 0; i < nodeindex.size(); i++) {
-			newnodecorrelation.put(nodeindex.get(i),
-					new Correlation(samplesize));
-		}
-		return newnodecorrelation;
-	}
+
 
 	private Map<Integer, Double> newCorrelationTableList() {
 		Map<Integer, Double> newnodecorrelationlist = new HashMap<Integer, Double>();
@@ -393,7 +407,7 @@ public class CorrelationManager {
 			for (int j : nodeindex) {
 				if (j != i) {
 					double correlation = correlationmap.get(i).get(j)
-							.getCorrelation(regressiontype, maxfaultratio);
+							.getEstimatedCorrelation();
 					correlationtrendtable.get(i).put(j, correlation);
 					// correlationtable.get(j).put(i, correlation);
 				}

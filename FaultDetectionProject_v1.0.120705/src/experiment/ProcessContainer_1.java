@@ -9,7 +9,6 @@ public class ProcessContainer_1 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Experiment_TCD e = new Experiment_TCD("TCD\\");
 		e.runSet(5, 0.005, 0.0051, 0.005);
 		e.runSet(7, 0.005, 0.0051, 0.005);

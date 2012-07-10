@@ -22,16 +22,23 @@ public class Experiment_Faults {
 	private String regressiontype = "";
 	private String faulttype;
 
-	private String filename = "FaultType\\Noisy\\";
+	private String filewritelocation = "FaultType\\Noisy\\";
+	private String filereadlocation = "FaultType\\Noisy\\";
+	
 	private int samplesize = 30;
 
-	public Experiment_Faults(String filename, String faulttype){
-		updateFileLocation(filename);
+	public Experiment_Faults(String filewritelocation, String filereadlocation, String faulttype){
+		updateFilewriteLocation(filewritelocation);
+		updateFileReadLocation(filereadlocation);
 		updateFaultType(faulttype);
 	}
 	
-	public void updateFileLocation(String filename){
-		this.filename = filename;
+	public void updateFilewriteLocation(String filewritelocation){
+		this.filewritelocation = filewritelocation;
+	}
+	
+	public void updateFileReadLocation(String filereadlocation){
+		this.filereadlocation = filereadlocation;
 	}
 	
 	public void updateFaultType(String faulttype){
@@ -48,7 +55,7 @@ public class Experiment_Faults {
 	private void runRoundSet(Map<Integer, Double> readingpack, int num,
 			double faultratio, String regressiontype) {
 		DecimalFormat df = new DecimalFormat("0.0");
-		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + filename
+		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + filewritelocation
 				+ "Result_1_" + regressiontype + "__" + faulttype + "__NUM_"
 				+ num + "__FaultRatio_" + df.format(faultratio) + ".txt",
 				"C:\\TEST\\NULL.txt");
@@ -65,7 +72,7 @@ public class Experiment_Faults {
 			DCFaultround.clear();
 			ProcessManager manager = new ProcessManager();
 
-			String readingpath = "C:\\TEST\\" + filename + "source_1__"
+			String readingpath = "C:\\TEST\\" + filereadlocation + "source_1__"
 					+ faulttype + "__" + df.format(faultratio) + "__NUM_" + num
 					+ "__" + x + ".txt";
 			agent.updatereadingpath(readingpath);
@@ -135,9 +142,9 @@ public class Experiment_Faults {
 			int falsepositivecount, int falsenegetivecount,
 			int successdetectcount, int totalrealfaultcount) {
 		agent.writeLineToFile("Total Detection Accuracy:");
-		 agent.writeLineToFile("Detection rate" + (double)successdetectcount * 100 / totalrealfaultcount + "%");
-		 agent.writeLineToFile("False Positive rate" + (double)falsepositivecount * 100 / totalrealfaultcount + "%");
-		 agent.writeLineToFile("False Negative rate" + (double)falsenegetivecount * 100 / totalrealfaultcount + "%");
+		 agent.writeLineToFile("Detection rate: " + (double)successdetectcount * 100 / totalrealfaultcount + " %");
+		 agent.writeLineToFile("False Positive rate: " + (double)falsepositivecount * 100 / totalrealfaultcount + " %");
+		 agent.writeLineToFile("False Negative rate: " + (double)falsenegetivecount * 100 / totalrealfaultcount + " %");
 	}
 
 	private void outputRealFaultRound(FileAccessAgent agent,

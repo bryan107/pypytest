@@ -1,7 +1,6 @@
 package experiment;
 
-import experiment_cores.Experiment_Events;
-import experiment_cores.Experiment_TCD;
+import experiment_cores.Experiment_Faults;
 
 public class ProcessContainer_1 {
 
@@ -9,10 +8,10 @@ public class ProcessContainer_1 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Experiment_TCD e = new Experiment_TCD("TCD\\");
-		e.runSet(5, 0.005, 0.0051, 0.005);
-		e.runSet(7, 0.005, 0.0051, 0.005);
-		e.runSet(10, 0.005, 0.0051, 0.005);
+		Experiment_Faults e = new Experiment_Faults("FaultType\\Noisy\\QE_Estimator\\", "FaultType\\Noisy\\", "Noisy");
+		e.runSet(5, 0.1, 0.6);
+		e.runSet(7, 0.1, 0.6);
+		e.runSet(10,0.1, 0.6);
 		
 //		e.runSet(5, 0.025, 0.035, 0.01);
 //		e.runSet(7, 0.025, 0.035, 0.01);

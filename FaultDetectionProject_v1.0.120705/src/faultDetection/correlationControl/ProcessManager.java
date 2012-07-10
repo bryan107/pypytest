@@ -56,7 +56,7 @@ public class ProcessManager {
 	}
 
 	// --------------------------------------------------------------
-	// ---------------------Public Functions--------------------------
+	// ---------------------Variable Settings--------------------------
 	// public void updateIntervalController(IntervalControl intervalControl){
 	// this.intervalcontrol = intervalControl;
 	// }
@@ -89,6 +89,8 @@ public class ProcessManager {
 		manager.updateRegressionEstimator(regressionestimator);
 	}
 
+	
+	// ---------------------Public Functions--------------------------
 	public Map<Integer, MarkedReading> markReadings(
 			Map<Integer, Double> readingpack) {
 		// Variables

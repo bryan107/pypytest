@@ -11,25 +11,29 @@ import org.apache.commons.logging.LogFactory;
 import faultDetection.tools.Calculator;
 
 public final class CorrelationStrengthManager {
-	//-------------------Defined Values-----------------------
+	// ------------------Defined Values-----------------------
 	//faulty conditions
 	private final short FT = 0;
 
-	//------------------Private Variables---------------------
+	// -----------------Private Variables---------------------
 	private double errortolerance;
 	
 	private static Log logger = LogFactory.getLog(CorrelationStrengthManager.class);
-	//--------------------Constructor-------------------------
+	// -------------------Constructor-------------------------
 	public CorrelationStrengthManager(double errortolerance){
 		updateErrorTolerance(errortolerance);
 	}
 	
+	// ------------------Variable Settings--------------------
 	public void updateErrorTolerance(double errortolerance){
 		this.errortolerance = errortolerance;
 	}
+	
+	// ------------------Public Functions---------------------
 	public double getErrorTolerance(){
 		return errortolerance;
 	}
+
 	public Map<Integer, Map<Integer, Double>> getCorrelationStrengthTable(Map<Integer, Map<Integer, Double>> correlationtable, Map<Integer, Map<Integer, Double>> correlationtrendtable){
 		Map<Integer, Map<Integer, Double>> correlationstrengthtable = new HashMap<Integer, Map<Integer,Double>>();
 		Set<Integer> keyraw = correlationtable.keySet();
@@ -84,14 +88,4 @@ public final class CorrelationStrengthManager {
 		return readingtrustworthiness;
 	}
 	
-//Unusable since Correlation Strength Manager only do the calculation without memory
-//	public Map<Integer, Map<Integer, Double>> getCorrelationStrengthTable(){
-//		return correlationstrengthtable;
-//	}
-//
-//	
-//	public double getCorrelationStrength(int node1 , int node2){
-//		
-//		return correlationstrengthtable.get(node1).get(node2);
-//	}
 }

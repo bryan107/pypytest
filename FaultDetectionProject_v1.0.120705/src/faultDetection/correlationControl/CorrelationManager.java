@@ -185,30 +185,14 @@ public class CorrelationManager {
 	}
 
 	public void updateCorrelations(Map<Integer, Short> readingfaultcondition) {
-		// Map<Integer, Boolean> devicefaultcondition = new HashMap<Integer,
-		// Boolean>();
-		// Set<Integer> key = readingfaultcondition.keySet();
-		// Iterator<Integer> iterator = key.iterator();
-		// while (iterator.hasNext()) {
-		// int nodeid = iterator.next();
-		// if (readingfaultcondition.get(nodeid) == FT) {
-		// devicefaultcondition.put(nodeid, false);
-		// } else {
-		// devicefaultcondition.put(nodeid, true);
-		// }
-		// }
-
 		if (samplecount < samplesize) {
 			samplecount++;
 		} else {
-			checkEventOccurence(readingfaultcondition);// Check if an new event
-														// occurs. Yes, reset
-														// CT.
+			checkEventOccurence(readingfaultcondition);
+			// Check if an new event occurs. Yes, reset CT.
 		}
-
 		checkDeviceCondition(readingfaultcondition); // Update node condition
-		bufferToCorrelation(); // buffer to correlation if node condition is
-								// normal.
+		bufferToCorrelation(); // buffer to correlation if node condition is normal.
 	}
 
 	public Map<Integer, Short> getDeviceCondition() {
@@ -235,9 +219,11 @@ public class CorrelationManager {
 		logger.info("New Node[" + nodeid + "] has been added");
 		addNewNode(nodeid);
 		logger.info("Index Size = " + nodeindex.size());
+		// TODO TEST CODE--------------------------------------------
 		// logger.info("Reading = " + reading + " Correlation = " +
 		// Math.pow(reading, (1.0/correlationpower)) + "Power" +
 		// correlationpower);
+		// ----------------------------------------------------------
 		buffer.putBufferData(nodeid,
 				Math.pow(reading, (1.0 / correlationpower)));
 	}
@@ -317,10 +303,12 @@ public class CorrelationManager {
 					FTcount++;
 				}
 			}
+			// TODO TEST CODE-----------------------------------------------
 			// logger.info("[" + nodeid + "] samplesize = " + samplesize +
 			// " errorcount:" + count);
 			// logger.info("[" + nodeid + "]fault ratio:" + (double)count /
 			// samplesize + " max:" + maxfaultratio);
+			// -------------------------------------------------------------
 			if ((double) FTcount / samplesize >= maxfaultratio) {
 				logger.info("device fault");
 				devicecondition.put(nodeid, FT);
@@ -339,9 +327,11 @@ public class CorrelationManager {
 				try {
 					if (j != i && devicecondition.get(i) != FT
 							&& devicecondition.get(j) != FT) {
+						// TODO TEST CODE-----------------------------------
 						// logger.info("readfrombuffer: "
 						// + buffer.getBufferData(i) + " "
 						// + buffer.getBufferData(j));
+						// -------------------------------------------------
 						correlationmap
 								.get(i)
 								.get(j)
@@ -362,7 +352,9 @@ public class CorrelationManager {
 		newCorrelationTableEntry(nodeid);
 		deviceconditioncount.put(nodeid, new LinkedList<Short>());
 		devicecondition.put(nodeid, devicedefaultcondition);
+		// TODO TEST CODE-------------------------------------------
 		// logger.info("Has addd node[" + nodeid + "] to devicecondition");
+		// ---------------------------------------------------------
 		nodeindex.add(nodeid); // put last to avoid self-reference
 		// devicecondition.put(nodeid, value)
 	}
@@ -390,8 +382,6 @@ public class CorrelationManager {
 		}
 		correlationtrendtable.put(nodeid, newCorrelationTableList());
 	}
-
-
 
 	private Map<Integer, Double> newCorrelationTableList() {
 		Map<Integer, Double> newnodecorrelationlist = new HashMap<Integer, Double>();

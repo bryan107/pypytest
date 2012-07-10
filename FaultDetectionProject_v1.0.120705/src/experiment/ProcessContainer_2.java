@@ -1,6 +1,7 @@
 package experiment;
 
 import experiment_cores.Experiment_Events;
+import experiment_cores.Experiment_Faults;
 import experiment_cores.Experiment_TCD;
 
 public class ProcessContainer_2 {
@@ -9,8 +10,12 @@ public class ProcessContainer_2 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Experiment_TCD e = new Experiment_TCD("TCD\\");
-		e.runSet(15, 0.005, 0.0051, 0.005);
+		
+		Experiment_Faults e = new Experiment_Faults("FaultType\\Deviation\\Median_Estimator\\", "FaultType\\Deviation\\", "Deviation");
+		e.runSet(15, 0.1, 0.6);
+		
+		e = new Experiment_Faults("FaultType\\Stuck\\Median_Estimator\\", "FaultType\\Stuck\\", "Stuck");
+		e.runSet(15, 0.1, 0.6);
 		
 //		e.runSet(15, 0.025, 0.035, 0.01);
 //		

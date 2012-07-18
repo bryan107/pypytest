@@ -12,8 +12,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import faultDetection.correlationControl.MarkedReading;
 import faultDetection.correlationControl.ProcessManager;
+import faultDetection.correlationControl.ProcessedReadingPack;
 import fileAccessInterface.FileAccessAgent;
-
+//TODO NEED TEST
 public class Experiment_Events {
 	private Log logger = LogFactory.getLog(Experiment_Events.class);
 	private int round = 10800;
@@ -25,12 +26,21 @@ public class Experiment_Events {
 	private String regressiontype = "EventChange";
 //	private static String faulttype;
 
-	private String filename;
+	private String readingpath, writingpath;
 
-	public Experiment_Events(String filename){
-		this.filename = filename;
+	public Experiment_Events(String writingpath, String readingpath){
+		updateFilewriteLocation(writingpath);
+		updateFileReadLocation(readingpath);
 	}
 
+	public void updateFilewriteLocation(String writingpath){
+		this.writingpath = writingpath;
+	}
+	
+	public void updateFileReadLocation(String readingpath){
+		this.readingpath = readingpath;
+	}
+	
 	public void runSet(int num, double lowerbound, double upperbound, double eventLFratio) {
 		for (double eventchangeratio = lowerbound; eventchangeratio < upperbound + 0.00005; eventchangeratio += 0.001) {
 			runRoundSet(readingpack, num, eventchangeratio, regressiontype, eventLFratio);
@@ -40,7 +50,7 @@ public class Experiment_Events {
 	private void runRoundSet(Map<Integer, Double> readingpack, int num,
 			double eventchangeratio, String regressiontype, double eventLFratio) {
 		DecimalFormat df = new DecimalFormat("0.000");
-		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + filename
+		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + writingpath
 				+ "Result_1_" + regressiontype + "__NUM_"
 				+ num + "__EventChangeRatio_" + df.format(eventchangeratio) + "__"+ eventLFratio +".txt",
 				"C:\\TEST\\NULL.txt");
@@ -60,7 +70,7 @@ public class Experiment_Events {
 			ProcessManager manager = new ProcessManager();
 			manager.updateEventPower(2);
 			manager.updateEventLFRatio(eventLFratio);
-			String readingpath = "C:\\TEST\\" + filename + "source_1__" + df.format(eventchangeratio) + "__NUM_" + num
+			String readingpath = "C:\\TEST\\" + this.readingpath + "source_1__" + df.format(eventchangeratio) + "__NUM_" + num
 					+ "__" + x + ".txt";
 			agent.updatereadingpath(readingpath);
 			agent.setFileReader();
@@ -114,7 +124,7 @@ public class Experiment_Events {
 	private void outputPerformance(FileAccessAgent agent,
 			int falsepositivecount, int falsenegetivecount,
 			int successdetectcount, int totalrealfaultcount, int num, int eventcount) {
-		agent.writeLineToFile("Total Detection Accuracy:");
+		 agent.writeLineToFile("Total Detection Accuracy:");
 		 agent.writeLineToFile("Detection rate: " + (double)successdetectcount * 100 / eventcount + "%");
 		 agent.writeLineToFile("False Positive rate: " + (double)falsepositivecount * 100 / eventcount + "%");
 //		 agent.writeLineToFile("False Negative rate: " + (double)falsenegetivecount * 100 / totalrealfaultcount + "%");
@@ -162,8 +172,9 @@ public class Experiment_Events {
 			
 		}
 
-		Map<Integer, MarkedReading> markedreading = manager
-				.markReadings(readingpack);
+		ProcessedReadingPack processedreadingpack = manager.markReadings(readingpack);
+		
+		Map<Integer, MarkedReading> markedreading = processedreadingpack.markedReadingPack();
 
 		Set<Integer> key = markedreading.keySet();
 		Iterator<Integer> iterator = key.iterator();
@@ -175,18 +186,15 @@ public class Experiment_Events {
 						&& DC.get(markedreading.get(nodeid).id()) == 3) {
 					DCFaultround.put(markedreading.get(nodeid).id(), count);
 				}
-				else if(markedreading.get(nodeid).deviceCondition() == 4 && DC.get(markedreading.get(nodeid).id()) == 3){
-					LFcount++;
-				}
 			} catch (Exception e) {
 			}
 			DC.put(markedreading.get(nodeid).id(), markedreading.get(nodeid)
 					.deviceCondition());
 			// agent.writeLineToFile(message.toFormat());
 		}
-		if((double)LFcount/ markedreading.size() > 0.5)
+		if(processedreadingpack.newEventOccurs()){
 			neweventround.add(count);
-		// agent.writeLineToFile("\n");
+		}
 		readingpack.clear();
 	}
 }

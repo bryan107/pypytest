@@ -91,7 +91,7 @@ public class ProcessManager {
 
 	
 	// ---------------------Public Functions--------------------------
-	public Map<Integer, MarkedReading> markReadings(
+	public ProcessedReadingPack markReadings(
 			Map<Integer, Double> readingpack) {
 		// Variables
 		Map<Integer, Short> devicecondition;
@@ -124,7 +124,7 @@ public class ProcessManager {
 		//
 		// SETP 5 : Update device condition from the result of DFD & generate
 		// reading trustworthiness
-		manager.updateCorrelations(readingfaultcondition);
+		boolean eventoccurence = manager.updateCorrelations(readingfaultcondition);
 		readingtrustworthiness = CSmanager.getReadingTrustworthiness(
 				correlationstrengthtable, readingfaultcondition);
 		// Return result
@@ -142,7 +142,8 @@ public class ProcessManager {
 			markedreadingpack.put(nodeid, markedreading);
 
 		}
-		return markedreadingpack;
+		ProcessedReadingPack processedreadingpack = new ProcessedReadingPack(markedreadingpack, eventoccurence);
+		return processedreadingpack;
 	}
 
 	public void putReading(int nodeid, double reading) {

@@ -12,62 +12,70 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import faultDetection.correlationControl.MarkedReading;
 import faultDetection.correlationControl.ProcessManager;
+import faultDetection.correlationControl.ProcessedReadingPack;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
-
+//TODO NEED TEST
 public class Experiment_TCD {
 	private Log logger = LogFactory.getLog(Experiment_TCD.class);
-	private int round = 10800;
+	private int totalround = 10800;
 	private int count = 0;
 	private int eventcount = 0;
-	private int LFcount = 0;
 	private int totalfaultcount = 0;
-	private int normalcount = 0;
-	private int normalsectioncount = 1;
-	private int renewcountdown = 0;
 	private Map<Integer, Short> DC = new HashMap<Integer, Short>();
 	private Map<Integer, Integer> DCFaultround = new HashMap<Integer, Integer>();
 	private Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
 	private String regressiontype = "";
 	private double noise;
-	private String filename;
+	private String writingpath;
+	private String readingpath;
 
-	public Experiment_TCD(String filename){
-		updatefileLocation(filename);
+	private final short FT = 0;
+	// private final short LF = 1;
+	// private final short LG = 2;
+	private final short GD = 3;
+	private final short UNKNOWN = 4;
+
+	public Experiment_TCD(String writingpath, String readingpath) {
+		updateWritingPath(writingpath);
+		updateReadingPath(readingpath);
 	}
 
-	public void updatefileLocation(String filename){
-		this.filename = filename;
+	public void updateReadingPath(String readingpath) {
+		this.readingpath = readingpath;
 	}
 
+	public void updateWritingPath(String writingpath) {
+		this.writingpath = writingpath;
+	}
 
-	public void runSet(int num, double lowerbound, double upperbound, double noise) {
+	public void runSet(int nodenumber, double lowerbound, double upperbound,
+			double noise) {
 		this.noise = noise;
 		for (double CSErrorTolerance = lowerbound; CSErrorTolerance < (upperbound + 0.004); CSErrorTolerance += 0.005) {
-			runRoundSet(readingpack, num, CSErrorTolerance, regressiontype);
+			runRoundSet(nodenumber, CSErrorTolerance, regressiontype);
 		}
 	}
 
-	private void runRoundSet(Map<Integer, Double> readingpack, int num,
+	private void runRoundSet(int nodenumber,
 			double CSErrorTolerance, String regressiontype) {
 		DecimalFormat df = new DecimalFormat("0.000");
-		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\"+ filename +"Result_1_"
-				+ regressiontype + "__" + noise + "__NUM_" + num + "__CSET_"
-				+ df.format(CSErrorTolerance) + ".txt", "C:\\TEST\\NULL.txt");
+		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + writingpath
+				+ "Result_1_" + regressiontype + "__" + noise + "__NUM_" + nodenumber
+				+ "__CSET_" + df.format(CSErrorTolerance) + ".txt",
+				"C:\\TEST\\NULL.txt");
 		agent.writeLineToFile("CSET = " + CSErrorTolerance);
-		System.out.println(num);
+		System.out.println(nodenumber);
 		totalfaultcount = 0;
-		for (int x = 0; x < 30; x++) {
+		for (int round = 0; round < 30; round++) {
 			// ---------------Round Setup-------------------
-			renewcountdown = 30;
 			count = 0;
 			DC.clear();
 			DCFaultround.clear();
 			ProcessManager manager = new ProcessManager();
-
 			manager.updateCSErrorTolerance(CSErrorTolerance);
-			String readingpath = "C:\\TEST\\" + filename + "source_1__" + noise + "__NUM_" + num + "__"
-					+ x + ".txt";
+			String readingpath = "C:\\TEST\\" + this.readingpath + "source_1__"
+					+ noise + "__NUM_" + nodenumber + "__" + round + ".txt";
 			agent.updatereadingpath(readingpath);
 			agent.setFileReader();
 			// ---------------------------------------------
@@ -77,41 +85,58 @@ public class Experiment_TCD {
 				logger.info(line);
 				line = agent.readLineFromFile();
 			}
-
 			while (true) {
 				line = agent.readLineFromFile();
 				if (line != null) {
-					proceedLine(readingpack, line, manager);
+					proceedLine(line, manager);
 					count++;
 				} else
 					break;
 			}
 
-			Set<Integer> key = DCFaultround.keySet();
-			Iterator<Integer> iterator = key.iterator();
-			agent.writeLineToFile("Device Fault Round:");
-			while (iterator.hasNext()) {
-				int nodeid = iterator.next();
-				agent.writeLineToFile("[" + nodeid + "] "
-						+ DCFaultround.get(nodeid));
-			}
-			totalfaultcount += DCFaultround.size();
-			System.out
-					.println("Num[" + num + "] at Round[" + x
-							+ "] procceding: "
-							+ df.format((double) x * 100 / 30) + "%");
-
+			printRoundResult(nodenumber, df, agent, round);
 		}
-		
-//		agent.writeLineToFile("Total Fault Count:" + (totalfaultcount) + " Normalseccount: "+ normalsectioncount);
-		agent.writeLineToFile("Total Fault Ratio:" + (double)(totalfaultcount)
-				* 100 / (num * 30) + "%");
-		agent.writeLineToFile("Total Event Ratio:" + (double)(eventcount)
-				* 100 / normalcount + "%");
+		printResult(nodenumber, agent);
 	}
 
-	private void proceedLine(Map<Integer, Double> readingpack,
-			String line, ProcessManager manager) {
+	private void printRoundResult(int nodenumber, DecimalFormat df,
+			FileAccessAgent agent, int round) {
+		Set<Integer> key = DCFaultround.keySet();
+		Iterator<Integer> iterator = key.iterator();
+		agent.writeLineToFile("Device Fault Round:");
+		while (iterator.hasNext()) {
+			int nodeid = iterator.next();
+			agent.writeLineToFile("[" + nodeid + "] "
+					+ DCFaultround.get(nodeid));
+		}
+		totalfaultcount += DCFaultround.size();
+		System.out
+				.println("Num[" + nodenumber + "] at Round[" + round
+						+ "] procceding: "
+						+ df.format((double) round * 100 / 30) + "%");
+	}
+
+	private void printResult(int nodenumber, FileAccessAgent agent) {
+		// agent.writeLineToFile("Total Fault Count:" + (totalfaultcount) +
+		// " Normalseccount: "+ normalsectioncount);
+		agent.writeLineToFile("Total Fault Ratio:" + (double) (totalfaultcount)
+				* 100 / (nodenumber * 30) + "%");
+		agent.writeLineToFile("Total Event Ratio:" + (double) (eventcount)
+				* 100 / (totalround - eventcount*30 - 30) + "%");
+	}
+
+	private void proceedLine(String line,
+			ProcessManager manager) {
+		generateReadingPack(line);
+		ProcessedReadingPack processedreadingpack = manager
+				.markReadings(readingpack);
+		checkFaultOccurence(processedreadingpack);
+		checkEventOccurence(processedreadingpack);
+		// agent.writeLineToFile("\n");
+		readingpack.clear();
+	}
+
+	private void generateReadingPack(String line) {
 		String[] readingstringpack = line.split("\t");
 		for (int i = 0; i < readingstringpack.length; i++) {
 			String[] reading = readingstringpack[i].split(":");
@@ -122,43 +147,26 @@ public class Experiment_TCD {
 			else
 				logger.error("Error Data Structure");
 		}
+	}
 
-		Map<Integer, MarkedReading> markedreading = manager
-				.markReadings(readingpack);
-
-		// Set<Integer> key = markedreading.keySet();
-		// Iterator<Integer> iterator = key.iterator();
-		for (MarkedReading message : markedreading.values()) {
+	private void checkFaultOccurence(ProcessedReadingPack processedreadingpack) {
+		for (MarkedReading message : processedreadingpack.markedReadingPack()
+				.values()) {
 			try {
-				if (message.deviceCondition() == 0
-						&& DC.get(message.id()) == 3) {
+				if (message.deviceCondition() == FT
+						&& DC.get(message.id()) == GD) {
 					DCFaultround.put(message.id(), count);
-				}
-				else if(message.deviceCondition() == 4 && DC.get(markedreading.get(message.id()).id()) == 3){
-					LFcount++;
 				}
 			} catch (Exception e) {
 			}
 			DC.put(message.id(), message.deviceCondition());
 			// agent.writeLineToFile(message.toFormat());
 		}
-		if(count > 30){
-			if(LFcount > (double)markedreading.size()/2){
-				eventcount++;
-				renewcountdown = 30;
-			}
-			else if(renewcountdown == 0){
-				normalcount++;
-			}
-			else{
-				renewcountdown--;
-				if(renewcountdown == 0){
-					normalsectioncount++;
-				}
-			}
+	}
+
+	private void checkEventOccurence(ProcessedReadingPack processedreadingpack) {
+		if (processedreadingpack.newEventOccurs()) {
+			eventcount++;
 		}
-		LFcount = 0;
-		// agent.writeLineToFile("\n");
-		readingpack.clear();
 	}
 }

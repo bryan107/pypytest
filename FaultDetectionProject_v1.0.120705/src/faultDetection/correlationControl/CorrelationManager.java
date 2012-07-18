@@ -38,7 +38,7 @@ public class CorrelationManager {
 	// buffer
 	
 	//-------------------------Global Variables-----------------------------
-	
+	private boolean eventoccurence = false;
 	private int samplesize;
 	private int correlationpower;
 	private double maxfaultratio;
@@ -134,6 +134,7 @@ public class CorrelationManager {
 	}
 
 	public void putReading(Map<Integer, Double> reading) {
+		resetEventOccurence();//reset eventoccurence when new readings arrives
 		Set<Integer> key = reading.keySet();
 		Iterator<Integer> iterator = key.iterator();
 		while (iterator.hasNext()) {
@@ -143,6 +144,10 @@ public class CorrelationManager {
 
 	}
 
+	private void resetEventOccurence() {
+		eventoccurence = false;
+	}
+
 	public void removeNode(int nodeid) {
 		correlationmap.remove(nodeid);
 		for (int i = 0; i < correlationmap.size(); i++) {
@@ -150,6 +155,10 @@ public class CorrelationManager {
 		}
 	}
 
+	public boolean getEventOccurence(){
+		return eventoccurence;
+	}
+	
 	public Map<Integer, Map<Integer, Double>> getCorrelationTable() {
 		Map<Integer, Double> reading = buffer.getBufferData();
 		Set<Integer> key = reading.keySet();
@@ -184,7 +193,7 @@ public class CorrelationManager {
 		return correlationtrendtable;
 	}
 
-	public void updateCorrelations(Map<Integer, Short> readingfaultcondition) {
+	public boolean updateCorrelations(Map<Integer, Short> readingfaultcondition) {
 		if (samplecount < samplesize) {
 			samplecount++;
 		} else {
@@ -193,6 +202,7 @@ public class CorrelationManager {
 		}
 		checkDeviceCondition(readingfaultcondition); // Update node condition
 		bufferToCorrelation(); // buffer to correlation if node condition is normal.
+		return getEventOccurence();
 	}
 
 	public Map<Integer, Short> getDeviceCondition() {
@@ -250,6 +260,7 @@ public class CorrelationManager {
 		}
 		if (((double) eventLFcount / samplesize) > eventLFratio) {
 			logger.warn("New event occurs! Correlation reseting");
+			eventoccurence = true;
 			eventLFcount = 0;
 			samplecount = 0;
 			// TODO should get key set from readingfaultcondition -> nodeindex

@@ -19,11 +19,11 @@ public class ProcessContainer_6 {
 //		et.runSet(10, 0.12, 0.19, 0.03);
 		
 		// Fault Detection
-		Experiment_Faults e = new Experiment_Faults("FaultType\\Stuck\\Least_Square_Estimator_0.20\\", "FaultType\\Stuck\\", "Stuck");
+		Experiment_Faults e = new Experiment_Faults("FaultType\\Stuck\\Median_Estimator\\", "FaultType\\Stuck\\", "Stuck");
 		e.runSet(5, 0.1, 0.6);
 		e.runSet(7, 0.1, 0.6);
 		e.runSet(10,0.1, 0.6);
-		e = new Experiment_Faults("FaultType\\Deviation\\Least_Square_Estimator_0.20\\", "FaultType\\Deviation\\", "Deviation");
+		e = new Experiment_Faults("FaultType\\Deviation\\Median_Estimator\\", "FaultType\\Deviation\\", "Deviation");
 		e.runSet(5, 0.1, 0.6);
 		e.runSet(7, 0.1, 0.6);
 		e.runSet(10,0.1, 0.6);

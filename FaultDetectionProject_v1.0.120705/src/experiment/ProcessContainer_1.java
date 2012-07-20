@@ -10,7 +10,7 @@ public class ProcessContainer_1 {
 	 */
 	public static void main(String[] args) {
 //		
-		Experiment_Faults e = new Experiment_Faults("FaultType\\Noisy\\Least_Square_Estimator_0.20\\", "FaultType\\Noisy\\", "Noisy");
+		Experiment_Faults e = new Experiment_Faults("FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
 		e.runSet(5, 0.1, 0.6);
 		e.runSet(7, 0.1, 0.6);
 		e.runSet(10,0.1, 0.6);

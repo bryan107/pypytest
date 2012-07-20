@@ -58,13 +58,13 @@ public class Experiment_TCD {
 	}
 
 	private void runRoundSet(int nodenumber,
-			double CSErrorTolerance, String regressiontype) {
+			double CSTolerableNoise, String regressiontype) {
 		DecimalFormat df = new DecimalFormat("0.000");
 		FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\" + writingpath
 				+ "Result_1_" + regressiontype + "__" + noise + "__NUM_" + nodenumber
-				+ "__CSET_" + df.format(CSErrorTolerance) + ".txt",
+				+ "__CSET_" + df.format(CSTolerableNoise) + ".txt",
 				"C:\\TEST\\NULL.txt");
-		agent.writeLineToFile("CSET = " + CSErrorTolerance);
+		agent.writeLineToFile("CSET = " + CSTolerableNoise);
 		System.out.println(nodenumber);
 		totalfaultcount = 0;
 		for (int round = 0; round < 30; round++) {
@@ -73,7 +73,7 @@ public class Experiment_TCD {
 			DC.clear();
 			DCFaultround.clear();
 			ProcessManager manager = new ProcessManager();
-			manager.updateCSErrorTolerance(CSErrorTolerance);
+			manager.updateCSTolerableNoise(CSTolerableNoise);
 			String readingpath = "C:\\TEST\\" + this.readingpath + "source_1__"
 					+ noise + "__NUM_" + nodenumber + "__" + round + ".txt";
 			agent.updatereadingpath(readingpath);

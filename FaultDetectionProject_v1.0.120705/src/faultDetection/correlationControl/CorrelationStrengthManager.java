@@ -16,23 +16,47 @@ public final class CorrelationStrengthManager {
 	private final short FT = 0;
 
 	// -----------------Private Variables---------------------
-	private double errortolerance;
-	
+//	private double TCD;
+	private double tolerablenoise;
+	private double minimumcorrelationstrength;
 	private static Log logger = LogFactory.getLog(CorrelationStrengthManager.class);
 	// -------------------Constructor-------------------------
-	public CorrelationStrengthManager(double errortolerance){
-		updateErrorTolerance(errortolerance);
+	public CorrelationStrengthManager(double tolerablenoise, double minimumcorrelationstrength){
+		updateTolerableNoise(tolerablenoise);
+		updateMinimumCorrelationStrength(minimumcorrelationstrength);
+//		updateErrorTolerance(errortolerance);
 	}
 	
 	// ------------------Variable Settings--------------------
-	public void updateErrorTolerance(double errortolerance){
-		this.errortolerance = errortolerance;
+	
+	public void updateTolerableNoise(double tolerablenoise){
+		if(tolerablenoise == 1){
+			logger.error("CSTolerableNoise cannot be 1. CSTolerableNoise has been temporaryly set to 0.02");
+			this.tolerablenoise = 0.02;
+		}
+		this.tolerablenoise = tolerablenoise;
+	}
+	public void updateMinimumCorrelationStrength(double minimumcorrelationstrength){
+		if(minimumcorrelationstrength == 1){
+			logger.error("DFDThreshold cannot be 1. DFDThreshold has been temporaryly set to 0.8");
+			this.tolerablenoise = 0.8;
+		}
+		this.minimumcorrelationstrength = minimumcorrelationstrength;
 	}
 	
+//	public void updateErrorTolerance(double TCD){
+//		this.TCD = TCD;
+//	}
+	
 	// ------------------Public Functions---------------------
-	public double getErrorTolerance(){
-		return errortolerance;
+	
+	public double getTolerableNoise(){
+		return tolerablenoise;
 	}
+	
+//	public double getErrorTolerance(){
+//		return TCD;
+//	}
 
 	public Map<Integer, Map<Integer, Double>> getCorrelationStrengthTable(Map<Integer, Map<Integer, Double>> correlationtable, Map<Integer, Map<Integer, Double>> correlationtrendtable){
 		Map<Integer, Map<Integer, Double>> correlationstrengthtable = new HashMap<Integer, Map<Integer,Double>>();
@@ -46,9 +70,9 @@ public final class CorrelationStrengthManager {
 			while(iteratorcoloum.hasNext()){
 				int nodeidcoloum = iteratorcoloum.next();
 				double correlation = correlationtable.get(nodeidraw).get(nodeidcoloum);
-				try {//Chech whether the correlationtrend table has the some entry of correlation table
+				try {//Check whether the correlationtrend table has the some entry of correlation table
 					double correlationtrend = correlationtrendtable.get(nodeidraw).get(nodeidcoloum);
-					double correlationstrength = Calculator.getInstance().correlationStrength(correlation, correlationtrend, errortolerance);
+					double correlationstrength = Calculator.getInstance().correlationStrength(correlation, correlationtrend, getTCD());
 					tempcontainer.put(nodeidcoloum, correlationstrength);
 				} catch (Exception e) {
 					tempcontainer.put(nodeidcoloum, 1.0);
@@ -88,4 +112,21 @@ public final class CorrelationStrengthManager {
 		return readingtrustworthiness;
 	}
 	
+	public double getTCD(){
+		try {
+			return (2 * tolerablenoise)/((1 - minimumcorrelationstrength) * (1 - tolerablenoise));
+		} catch (Exception e) {
+			logger.error("Incorrect FDC Service Setting");
+			logger.error("CSTolerableNoise: " + tolerablenoise);
+			logger.error("DFDThreshold: " + minimumcorrelationstrength);
+			return 0;
+		}
+		
+	}
+	
+	public double getTCD(double toleralbenoise, double minimumcorrelationstrength){
+		updateTolerableNoise(toleralbenoise);
+		updateMinimumCorrelationStrength(minimumcorrelationstrength);
+		return getTCD();
+	}
 }

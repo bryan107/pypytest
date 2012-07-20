@@ -20,7 +20,7 @@ public class ProcessManager {
 	private CorrelationManager manager =  new CorrelationManager(30, 2, 0.293,
 			0.03, null);
 	DFDEngine DFDengine = new DFDEngine(0.8, 0.5);
-	CorrelationStrengthManager CSmanager = new CorrelationStrengthManager(0.2);
+	CorrelationStrengthManager CSmanager = new CorrelationStrengthManager(0.02, 0.8);
 	//---------------File Access Interface---------------------
 	private PropertyAgent propagent = new PropertyAgent("conf");
 	//----------------------------------------------------------------------------
@@ -42,8 +42,8 @@ public class ProcessManager {
 				"EventLFRatio"));
 		double DFDthreshold = Double.valueOf(propagent.getProperties("FDC",
 				"DFDThreshold"));
-		double CSerrortolerance = Double.valueOf(propagent.getProperties("FDC",
-				"CSErrorTolerance"));	
+		double tolerablenoise = Double.valueOf(propagent.getProperties("FDC",
+				"CSTolerableNoise"));	
 		RegressionEstimator regressionestimator = initailRegressionEstimator();
 		
 		updateCorrelationSampleSize(samplesize);
@@ -52,7 +52,7 @@ public class ProcessManager {
 		updateEventLFRatio(eventLFratio);
 		updateRegressionEstimator(regressionestimator);
 		updateDFDThreshold(DFDthreshold);
-		updateCSErrorTolerance(CSerrortolerance);
+		updateCSTolerableNoise(tolerablenoise);
 	}
 
 	// --------------------------------------------------------------
@@ -79,10 +79,12 @@ public class ProcessManager {
 
 	public void updateDFDThreshold(double threshold) {
 		DFDengine.updateThreshold(threshold);
+		CSmanager.updateMinimumCorrelationStrength(threshold);
+		
 	}
 
-	public void updateCSErrorTolerance(double errortolerance) {
-		CSmanager.updateErrorTolerance(errortolerance);
+	public void updateCSTolerableNoise(double tolerablenoise) {
+		CSmanager.updateTolerableNoise(tolerablenoise);
 	}
 
 	public void updateRegressionEstimator(RegressionEstimator regressionestimator) {

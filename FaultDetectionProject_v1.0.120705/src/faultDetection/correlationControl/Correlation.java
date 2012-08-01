@@ -1,12 +1,16 @@
 package faultDetection.correlationControl;
 
+import java.util.LinkedList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import faultDetection.tools.Calculator;
+import faultDetection.tools.PairedReading;
 import faultDetection.tools.RegressionEstimator;
 import fileAccessInterface.PropertyAgent;
 
 public class Correlation {
+	private LinkedList<PairedReading> pairedreadings = new LinkedList<PairedReading>();
 	private double[][] pair;
 	private int mappointer;
 	private int samplesize; // Max number of pairs
@@ -37,6 +41,9 @@ public class Correlation {
 	}
 
 	public void addPair(double x, double y) {
+		
+		pairedreadings.add(new PairedReading(x, y));
+		
 		pair[0][mappointer] = x;
 		pair[1][mappointer] = y;
 		mappointer++;

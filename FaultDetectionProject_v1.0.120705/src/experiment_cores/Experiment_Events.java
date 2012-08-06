@@ -109,8 +109,11 @@ public class Experiment_Events {
 		line = agent.readLineFromFile();
 		while(line != null){
 			agent.writeLineToFile(line);
+//			TODO TEST NEW¡@CODE
+			if(Integer.valueOf(line) < round){
+				eventcount++;
+			}
 			line = agent.readLineFromFile();
-			eventcount++;
 		}
 		agent.writeLineToFile("Event Detected Round:");
 		String eventdetectround = "";

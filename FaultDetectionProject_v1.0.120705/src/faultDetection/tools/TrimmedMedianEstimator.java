@@ -1,8 +1,7 @@
 package faultDetection.tools;
 
-public class MedianEstimator implements RegressionEstimator {
+public class TrimmedMedianEstimator implements RegressionEstimator {
 
-	//Simple Median Estimator
 	@Override
 	public double getEstimatedValue(double[] x, double[] y,
 			double maxtolerableerror) {
@@ -21,6 +20,7 @@ public class MedianEstimator implements RegressionEstimator {
 
 	@Override
 	public boolean isFreeFromOutliers(){
-		return false;
+		return true;
 	}
+
 }

@@ -40,13 +40,16 @@ public class Correlation {
 	}
 
 	public void addPair(double x, double y) {
-		
+//		TODO TEST NEW CODE
+		if(regressionestimator.isFreeFromOutliers()){//Set correlation of this pair as median
+			y = regressionestimator.getEstimatedValue(pair[0], pair[1], maxtolerableerror);
+			x = 1;
+		}
 		pair[0][mappointer] = x;
 		pair[1][mappointer] = y;
 		mappointer++;
 		if (mappointer < samplesize) {
-//			TODO !!!!!!!!!!
-//			return;
+			return;
 		} else {
 			if (mapenable == false) {
 				mapenable = true;

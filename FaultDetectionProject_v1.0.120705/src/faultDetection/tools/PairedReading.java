@@ -11,12 +11,11 @@ public class PairedReading {
 	private LinkedList<Double> trimmedpairedreadingY = new LinkedList<Double>();
 	
 	
-	
 	public PairedReading(int samplesize){
 		
 	}
 	
-	public void putPair(double x, double y){
+	public void addPair(double x, double y){
 		pairedreadingX.add(x);
 		pairedreadingY.add(y);
 	}

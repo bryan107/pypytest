@@ -108,7 +108,19 @@ public class Experiment_Faults {
 
 	private Map<Integer, Integer> fileHeaderProcessing(String line) {
 		String[] faultynodeinfo = line.split("\t");
-		totalrealfaultcount += faultynodeinfo.length;
+//		totalrealfaultcount += faultynodeinfo.length;
+//		only count those faults that are detectable.
+//		TODO TEST NEW CODE
+		int[] faultround = new int[faultynodeinfo.length];
+		for(int i = 0 ; i < faultynodeinfo.length ; i++){
+			faultround[i] = Integer.valueOf(faultynodeinfo[i]);
+		}
+		for(int value : faultround){
+			if(value <= (round - 30)){
+				totalrealfaultcount ++;
+			}
+		}
+//
 		Map<Integer, Integer> faultroundMap = new HashMap<Integer, Integer>();
 		for (int i = 0; i < faultynodeinfo.length; i++) {
 			String[] reading = faultynodeinfo[i].split(":");

@@ -9,5 +9,8 @@ public class LeastSquareEstimator implements RegressionEstimator {
 		}
 		
 	}
-
+	@Override
+	public boolean isFreeFromOutliers(){
+		return false;
+	}
 }

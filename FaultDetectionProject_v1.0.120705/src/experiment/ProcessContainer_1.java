@@ -10,12 +10,12 @@ public class ProcessContainer_1 {
 	 */
 	public static void main(String[] args) {
 //		
-		Experiment_Faults e = new Experiment_Faults("FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
+		Experiment_Faults e = new Experiment_Faults("C:\\TEST\\FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
 		e.runSet(5, 0.1, 0.6);
 		e.runSet(7, 0.1, 0.6);
 		e.runSet(10,0.1, 0.6);
 		
-//		Experiment_Faults e = new Experiment_Faults("FaultType\\Noisy\\QE_Estimator\\", "FaultType\\Noisy\\", "Noisy");
+//		Experiment_Faults e = new Experiment_Faults("C:\\TEST\\FaultType\\Noisy\\QE_Estimator\\", "FaultType\\Noisy\\", "Noisy");
 //		e.runSet(5, 0.1, 0.6);
 //		e.runSet(7, 0.1, 0.6);
 //		e.runSet(10,0.1, 0.6);
@@ -34,12 +34,12 @@ public class ProcessContainer_1 {
 		
 		
 		//Event Detection
-//		Experiment_Events e = new Experiment_Events("EventChange\\QE_Estimator\\", "EventChange\\");
+//		Experiment_Events e = new Experiment_Events("C:\\TEST\\EventChange\\QE_Estimator\\", "EventChange\\");
 //		for(double i = 0.03 ; i < 0.1 ; i += 0.03){
 //			e.runSet(5, 0.001, 0.01, i);
 //		}	
 		
-//		Experiment_Events e = new Experiment_Events("EventChange\\");
+//		Experiment_Events e = new Experiment_Events("C:\\TEST\\EventChange\\");
 //		for(double i = 0.03 ; i < 0.1 ; i += 0.03){
 //			e.runSet(5, 0.001, 0.01, i);
 //			e.runSet(7, 0.001, 0.01, i);

@@ -10,7 +10,7 @@ import java.util.Set;
 import faultDetection.correlationControl.MarkedReading;
 import faultDetection.correlationControl.ProcessedReadingPack;
 import fileAccessInterface.FileAccessAgent;
-
+//TODO TEST
 public abstract class PerformanceAnalyzer {
 
 	// -----------------Definition of reading conditions--------------------

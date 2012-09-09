@@ -1,5 +1,6 @@
 package experiment;
 
+import experiment_cores.CopyOfExperiment_Faults;
 import experiment_cores.Experiment_Events;
 import experiment_cores.Experiment_Faults;
 
@@ -10,7 +11,7 @@ public class ProcessContainer_1 {
 	 */
 	public static void main(String[] args) {
 //		
-		Experiment_Faults e = new Experiment_Faults("C:\\TEST\\FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
+		CopyOfExperiment_Faults e = new CopyOfExperiment_Faults("FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
 		e.runSet(5, 0.1, 0.6);
 		e.runSet(7, 0.1, 0.6);
 		e.runSet(10,0.1, 0.6);

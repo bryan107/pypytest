@@ -1,5 +1,6 @@
 package experiment;
 
+import experiment_cores.CopyOfExperiment_Faults;
 import experiment_cores.Experiment_Events;
 import experiment_cores.Experiment_Faults;
 import experiment_cores.Experiment_TCD;
@@ -19,11 +20,11 @@ public class ProcessContainer_2 {
 //		et.runSet(15, 0.12, 0.19, 0.03);
 		
 		// Fault Detection
-		Experiment_Faults e = new Experiment_Faults("FaultType\\Deviation\\Median_Estimator\\", "FaultType\\Deviation\\", "Deviation");
+		CopyOfExperiment_Faults e = new CopyOfExperiment_Faults("FaultType\\Deviation\\Median_Estimator\\", "FaultType\\Deviation\\", "Deviation");
 		e.runSet(15, 0.1, 0.6);
-		e = new Experiment_Faults("FaultType\\Stuck\\Median_Estimator\\", "FaultType\\Stuck\\", "Stuck");
+		e = new CopyOfExperiment_Faults("FaultType\\Stuck\\Median_Estimator\\", "FaultType\\Stuck\\", "Stuck");
 		e.runSet(15, 0.1, 0.6);
-		e = new Experiment_Faults("FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
+		e = new CopyOfExperiment_Faults("FaultType\\Noisy\\Median_Estimator\\", "FaultType\\Noisy\\", "Noisy");
 		e.runSet(15, 0.1, 0.6);
 				
 		//Event Detection

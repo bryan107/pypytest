@@ -111,22 +111,27 @@ public class CopyOfExperiment_Faults {
 //		totalrealfaultcount += faultynodeinfo.length;
 //		only count those faults that are detectable.
 //		TODO TEST NEW CODE
-		int[] faultround = new int[faultynodeinfo.length];
-		for(int i = 0 ; i < faultynodeinfo.length ; i++){
-			faultround[i] = Integer.valueOf(faultynodeinfo[i]);
-		}
-		for(int value : faultround){
-			if(value <= (round - 30)){
-				totalrealfaultcount ++;
-			}
-		}
+//		int[] faultround = new int[faultynodeinfo.length];
+//		for(int i = 0 ; i < faultynodeinfo.length ; i++){
+//			faultround[i] = Integer.valueOf(faultynodeinfo[i]);
+//		}
+//		for(int value : faultround){
+//			if(value <= (round - 30)){
+//				totalrealfaultcount ++;
+//			}
+//		}
 //
 		Map<Integer, Integer> faultroundMap = new HashMap<Integer, Integer>();
 		for (int i = 0; i < faultynodeinfo.length; i++) {
 			String[] reading = faultynodeinfo[i].split(":");
-			if (reading.length == 2)
+			if (reading.length == 2){
 				faultroundMap.put(Integer.valueOf(reading[0]),
 						Integer.valueOf(reading[1]));
+				if(Integer.valueOf(reading[1]) <= (round - 30)){
+					totalrealfaultcount ++;
+				}
+			}
+				
 		}
 		return faultroundMap;
 	}
@@ -162,10 +167,10 @@ public class CopyOfExperiment_Faults {
 		while (it.hasNext()) {
 			int nodeid = it.next();
 			if (DCFaultround.containsKey(nodeid)) {
-				if (Math.abs(faultroundMap.get(nodeid)
-						- DCFaultround.get(nodeid)) <= samplesize)
+				int difference = DCFaultround.get(nodeid) - faultroundMap.get(nodeid);
+				if ((difference <= samplesize) && difference >= 0)
 					successdetectcount++;
-				else if (faultroundMap.get(nodeid) > DCFaultround.get(nodeid))
+				else if (difference > samplesize)
 					latedetectioncount++;
 				else
 					falsenegetivecount++;

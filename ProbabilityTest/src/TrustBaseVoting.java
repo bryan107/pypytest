@@ -18,7 +18,7 @@ public class TrustBaseVoting {
 		calcpgf();
 		calcpfg();
 		calcpgg();
-//		printp();
+		printp();
 		
 		PFG = p * calcDifferLeftBody() + pfg * calcRightBody();
 		PGF = (1-p) * calcDifferLeftBody() + pgf * calcRightBody();
@@ -27,25 +27,54 @@ public class TrustBaseVoting {
 		System.out.println();
 		System.out.println("======TOTAL=====");
 		printP();
-		
+	
 		
 		double CPFF = PFF/(PFF+PFG);
 		double CPFG = PFG/(PFF+PFG);
 		double CPGG = PGG/(PGG+PGF);
 		double CPGF = PGF/(PGG+PGF);
+//		double CGGG = CPFF + CPGG;
 		
-		System.out.println("PF");
-		double CDF = 0;
-		for(int i = 0 ; i <= samplesize ; i++){
-			CDF += Combin(samplesize,i)*Math.pow(CPFG, i)*Math.pow(CPFF, samplesize-i);
-			System.out.println("PF" + i + ": " + CDF*100);
+		System.out.println("EVENT");
+		double FCDF = 0;
+		for(int i = m ; i <=k ; i++){
+			FCDF += Combin(k,i) * Math.pow(CPFG, i) * Math.pow(CPFF, k - i);
+			System.out.println("PF" + i + ": " + FCDF * 100);
 		}
-		System.out.println("PG");
-		CDF = 0;
+		
+		double falsenegetiveevent = 0;
 		for(int i = 0 ; i <= samplesize ; i++){
-			CDF += Combin(samplesize,i)*Math.pow(CPGF, i)*Math.pow(CPGG, samplesize-i);
-			System.out.println("PG" + i + ": " + CDF*100);
+			falsenegetiveevent += Combin(samplesize, i)*Math.pow(FCDF, i)*Math.pow(1-FCDF, samplesize -i);
+			System.out.println("False Positive [" + i + "] " + (1-falsenegetiveevent) * 100);
 		}
+		
+		FCDF = 0;
+		for(int i = m ; i <=k ; i++){
+			FCDF += Combin(k,i) * Math.pow(CPGF, i) * Math.pow(CPGG, k - i);
+			System.out.println("PF" + i + ": " + FCDF * 100);
+		}
+		
+		double falsepositiveevent = 0;
+		for(int i = 0 ; i <= samplesize ; i++){
+			falsepositiveevent += Combin(samplesize, i)*Math.pow(FCDF, i)*Math.pow(1-FCDF, samplesize -i);
+			System.out.println("False Positive [" + i + "] " + (1- falsepositiveevent) * 100);
+		}
+		
+		
+
+		
+//		System.out.println("PF");
+//		double CDF = 0;
+//		for(int i = 0 ; i <= samplesize ; i++){
+//			CDF += Combin(samplesize,i)*Math.pow(CPFG, i)*Math.pow(CPFF, samplesize-i);
+//			System.out.println("PF" + i + ": " + CDF*100);
+//		}
+//		System.out.println("PG");
+//		CDF = 0;
+//		for(int i = 0 ; i <= samplesize ; i++){
+//			CDF += Combin(samplesize,i)*Math.pow(CPGF, i)*Math.pow(CPGG, samplesize-i);
+//			System.out.println("PG" + i + ": " + CDF*100);
+//		}
 		
 
 	}

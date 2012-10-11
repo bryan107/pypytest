@@ -8,6 +8,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
+import eventDiffusivePattern.EventType;
 import faultSymptom.FaultSymptom;
 
 public class SensorManager {
@@ -18,8 +20,8 @@ public class SensorManager {
 		
 	}
 	
-	public void addNewSensor(int xlocation, int ylocation, double noise){
-		sensorpack.put(sensoridpool, new Sensor(sensoridpool, noise));
+	public void addNewSensor(int xlocation, int ylocation, double noise, EventType eventtype){
+		sensorpack.put(sensoridpool, new Sensor(sensoridpool, noise, eventtype));
 		DeployMap.getInstance().addSensor(sensoridpool, xlocation, ylocation);
 		sensoridpool++;
 	}

@@ -1,4 +1,4 @@
-package Patterns;
+package eventPatterns;
 
 public class AbruptPattern implements Pattern {
 	@Override

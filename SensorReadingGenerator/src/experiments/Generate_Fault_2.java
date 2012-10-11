@@ -2,16 +2,18 @@ package experiments;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
-import Patterns.Pattern;
 
 import dataGenerator.DeployMap;
 import dataGenerator.EventSourceManager;
 import dataGenerator.SensorManager;
+import eventDiffusivePattern.DiffusiveEvent;
+import eventDiffusivePattern.EventType;
+import eventDiffusivePattern.ExponentialEvent;
+import eventDiffusivePattern.LogEvent;
+import eventDiffusivePattern.NonDiffusionEvent;
 
 import faultSymptom.DeviationReadingFault;
 import faultSymptom.FaultSymptom;
@@ -23,40 +25,50 @@ import fileAccessInterface.PropertyAgent;
 
 import junit.framework.TestCase;
 
-public class Generate2_2 extends TestCase {
+public class Generate_Fault_2 extends TestCase {
 	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt",
 			"C:\\TEST\\NULL.txt");
 	private int sourceid = 1;
+	private EventType eventtype;
 	int round = Integer.valueOf(PropertyAgent.getInstance().getProperties(
 			"Event",
 			tagAccumulation("Event" + sourceid,
 					tagAccumulation("Pattern", "Sections"))));
-	
-	private String fileaddress = "EventChange\\";
 
-	
 	public void test() {
-		double noise = 0.02;
-
-		for(double i = 0.006 ; i <= 0.00601; i+=0.001){
-			creatSet(5, noise, i);
-			creatSet(7, noise,  i);
-			creatSet(10, noise,  i);
-			creatSet(15, noise,  i);
-			creatSet(20, noise, i);
+		//=================NOISE SETTING===================
+		double noise = 0.02;						
+		//=================================================
+		for(double i = 0.1 ; i <= 0.6; i+=0.1){
+			creatSet(5, noise, new NoisyReadingFault(), i);
+			creatSet(7, noise, new NoisyReadingFault(), i);
+			creatSet(10, noise, new NoisyReadingFault(), i);
+			creatSet(15, noise, new NoisyReadingFault(), i);
+			creatSet(20, noise, new NoisyReadingFault(), i);
+			creatSet(5, noise, new DeviationReadingFault(), i);
+			creatSet(7, noise, new DeviationReadingFault(), i);
+			creatSet(10, noise, new DeviationReadingFault(), i);
+			creatSet(15, noise, new DeviationReadingFault(), i);
+			creatSet(20, noise, new DeviationReadingFault(), i);
+			creatSet(5, noise, new StuckOfReadingFault(), i);
+			creatSet(7, noise, new StuckOfReadingFault(), i);
+			creatSet(10, noise, new StuckOfReadingFault(), i);
+			creatSet(15, noise, new StuckOfReadingFault(), i);
+			creatSet(20, noise, new StuckOfReadingFault(), i);
 		}
 		
 
 	}
 
-	private void creatSet(int number, double noise, double eventratio) {
-
+	private void creatSet(int number, double noise, FaultSymptom faultsymptom,
+			double faultratio) {
+		setupEventType();
 		for (int r = 0; r < 30; r++) {
 			// -------------------Reset Round-------------------
 
-			DecimalFormat df2 = new DecimalFormat("0.000");
-			f.updatewritingpath("C:\\TEST\\"+ fileaddress +"source_1__"
-					+ df2.format(eventratio) + "__NUM_" + number + "__" + r + ".txt");
+			DecimalFormat df2 = new DecimalFormat("0.0");
+			f.updatewritingpath("C:\\TEST\\FaultType\\" + eventtype.toString() + "\\source_1__" + faultsymptom.getKey() + "__"
+					+ df2.format(faultratio) + "__NUM_" + number + "__" + r + ".txt");
 			f.writeLineToFile("Total Round: " + round);
 			DeployMap.getInstance().clear();
 			EventSourceManager esmanager = new EventSourceManager();
@@ -66,35 +78,32 @@ public class Generate2_2 extends TestCase {
 			f.writeLineToFile("Start");
 			// -------------------------------------------------
 
-			// -------------Event change Round ---------------
-			Queue<int[]> eventchangeround = new LinkedList<int[]>();
+			// -------------Fault Node and Round ---------------
+			int faultnum = (int) Math.round((number * faultratio));
+			int[] faultround = new int[faultnum];
+			for (int i = 0; i < faultnum; i++) {
+				faultround[i] = (int) Math.ceil((Math.random() * round));
+			}
 			f.writeLineToFile("FaultCondition");
-
+			String outputstring = "";
+			for (int nodeid = 0; nodeid < faultnum; nodeid++) {
+				outputstring = outputstring + nodeid + ":" + faultround[nodeid]
+						+ "\t";
+			}
+			f.writeLineToFile(outputstring);
 			// -------------------------------------------------
 
 			f.writeLineToFile("Readings");
 			for (int section = 0; section <= round; section++) {
-				if(Math.random() <= eventratio){
-					int[] eventinfo = new int[3];
-					eventinfo[0] = section;
-					eventinfo[1] = (int)(20*Math.random());
-					eventinfo[2] = (int)(20*Math.random());
-					esmanager.updateSourceLocation(sourceid, eventinfo[1], eventinfo[2]);
-//					if(Math.random()>0.5){
-//						esmanager.getEventSource(sourceid).updateAverageValue(10 + (average-10)*Math.random());
-//						eventinfo[1] = 0;
-//					}
-//					else{
-//						esmanager.getEventSource(sourceid).updateAttribute1(variance*Math.random());
-//						eventinfo[1] = 1;
-//					}			
-					eventchangeround.add(eventinfo);
+				for (int nodeid = 0; nodeid < faultnum; nodeid++) {
+					if (section == faultround[nodeid]) {
+						smanager.insertFault(nodeid, faultsymptom);
+					}
 				}
-
 				Map<Integer, Double> readingpack = smanager
 						.getReadingSet(esmanager.getEventSet(section));
 				DecimalFormat df = new DecimalFormat("00.00");
-				String outputstring = "";
+				outputstring = "";
 				Set<Integer> key = readingpack.keySet();
 				Iterator<Integer> iterator = key.iterator();
 				while (iterator.hasNext()) {
@@ -104,17 +113,31 @@ public class Generate2_2 extends TestCase {
 				}
 				// f.writeLineToFile("Round" + i);
 				f.writeLineToFile(outputstring);
-				System.out.println("Finished: "
-						+ df.format((double) section * 100 / round) + "%");
+
 			}
-			f.writeLineToFile("Event Change round:");
-			while(eventchangeround.isEmpty()!=true){
-				int[] eventinfo = eventchangeround.poll();
-				f.writeLineToFile("Round:" + eventinfo[0]+" x:"+ eventinfo[1] + " y:" + eventinfo[2] );
-			}
+			DecimalFormat df = new DecimalFormat("00.00");
+			System.out.println("SYSTEM: " + df.format((double) r * 100 / 30) + "%  processes are finished");
 		}
 	}
 
+	private void setupEventType() {
+		switch(Integer.valueOf(PropertyAgent.getInstance().getProperties("Event", tagAccumulation("Event" + sourceid, "Type")))){
+		case 0:
+			eventtype = new NonDiffusionEvent();
+			break;
+		case 1:
+			eventtype = new DiffusiveEvent();
+			break;
+		case 2:
+			eventtype = new LogEvent();
+			break;
+		case 3:
+			eventtype = new ExponentialEvent();
+		default:
+			break;
+		}
+	}
+	
 	private void nodeSetup(SensorManager smanager, int number, double noise) {
 		int[][] nodelocation = new int[number][2];
 		for (int i = 0; i < number; i++) {
@@ -134,7 +157,7 @@ public class Generate2_2 extends TestCase {
 			}
 			nodelocation[i][0] = x;
 			nodelocation[i][1] = y;
-			smanager.addNewSensor(x, y, noise);
+			smanager.addNewSensor(x, y, noise,eventtype);
 		}
 		String nodeinfo = "";
 		for (int i = 0; i < number; i++) {

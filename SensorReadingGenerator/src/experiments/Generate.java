@@ -5,9 +5,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+
 import dataGenerator.DeployMap;
 import dataGenerator.EventSourceManager;
 import dataGenerator.SensorManager;
+import eventDiffusivePattern.DiffusiveEvent;
+import eventDiffusivePattern.EventType;
+import eventDiffusivePattern.LogEvent;
+import eventDiffusivePattern.NonDiffusionEvent;
 
 import faultSymptom.DeviationReadingFault;
 import fileAccessInterface.FileAccessAgent;
@@ -18,8 +23,9 @@ import junit.framework.TestCase;
 public class Generate extends TestCase {
 	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt", "E:\\test.txt");
 	private int sourceid = 1;
+	private EventType eventtype;
 	public void test(){
-		double noise = 0.005;
+		double noise = 0.02;
 		
 		creatSet(5, noise);
 		creatSet(7, noise);
@@ -32,10 +38,11 @@ public class Generate extends TestCase {
 	private void creatSet(int number, double noise) {
 		EventSourceManager esmanager = new EventSourceManager();
 		SensorManager smanager = new SensorManager();
+		setupEventType();
 		DeployMap.getInstance().clear();
 		nodeSetup(smanager, number, noise);
 		for(int r = 0 ; r < 30 ; r++){
-			f.updatewritingpath("C:\\TEST\\source_1__"+ noise +"__NUM_"+ number +"__"+ r +".txt");
+			f.updatewritingpath("C:\\TEST\\EventChange\\" + eventtype.toString() + "\\source_1__"+ eventtype.toString() + "__" + noise +"__NUM_"+ number +"__"+ r +".txt");
 //			for(int i = 0 ; i < number ; i++){
 //				for(int j = 0 ; j < number ; j++){
 //					smanager.addNewSensor(i*20/(number-1), j*20/(number-1), 0.01);
@@ -49,6 +56,21 @@ public class Generate extends TestCase {
 		}
 	}
 
+	private void setupEventType() {
+		switch(Integer.valueOf(PropertyAgent.getInstance().getProperties("Event", tagAccumulation("Event" + sourceid, "Type")))){
+		case 0:
+			eventtype = new NonDiffusionEvent();
+			break;
+		case 1:
+			eventtype = new DiffusiveEvent();
+			break;
+		case 2:
+			eventtype = new LogEvent();
+		default:
+			break;
+		}
+	}
+	
 	private void generateFile(EventSourceManager esmanager,
 			SensorManager smanager) {
 		int round = Integer.valueOf(PropertyAgent.getInstance().getProperties("Event", tagAccumulation("Event" + sourceid, tagAccumulation("Pattern", "Sections"))));
@@ -88,7 +110,7 @@ public class Generate extends TestCase {
 				}
 				nodelocation[i][0] = x;
 				nodelocation[i][1] = y;
-				smanager.addNewSensor(x, y, noise);
+				smanager.addNewSensor(x, y, noise, eventtype);
 			}
 //			String nodeinfo = "";
 //			for(int i = 0 ; i < number ; i++){

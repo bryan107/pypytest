@@ -3,13 +3,13 @@ package dataGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import eventPatterns.AbruptPattern;
+import eventPatterns.Pattern;
+import eventPatterns.RandomPattern;
+import eventPatterns.SinPattern;
+import eventPatterns.StablePattern;
 import fileAccessInterface.PropertyAgent;
 
-import Patterns.AbruptPattern;
-import Patterns.Pattern;
-import Patterns.RandomPattern;
-import Patterns.SinPattern;
-import Patterns.StablePattern;
 
 
 public class EventSource {

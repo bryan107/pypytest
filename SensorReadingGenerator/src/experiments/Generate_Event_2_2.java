@@ -7,11 +7,15 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import Patterns.Pattern;
 
 import dataGenerator.DeployMap;
 import dataGenerator.EventSourceManager;
 import dataGenerator.SensorManager;
+import eventDiffusivePattern.DiffusiveEvent;
+import eventDiffusivePattern.EventType;
+import eventDiffusivePattern.LogEvent;
+import eventDiffusivePattern.NonDiffusionEvent;
+import eventPatterns.Pattern;
 
 import faultSymptom.DeviationReadingFault;
 import faultSymptom.FaultSymptom;
@@ -23,10 +27,11 @@ import fileAccessInterface.PropertyAgent;
 
 import junit.framework.TestCase;
 
-public class Generate2_1 extends TestCase {
+public class Generate_Event_2_2 extends TestCase {
 	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt",
 			"C:\\TEST\\NULL.txt");
 	private int sourceid = 1;
+	private EventType eventtype;
 	int round = Integer.valueOf(PropertyAgent.getInstance().getProperties(
 			"Event",
 			tagAccumulation("Event" + sourceid,
@@ -38,7 +43,7 @@ public class Generate2_1 extends TestCase {
 	public void test() {
 		double noise = 0.02;
 
-		for(double i = 0.001 ; i <= 0.0061; i+=0.001){
+		for(double i = 0.006 ; i <= 0.00601; i+=0.001){
 			creatSet(5, noise, i);
 			creatSet(7, noise,  i);
 			creatSet(10, noise,  i);
@@ -50,7 +55,7 @@ public class Generate2_1 extends TestCase {
 	}
 
 	private void creatSet(int number, double noise, double eventratio) {
-
+		setupEventType();
 		for (int r = 0; r < 30; r++) {
 			// -------------------Reset Round-------------------
 
@@ -115,6 +120,21 @@ public class Generate2_1 extends TestCase {
 		}
 	}
 
+	private void setupEventType() {
+		switch(Integer.valueOf(PropertyAgent.getInstance().getProperties("Event", tagAccumulation("Event" + sourceid, "Type")))){
+		case 0:
+			eventtype = new NonDiffusionEvent();
+			break;
+		case 1:
+			eventtype = new DiffusiveEvent();
+			break;
+		case 2:
+			eventtype = new LogEvent();
+		default:
+			break;
+		}
+	}
+	
 	private void nodeSetup(SensorManager smanager, int number, double noise) {
 		int[][] nodelocation = new int[number][2];
 		for (int i = 0; i < number; i++) {
@@ -134,7 +154,7 @@ public class Generate2_1 extends TestCase {
 			}
 			nodelocation[i][0] = x;
 			nodelocation[i][1] = y;
-			smanager.addNewSensor(x, y, noise);
+			smanager.addNewSensor(x, y, noise,eventtype);
 		}
 		String nodeinfo = "";
 		for (int i = 0; i < number; i++) {

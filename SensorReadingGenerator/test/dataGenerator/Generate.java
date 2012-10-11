@@ -5,6 +5,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+
+import eventDiffusivePattern.DiffusiveEvent;
+import eventDiffusivePattern.EventType;
+import eventDiffusivePattern.LogEvent;
+import eventDiffusivePattern.NonDiffusionEvent;
 import faultSymptom.DeviationReadingFault;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
@@ -14,6 +19,7 @@ import junit.framework.TestCase;
 public class Generate extends TestCase {
 	FileAccessAgent f = new FileAccessAgent("C:\\TEST\\NULL.txt", "E:\\test.txt");
 	private int sourceid = 1;
+	private EventType eventtype;
 	public void test(){
 		double noise = 0.01;
 		
@@ -27,7 +33,8 @@ public class Generate extends TestCase {
 
 	private void creatSet(int number, double noise) {
 		EventSourceManager esmanager = new EventSourceManager();
-		SensorManager smanager = new SensorManager();
+		SensorManager smanager = new SensorManager();	
+		setupEventType();
 		DeployMap.getInstance().clear();
 		nodeSetup(smanager, number, noise);
 		for(int r = 0 ; r < 30 ; r++){
@@ -42,6 +49,21 @@ public class Generate extends TestCase {
 //			smanager.insertFault(3, new DeviationReadingFault());
 			
 			generateFile(esmanager, smanager);
+		}
+	}
+
+	private void setupEventType() {
+		switch(Integer.valueOf(PropertyAgent.getInstance().getProperties("Event", tagAccumulation("Event" + sourceid, "Type")))){
+		case 0:
+			eventtype = new NonDiffusionEvent();
+			break;
+		case 1:
+			eventtype = new DiffusiveEvent();
+			break;
+		case 2:
+			eventtype = new LogEvent();
+		default:
+			break;
 		}
 	}
 
@@ -84,7 +106,7 @@ public class Generate extends TestCase {
 				}
 				nodelocation[i][0] = x;
 				nodelocation[i][1] = y;
-				smanager.addNewSensor(x, y, noise);
+				smanager.addNewSensor(x, y, noise, eventtype);
 			}
 			String nodeinfo = "";
 			for(int i = 0 ; i < number ; i++){

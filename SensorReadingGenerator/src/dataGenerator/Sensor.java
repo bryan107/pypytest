@@ -1,5 +1,6 @@
 package dataGenerator;
 
+import eventDiffusivePattern.EventType;
 import faultSymptom.FaultSymptom;
 import faultSymptom.NullFault;
 import fileAccessInterface.PropertyAgent;
@@ -8,10 +9,17 @@ public class Sensor {
 	//TODO change distance to Map for multiple events
 	double noise; //reading = value +- value*noise
 	int nodeid;
+	EventType eventtype;
 	FaultSymptom faultsymptom = new NullFault();
-	public Sensor(int nodeid, double noise){
+	public Sensor(int nodeid, double noise, EventType eventtype){
 		updateNodeid(nodeid);
 		updateNoise(noise);
+		updateEventtype(eventtype);
+	}
+	
+	public void updateEventtype(EventType eventtype){
+		this.eventtype = eventtype;
+		//logger.info("Event type is set up to" + eventtype.toString);
 	}
 	
 	public void updateNoise(double noise){
@@ -41,6 +49,7 @@ public class Sensor {
 	}
 	
 	public double getValue(double eventvalue, double diffusion, double constant, double distance){
-		return eventvalue/Math.pow((constant*distance + 1), diffusion);
+		//TODO Need TEST
+		return eventtype.getValue(eventvalue, diffusion, constant, distance);	
 	}
 }

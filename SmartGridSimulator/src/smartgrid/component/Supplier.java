@@ -50,10 +50,16 @@ public class Supplier {
 		return averagegeneration + generationpattern.getValue(variation, attribute, sections, sectionnumber);
 	}
 	
-	public double supplyValue(){
-		
-		
-		
-		return 0;
+	public double supplyValue(long sections, long sectionnumber){
+		double supply = storage + generation(sections, sectionnumber) - consumption;
+		if(supply > maxstorage)
+			storage = maxstorage;
+		else
+			storage = supply;
+		return storage;
+	}
+	
+	public void supplytransmission(double transmitpower){
+		storage -= transmitpower;
 	}
 }

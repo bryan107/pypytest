@@ -1,4 +1,4 @@
-package smartgrid.component;
+package smartgridsimulator;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -6,6 +6,18 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import smartgrid.component.Consumer;
+import smartgrid.component.Fault;
+import smartgrid.component.FaultDeviationConstant;
+import smartgrid.component.FaultDeviationProportion;
+import smartgrid.component.FaultNull;
+import smartgrid.component.Pattern;
+import smartgrid.component.PatternManualChange;
+import smartgrid.component.PatternRandom;
+import smartgrid.component.PatternSin;
+import smartgrid.component.PatternStable;
+import smartgrid.component.Supplier;
 
 import fileAccessInterface.PropertyAgent;
 
@@ -18,13 +30,13 @@ public class GridSimulator {
 	Map<Integer, Consumer> consumercluster = new HashMap<Integer, Consumer>();
 	
 	//Supplier Props Attribute
-	double maxstorage, storage, consumption, averagegeneration, supplierpatternvariation, suppliernoise;
+	double maxstorage, storage, consumption, averagegeneration, supplierpatternvariation, suppliernoise, sfchance;
 	String supplierpattern;
 	double[][] supplierpatternattribute;
 	int supplierfault;
 	
 	//Consumer Props Attribute
-	double averageconsumption, consumerpatternvariation, consumernoise;
+	double averageconsumption, consumerpatternvariation, consumernoise, cfchance;
 	String consumerpattern;
 	double[][] consumerpatternattrubute;
 	int consumerfault;
@@ -45,10 +57,23 @@ public class GridSimulator {
 		
 		//Initial Supplier & Consumer Clusters
 		for(int i = 0 ; i < suppliernumber ; i++){
-			suppliercluster.put(i, new Supplier(maxstorage, storage , consumption , averagegeneration , getPattern(supplierpattern), supplierpatternvariation, supplierpatternattribute, suppliernoise, getFault(supplierfault)));
+			suppliercluster.put(i, new Supplier(maxstorage,
+												storage,
+												consumption,
+												averagegeneration,
+												getPattern(supplierpattern),
+												supplierpatternvariation, 
+												supplierpatternattribute, 
+												suppliernoise, 
+												new FaultNull()));
 		}
 		for(int i = 0 ; i < consumernumber ; i++){
-			consumercluster.put(i, new Consumer(averageconsumption, getPattern(consumerpattern), consumerpatternvariation, consumerpatternattrubute, consumernoise, getFault(consumerfault)));
+			consumercluster.put(i, new Consumer(averageconsumption, 
+												getPattern(consumerpattern), 
+												consumerpatternvariation, 
+												consumerpatternattrubute, 
+												consumernoise, 
+												new FaultNull()));
 		}
 		
 		//Main Loop
@@ -57,14 +82,20 @@ public class GridSimulator {
 			Iterator<Integer> its = suppliercluster.keySet().iterator();
 			while(its.hasNext()){
 				int key = its.next();
-				//TODO add fault 
+				if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
+					suppliercluster.get(key).updateFault(getFault(supplierfault));
+					logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
+				}
 				energy += suppliercluster.get(key).supplyValue(totalround, round);
 			}
 			
 			Iterator<Integer> itc = consumercluster.keySet().iterator();
 			while(itc.hasNext()){
 				int key = itc.next();
-				//TODO add fault
+				if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
+					consumercluster.get(key).updateFault(getFault(consumerfault));
+					logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
+				}
 				energy -= consumercluster.get(key).getDemand(totalround, round);
 			}
 		}
@@ -120,6 +151,7 @@ public class GridSimulator {
 		supplierpatternattribute = null; //Currently Unused parameter
 		suppliernoise = Double.valueOf(prop.getProperties("SET", "Supplier.Noise"));
 		supplierfault = Integer.valueOf(prop.getProperties("SET", "Supplier.Fault"));
+		sfchance = Double.valueOf(prop.getProperties("SET", "Supplier.Fault.Chance"));
 		
 		//Consumer Prop Setting
 		averageconsumption = Double.valueOf(prop.getProperties("SEt", "Consumer.AverageConsumption"));
@@ -128,6 +160,7 @@ public class GridSimulator {
 		consumerpatternattrubute = null; //Currently Unused parameter
 		consumernoise = Double.valueOf(prop.getProperties("SET", "Consumer.Noise"));
 		consumerfault = Integer.valueOf(prop.getProperties("SET", "Consumer.Fault"));
+		cfchance = Double.valueOf(prop.getProperties("SET", "Consumer.Fault.Chance"));
 	}
 	
 }

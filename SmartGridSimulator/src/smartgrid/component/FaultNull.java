@@ -7,4 +7,9 @@ public class FaultNull implements Fault {
 		return value;
 	}
 
+	@Override
+	public boolean isNull() {
+		return true;
+	}
+
 }

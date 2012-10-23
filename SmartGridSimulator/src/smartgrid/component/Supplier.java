@@ -81,4 +81,8 @@ public class Supplier {
 	public void supplytransmission(double transmitpower){
 		storage -= transmitpower;
 	}
+	
+	public boolean isNormal(){
+		return fault.isNull();
+	}
 }

@@ -45,4 +45,8 @@ public class Consumer {
 		double value = (averageconsumption + consumepattern.getValue(variation, attribute, sections, sectionnumber)) * (1 + Math.random() * noise);
 		return fault.getValue(value);
 	}
+	
+	public boolean isNormal(){
+		return fault.isNull();
+	}
 }

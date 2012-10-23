@@ -16,7 +16,7 @@ public final class PropertyAgent {
 	// private Properties sensorprop = new Properties();
 	// private Properties locationprop = new Properties();
 	// private Properties actuatorprop = new Properties();
-	private Properties FDCserviceprop = new Properties();
+	private Properties SETprop = new Properties();
 
 	// public PropertyAgent(Object ...args) {
 	// for (Object object : args) {
@@ -37,12 +37,12 @@ public final class PropertyAgent {
 		// loadProperties(sensorprop, "sensor.properties");
 		// loadProperties(locationprop, "location.properties");
 		// loadProperties(actuatorprop, "actuator.properties");
-		loadProperties(FDCserviceprop, "FDCservice.properties");
+		loadProperties(SETprop, "FDCservice.properties");
 	}
 
 	public String getProperties(String filename, String key) {
-		if (filename.equals("FDCservice") || filename.equals("FDC"))
-			return FDCserviceprop.getProperty(key, null);
+		if (filename.equals("SET"))
+			return SETprop.getProperty(key, null);
 		// else if (filename.equals("actuator") || filename.equals("Actuator"))
 		// return actuatorprop.getProperty(key, null);
 		// else if (filename.equals("location") || filename.equals("Location"))
@@ -82,8 +82,8 @@ public final class PropertyAgent {
 
 	public boolean setProperties(String filename, String key, String value) {
 		boolean ret = true;
-		if (filename.equals("FDCservice") || filename.equals("FDC")) {
-			FDCserviceprop.setProperty(key, value);
+		if (filename.equals("SET") || filename.equals("SET")) {
+			SETprop.setProperty(key, value);
 			// do save
 			// } else if (filename.equals("actuator")) {
 			// actuatorprop.setProperty(key, value);
@@ -100,8 +100,8 @@ public final class PropertyAgent {
 	}
 
 	public void listProperties(String filename) {
-		if (filename.equals("FDCservice") || filename.equals("FDC"))
-			FDCserviceprop.list(System.out);
+		if (filename.equals("SET") || filename.equals("SEt"))
+			SETprop.list(System.out);
 		// else if (filename.equals("actuator") || filename.equals("Actuator"))
 		// actuatorprop.list(System.out);
 		// else if (filename.equals("location") || filename.equals("Location"))

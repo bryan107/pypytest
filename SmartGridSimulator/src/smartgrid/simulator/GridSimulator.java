@@ -58,6 +58,16 @@ public class GridSimulator {
 		updateWriteFileAddress(writtingaddress);
 		updateAverageConsumption(averageconsumption);
 		updateAverageGeneration(averagegeneration);
+		//Initiate Properties
+		PropSetting();
+	}
+	
+	public void updateConsumerFaultChance(double cfchance){
+		this.cfchance = cfchance;
+	}
+	
+	public void updateSupplierFaultChance(double sfchance){
+		this.sfchance = sfchance;
 	}
 	
 	public void updateAverageGeneration(double averagegeneration){
@@ -73,8 +83,6 @@ public class GridSimulator {
 	}
 	
 	public double run(int totalround){
-		//Initiate Properties
-		PropSetting();
 		//Initiate Supplier & Consumer Clusters
 		initiateSuppliers();
 		initiateConsumers();
@@ -128,7 +136,7 @@ public class GridSimulator {
 												suppliernoise, 
 												new FaultNull()));
 		}
-		logger.info("Suppliers Initiated");
+//		logger.info("Suppliers Initiated");
 	}
 
 	private void initiateConsumers() {
@@ -140,7 +148,7 @@ public class GridSimulator {
 												consumernoise, 
 												new FaultNull()));
 		}
-		logger.info("Consumers Initiated");
+//		logger.info("Consumers Initiated");
 	}
 
 	private void outPutRoundResults(String svalues, String cvalues) {
@@ -151,16 +159,37 @@ public class GridSimulator {
 	}
 
 	private String runConsumers(int totalround, int round) {
+		//--------------Setup Attack Rounds (Ratio)--------------
+		int attacknum = (int) Math.round((consumernumber * cfchance));
+		for (int i = 0; i < attacknum; i++) {
+			catkround.put(i, 31 + (int) Math.ceil((Math.random() * (totalround - 60))));
+		}
+		//-------------------------------------------------------
+		
 		String cvalues = "";
 		Iterator<Integer> itc = consumercluster.keySet().iterator();
 		while(itc.hasNext()){
 			int key = itc.next();
-			if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
-				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
-				consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
-				logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
-				catkround.put(key,round);
+			//--------------Setup Attack Rounds (Ratio)--------------
+			if(catkround.containsValue(round)){
+				Iterator<Integer> it = catkround.keySet().iterator();
+				while(it.hasNext()){
+					if(catkround.get(it.next()) == round){
+						double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
+						consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
+//						logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
+					}
+				}
 			}
+			//-------------------------------------------------------
+			//-----------Setup Attack Rounds (Probability)-----------
+//			if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
+//				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
+//				consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
+////				logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
+//				catkround.put(key,round);
+//			}
+			//-------------------------------------------------------
 			double value = consumercluster.get(key).getDemand(totalround, round);
 			DecimalFormat df = new DecimalFormat("0.0000");
 			cvalues = cvalues + key + ":" + df.format(value) + "\t"; 
@@ -170,16 +199,36 @@ public class GridSimulator {
 	}
 
 	private String runSuppliers(int totalround, int round) {
+		//--------------Setup Attack Rounds (Ratio)--------------
+		int attacknum = (int) Math.round((suppliernumber * sfchance));
+		for (int i = 0; i < attacknum; i++) {
+			satkround.put(i, 31 + (int) Math.ceil((Math.random() * (totalround - 60))));
+		}
+		//-------------------------------------------------------
 		String svalues = "";
 		Iterator<Integer> its = suppliercluster.keySet().iterator();
 		while(its.hasNext()){
 			int key = its.next();
-			if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
-				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
-				suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
-				logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
-				satkround.put(key,round);
+			//--------------Setup Attack Rounds (Ratio)--------------
+			if(satkround.containsValue(round)){
+				Iterator<Integer> it = satkround.keySet().iterator();
+				while(it.hasNext()){
+					if(satkround.get(it.next()) == round){
+						double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
+						suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
+//						logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
+					}
+				}
 			}
+			//-------------------------------------------------------
+			//-----------Setup Attack Rounds (Probability)-----------
+//			if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
+//				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
+//				suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
+////				logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
+//				satkround.put(key,round);
+//			}
+			//-------------------------------------------------------
 			double value = suppliercluster.get(key).supplyValue(totalround, round);
 			DecimalFormat df = new DecimalFormat("0.0000");
 			svalues = svalues + key + ":" + df.format(value) + "\t"; 
@@ -245,7 +294,7 @@ public class GridSimulator {
 		consumernoise = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Noise"));
 		consumerfault = Integer.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault"));
 		cfchance = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.Chance"));
-		logger.info("Properties Initiated");
+//		logger.info("Properties Initiated");
 	}
 	
 }

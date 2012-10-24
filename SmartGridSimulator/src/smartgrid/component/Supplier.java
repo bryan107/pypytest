@@ -74,10 +74,8 @@ public class Supplier {
 //		else
 //			storage = supply;
 //		return storage;
-		System.out.println(generationpattern.name());
 		double value = generation(sections, sectionnumber) - consumption;
-		System.out.println(fault.name());
-		double supply = fault.getValue(value) * (1 + Math.random() * noise);
+		double supply = fault.getValue(value);
 		return supply;
 	}
 	

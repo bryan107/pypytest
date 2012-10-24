@@ -1,7 +1,9 @@
 package smartgrid.simulator;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -47,19 +49,74 @@ public class GridSimulator {
 	private FileAccessAgent fagent;
 	private static Log logger = LogFactory.getLog(GridSimulator.class);
 	
+	//Result Info
+	private Map<Integer, Integer> satkround = new HashMap<Integer, Integer>();
+	private Map<Integer, Integer> catkround = new HashMap<Integer, Integer>();
 	
-	public GridSimulator(String writtingaddress){
+	
+	public GridSimulator(String writtingaddress, double averagegeneration, double averageconsumption){
 		updateWriteFileAddress(writtingaddress);
+		updateAverageConsumption(averageconsumption);
+		updateAverageGeneration(averagegeneration);
+	}
+	
+	public void updateAverageGeneration(double averagegeneration){
+		this.averagegeneration = averagegeneration;
+	}
+	
+	public void updateAverageConsumption(double averageconsumption){
+		this.averageconsumption = averageconsumption;
 	}
 	
 	public void updateWriteFileAddress(String writtingaddress){
-		 fagent = new FileAccessAgent(writtingaddress , "C:\\TEST\\NULL.txt");
+		 fagent = new FileAccessAgent(writtingaddress , "C:\\TEST\\Null.txt");
 	}
 	
 	public double run(int totalround){
-		
+		//Initiate Properties
 		PropSetting();
-		//Initial Supplier & Consumer Clusters
+		//Initiate Supplier & Consumer Clusters
+		initiateSuppliers();
+		initiateConsumers();
+		//Main Loop
+		for(int round = 0 ; round < totalround ; round++){
+			String svalues = runSuppliers(totalround, round);	
+			String cvalues = runConsumers(totalround, round);
+			outPutRoundResults(svalues, cvalues);
+		}
+		// Performance Calculation and Print 
+		double avesenergy = suppliedenergy/(totalround * suppliercluster.size());
+		double avecenergy = consumedenergy/(totalround * consumercluster.size());
+		outputResults(avesenergy, avecenergy);
+
+		return avesenergy - avecenergy;
+	}
+
+	private void outputResults(double avesenergy, double avecenergy) {
+		DecimalFormat df = new DecimalFormat("0.0000");
+		fagent.writeLineToFile("Average Energy Supply: " +  df.format(avesenergy));
+		fagent.writeLineToFile("Average Energy Consume: " +  df.format(avecenergy));
+		fagent.writeLineToFile("SupplierAttackRound:");
+		String sattackround = "";
+		Iterator<Integer> it = satkround.keySet().iterator();
+		while(it.hasNext()){
+			int key = it.next();
+			sattackround += key + ": " + satkround.get(key) + "\t";
+		}
+		fagent.writeLineToFile(sattackround);
+		
+		fagent.writeLineToFile("ConsumerAttackRound:");
+		String cattackround = "";
+		it = catkround.keySet().iterator();
+		while(it.hasNext()){
+			int key = it.next();
+			cattackround += key + ": " + catkround.get(key) + "\t";
+		}
+		fagent.writeLineToFile(cattackround);
+		fagent.writeLineToFile("Total Average Energy: " +  df.format(avesenergy - avecenergy));
+	}
+
+	private void initiateSuppliers() {
 		for(int i = 0 ; i < suppliernumber ; i++){
 			suppliercluster.put(i, new Supplier(maxstorage,
 												storage,
@@ -71,6 +128,10 @@ public class GridSimulator {
 												suppliernoise, 
 												new FaultNull()));
 		}
+		logger.info("Suppliers Initiated");
+	}
+
+	private void initiateConsumers() {
 		for(int i = 0 ; i < consumernumber ; i++){
 			consumercluster.put(i, new Consumer(averageconsumption, 
 												getPattern(consumerpattern), 
@@ -79,52 +140,52 @@ public class GridSimulator {
 												consumernoise, 
 												new FaultNull()));
 		}
-		//Main Loop
-		for(int round = 0 ; round < totalround ; round++){
-			//Supplier Rounds
-			String svalues = "";
-			Iterator<Integer> its = suppliercluster.keySet().iterator();
-			while(its.hasNext()){
-				int key = its.next();
-				if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
-					double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
-					suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
-					logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
-				}
-				double value = suppliercluster.get(key).supplyValue(totalround, round);
-				svalues = svalues + key + ":" + value + "\t"; 
-				suppliedenergy += value;
+		logger.info("Consumers Initiated");
+	}
+
+	private void outPutRoundResults(String svalues, String cvalues) {
+		String outputstring = "S\t" + svalues;
+		fagent.writeLineToFile(outputstring);
+		outputstring = "C\t" + cvalues;
+		fagent.writeLineToFile(outputstring);
+	}
+
+	private String runConsumers(int totalround, int round) {
+		String cvalues = "";
+		Iterator<Integer> itc = consumercluster.keySet().iterator();
+		while(itc.hasNext()){
+			int key = itc.next();
+			if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
+				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
+				consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
+				logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
+				catkround.put(key,round);
 			}
-			
-			//Consumer Rounds
-			String cvalues = "";
-			Iterator<Integer> itc = consumercluster.keySet().iterator();
-			while(itc.hasNext()){
-				int key = itc.next();
-				if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
-					double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
-					consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
-					logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
-				}
-				double value = consumercluster.get(key).getDemand(totalround, round);
-				cvalues = cvalues + key + ":" + value + "\t"; 
-				consumedenergy += value;
-			}
-			String outputstring = "S\t" + svalues;
-			fagent.writeLineToFile(outputstring);
-			outputstring = "C\t" + cvalues;
-			fagent.writeLineToFile(outputstring);
+			double value = consumercluster.get(key).getDemand(totalround, round);
+			DecimalFormat df = new DecimalFormat("0.0000");
+			cvalues = cvalues + key + ":" + df.format(value) + "\t"; 
+			consumedenergy += value;
 		}
-		
-		// Performance Calculation and Print 
-		double avesenergy = suppliedenergy/(totalround * suppliercluster.size());
-		double avecenergy = consumedenergy/(totalround * consumercluster.size());
-		System.out.println();
-		fagent.writeLineToFile("Average Energy Supply: " +  avesenergy);
-		fagent.writeLineToFile("Average Energy Consume: " +  avecenergy);
-		fagent.writeLineToFile("Total Average Energy: " +  (avesenergy - avecenergy));
-		
-		return avesenergy - avecenergy;
+		return cvalues;
+	}
+
+	private String runSuppliers(int totalround, int round) {
+		String svalues = "";
+		Iterator<Integer> its = suppliercluster.keySet().iterator();
+		while(its.hasNext()){
+			int key = its.next();
+			if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
+				double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
+				suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
+				logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
+				satkround.put(key,round);
+			}
+			double value = suppliercluster.get(key).supplyValue(totalround, round);
+			DecimalFormat df = new DecimalFormat("0.0000");
+			svalues = svalues + key + ":" + df.format(value) + "\t"; 
+			suppliedenergy += value;
+		}
+		return svalues;
 	}
 	
 	private Pattern getPattern(String patternname){
@@ -168,7 +229,7 @@ public class GridSimulator {
 		maxstorage = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Maxstorage"));
 		storage = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Storage"));
 		consumption = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Consumption"));
-		averagegeneration = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.AverageGeneration"));
+//		averagegeneration = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.AverageGeneration"));
 		supplierpattern = PropertyAgent.getInstance().getProperties("SET", "Supplier.Pattern");
 		supplierpatternvariation = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Pattern.Variation"));
 		supplierpatternattribute = null; //Currently Unused parameter
@@ -177,13 +238,14 @@ public class GridSimulator {
 		sfchance = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.Chance"));
 		
 		//Consumer Prop Setting
-		averageconsumption = Double.valueOf(PropertyAgent.getInstance().getProperties("SEt", "Consumer.AverageConsumption"));
+//		averageconsumption = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.AverageConsumption"));
 		consumerpattern = PropertyAgent.getInstance().getProperties("SET", "Consumer.Pattern");
 		consumerpatternvariation = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Pattern.Variation"));
 		consumerpatternattrubute = null; //Currently Unused parameter
 		consumernoise = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Noise"));
 		consumerfault = Integer.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault"));
 		cfchance = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.Chance"));
+		logger.info("Properties Initiated");
 	}
 	
 }

@@ -32,7 +32,7 @@ public class FileAccessAgent {
 			in = new BufferedReader(new FileReader(readingpath));
 			return true;
 		} catch (FileNotFoundException e) {
-			logger.error("File " + readingpath + " not found");
+			logger.error("File " + readingpath + " is not found");
 			e.printStackTrace();
 		}
 		return false;

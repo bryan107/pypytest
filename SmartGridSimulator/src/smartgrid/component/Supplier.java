@@ -62,7 +62,10 @@ public class Supplier {
 	
 	public double generation(long sections, long sectionnumber){	
 		double generatepower = averagegeneration + generationpattern.getValue(variation, attribute, sections, sectionnumber);
-		generatepower = generatepower * (1 + Math.random() * noise);
+		if(Math.random() > 0.5)
+			generatepower = generatepower * (1 + Math.random() * noise);
+		else
+			generatepower = generatepower * (1 - Math.random() * noise);
 		return generatepower;
 	}
 	

@@ -44,7 +44,11 @@ public class Consumer {
 	
 	public double getDemand(long sections, long sectionnumber){
 		double value = averageconsumption + consumepattern.getValue(variation, attribute, sections, sectionnumber);
-		value *=  (1 + Math.random() * noise);
+		if(Math.random() > 0.5)
+			value *=  (1 + Math.random() * noise);
+		else
+			value *=  (1 - Math.random() * noise);
+		
 		return fault.getValue(value);
 	}
 	

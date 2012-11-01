@@ -8,5 +8,7 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/junit-3.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.14.jar"/>
+	<classpathentry kind="lib" path="lib/STEMP_v1.0.120910.jar"/>
+	<classpathentry kind="lib" path="lib/flanagan.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

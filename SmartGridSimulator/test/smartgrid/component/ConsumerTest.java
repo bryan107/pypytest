@@ -1,6 +1,6 @@
 package smartgrid.component;
 
-import fileAccessInterface.PropertyAgent;
+import fileAccessInterface.PropertyAgentT;
 import junit.framework.TestCase;
 
 public class ConsumerTest extends TestCase {
@@ -13,7 +13,7 @@ public class ConsumerTest extends TestCase {
 			System.out.println("Round[" + i + "]: " + c.getDemand(365, i));
 			
 		}
-		double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
+		double impactvalue = Double.valueOf(PropertyAgentT.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
 		Fault f = new FaultDeviationProportion(impactvalue);
 		c.updateFault(f);
 		System.out.println("Fault (" + f.name() + ") has been inserted");

@@ -10,17 +10,17 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public final class PropertyAgent {
-	private Log logger = LogFactory.getLog(PropertyAgent.class);
+public final class PropertyAgentT {
+	private Log logger = LogFactory.getLog(PropertyAgentT.class);
 	private File currentPath;
 	// private Properties sensorprop = new Properties();
 	// private Properties locationprop = new Properties();
 	// private Properties actuatorprop = new Properties();
 	private Properties SETprop = new Properties();
-	public static PropertyAgent self = new PropertyAgent("conf");
+	public static PropertyAgentT self = new PropertyAgentT("conf");
 
 
-	private PropertyAgent(String currentPath) {
+	private PropertyAgentT(String currentPath) {
 		this.currentPath = new File(currentPath);
 		this.currentPath.mkdirs();
 
@@ -28,7 +28,7 @@ public final class PropertyAgent {
 		loadProperties();
 	}
 	
-	public static PropertyAgent getInstance(){
+	public static PropertyAgentT getInstance(){
 		return self;
 	}
 	

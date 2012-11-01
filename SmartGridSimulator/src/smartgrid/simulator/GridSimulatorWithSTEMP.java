@@ -3,7 +3,6 @@ package smartgrid.simulator;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -21,10 +20,12 @@ import smartgrid.component.PatternSin;
 import smartgrid.component.PatternStable;
 import smartgrid.component.Supplier;
 
+import faultDetection.correlationControl.ProcessManager;
+import faultDetection.correlationControl.ProcessedReadingPack;
 import fileAccessInterface.FileAccessAgentT;
 import fileAccessInterface.PropertyAgentT;
 
-public class GridSimulator {
+public class GridSimulatorWithSTEMP {
 
 	//Net Attribute
 	int suppliernumber, consumernumber;
@@ -38,23 +39,25 @@ public class GridSimulator {
 	String supplierpattern;
 	double[][] supplierpatternattribute;
 	int supplierfault;
+	ProcessManager pms = new ProcessManager();
 	
 	//Consumer Props Attribute
 	double averageconsumption, consumerpatternvariation, consumernoise, cfchance;
 	String consumerpattern;
 	double[][] consumerpatternattrubute;
 	int consumerfault;
+	ProcessManager pmc = new ProcessManager();
 	
 	//File Access Interface
 	private FileAccessAgentT fagent;
-	private static Log logger = LogFactory.getLog(GridSimulator.class);
+	private static Log logger = LogFactory.getLog(GridSimulatorWithSTEMP.class);
 	
 	//Result Info
 	private Map<Integer, Integer> satkround = new HashMap<Integer, Integer>();
 	private Map<Integer, Integer> catkround = new HashMap<Integer, Integer>();
 	
 	
-	public GridSimulator(String writtingaddress, double averagegeneration, double averageconsumption){
+	public GridSimulatorWithSTEMP(String writtingaddress, double averagegeneration, double averageconsumption){
 		updateWriteFileAddress(writtingaddress);
 		updateAverageConsumption(averageconsumption);
 		updateAverageGeneration(averagegeneration);
@@ -84,6 +87,8 @@ public class GridSimulator {
 	
 	public double run(int totalround){
 		//Initiate Supplier & Consumer Clusters
+		pms.updateCSTolerableNoise(0.01);
+		pmc.updateCSTolerableNoise(0.01);
 		initiateSuppliers();
 		initiateConsumers();
 		//Main Loop
@@ -160,26 +165,11 @@ public class GridSimulator {
 	}
 
 	private String runConsumers(int totalround, int round) {
-		//--------------Setup Attack Rounds (Ratio)--------------
-//		int attacknum = (int) Math.round((consumernumber * cfchance));
-//		for (int i = 0; i < attacknum; i++) {
-//			catkround.put(i, 31 + (int) Math.ceil((Math.random() * (totalround - 60))));
-//		}
-		//-------------------------------------------------------
-		
 		String cvalues = "";
+		Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
 		Iterator<Integer> itc = consumercluster.keySet().iterator();
 		while(itc.hasNext()){
 			int key = itc.next();
-			//--------------Setup Attack Rounds (Ratio)--------------
-//			if(catkround.containsKey(key)){
-//				if(catkround.get(key) == round){
-//					double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
-//					consumercluster.get(key).updateFault(getFault(consumerfault, impactvalue));
-////					logger.info("Round (" + round + "): Consumer Node ["+ key + "] is attacked");
-//				}
-//			}
-			//-------------------------------------------------------
 			//-----------Setup Attack Rounds (Probability)-----------
 			if(Math.random() < cfchance && consumercluster.get(key).isNormal()){
 				double impactvalue = Double.valueOf(PropertyAgentT.getInstance().getProperties("SET", "Consumer.Fault.ImpactValue"));
@@ -189,45 +179,46 @@ public class GridSimulator {
 			}
 			//-------------------------------------------------------
 			double value = consumercluster.get(key).getDemand(totalround, round);
+			readingpack.put(key, value);
+		}
+		ProcessedReadingPack prpack = pmc.markReadings(readingpack);
+		for(int i = 0 ; i < suppliercluster.size(); i++){
+			if (prpack.markedReadingPack().get(i).deviceCondition() == 0){ //If a "permanent" attack is detected, reset node
+				pms.resetNode(i);
+				consumercluster.get(i).updateFault(new FaultNull());
+			}
 			DecimalFormat df = new DecimalFormat("0.0000");
-			cvalues = cvalues + key + ":" + df.format(value) + "\t"; 
-			consumedenergy += value;
+			cvalues = cvalues + i + ":" + df.format(prpack.markedReadingPack().get(i).reading()) + "\t"; 
+			consumedenergy += prpack.markedReadingPack().get(i).reading();
 		}
 		return cvalues;
 	}
 
 	private String runSuppliers(int totalround, int round) {
-		//--------------Setup Attack Rounds (Ratio)--------------
-//		int attacknum = (int) Math.round((suppliernumber * sfchance));
-//		for (int i = 0; i < attacknum; i++) {
-//			satkround.put(i, 31 + (int) Math.ceil((Math.random() * (totalround - 60))));
-//		}
-		//-------------------------------------------------------
 		String svalues = "";
+		Map<Integer, Double> readingpack = new HashMap<Integer, Double>();
 		Iterator<Integer> its = suppliercluster.keySet().iterator();
 		while(its.hasNext()){
 			int key = its.next();
-			//--------------Setup Attack Rounds (Ratio)--------------
-//			if(satkround.containsKey(key)){
-//				if(satkround.get(key) == round){
-//					double impactvalue = Double.valueOf(PropertyAgent.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
-//					suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
-////					logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
-//				}
-//			}
-			//-------------------------------------------------------
 			//-----------Setup Attack Rounds (Probability)-----------
 			if(Math.random() < sfchance && suppliercluster.get(key).isNormal()){
 				double impactvalue = Double.valueOf(PropertyAgentT.getInstance().getProperties("SET", "Supplier.Fault.ImpactValue"));
 				suppliercluster.get(key).updateFault(getFault(supplierfault, impactvalue));
-//				logger.info("Round (" + round + "): Supplier Node ["+ key + "] is attacked");
 				satkround.put(key,round);
 			}
 			//-------------------------------------------------------
 			double value = suppliercluster.get(key).supplyValue(totalround, round);
+			readingpack.put(key, value);
+		}
+		ProcessedReadingPack prpack = pms.markReadings(readingpack);
+		for(int i = 0 ; i < suppliercluster.size(); i++){
+			if (prpack.markedReadingPack().get(i).deviceCondition() == 0){ //If a "permanent" attack is detected, reset node
+				pms.resetNode(i);
+				suppliercluster.get(i).updateFault(new FaultNull());
+			}
 			DecimalFormat df = new DecimalFormat("0.0000");
-			svalues = svalues + key + ":" + df.format(value) + "\t"; 
-			suppliedenergy += value;
+			svalues = svalues + i + ":" + df.format(prpack.markedReadingPack().get(i).reading()) + "\t"; 
+			suppliedenergy += prpack.markedReadingPack().get(i).reading();
 		}
 		return svalues;
 	}

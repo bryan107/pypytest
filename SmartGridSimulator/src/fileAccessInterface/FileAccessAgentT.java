@@ -8,13 +8,13 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class FileAccessAgent {
+public class FileAccessAgentT {
 	String writingpath;
 	String readingpath;
 	BufferedReader in;
-	private static Log logger = LogFactory.getLog(FileAccessAgent.class);
+	private static Log logger = LogFactory.getLog(FileAccessAgentT.class);
 	
-	public FileAccessAgent(String writingpath, String readingpath){
+	public FileAccessAgentT(String writingpath, String readingpath){
 		updatereadingpath(readingpath);
 		updatewritingpath(writingpath);
 		setFileReader();
@@ -22,6 +22,7 @@ public class FileAccessAgent {
 	
 	public void updatereadingpath(String readingpath){
 		this.readingpath = readingpath;
+		setFileReader();
 	}
 	
 	public void updatewritingpath(String writingpath){

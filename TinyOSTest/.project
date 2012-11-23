@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>TinyOSTest</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+		<nature>nescdt.nescdtNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>BlinkTest</name>
+			<type>2</type>
+			<location>C:/cygwin/opt/tinyos-2.x/apps/BlinkTest</location>
+		</link>
+		<link>
+			<name>BlinktoRadio</name>
+			<type>2</type>
+			<location>C:/cygwin/opt/tinyos-2.x/apps/BlinktoRadio</location>
+		</link>
+	</linkedResources>
+</projectDescription>

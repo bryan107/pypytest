@@ -9,28 +9,30 @@ import java.util.Queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import flanagan.analysis.Stat;
 import gad.calc.PCA;
 
 public class PatternGenerator {
 	private static Log logger = LogFactory.getLog(PatternGenerator.class);
-	private double[] referencereading = new double[2];
 	private int windowsize;
+	private final short GD = 3;
 	public PatternGenerator(int windowsize) {
 		this.windowsize = windowsize;
 	}
 
-	public Map<Integer, Map<Integer, EstimatedVariance>> getEstimation(
-			int[] nodeids) {
+	public Map<Integer, Map<Integer, EstimatedVariance>> getEstimation(Map<Integer, Double> reading) {
 		Map<Integer, Map<Integer, EstimatedVariance>> E = new HashMap<Integer, Map<Integer, EstimatedVariance>>();
-		for (int i = 0; i < nodeids.length; i++) {
+		Iterator<Integer> it1 = reading.keySet().iterator();
+		while(it1.hasNext()) {
+			int nodeid_i = it1.next();
 			Map<Integer, EstimatedVariance> content = new HashMap<Integer, EstimatedVariance>();
-			for (int j = 0; j < nodeids.length; j++) {
-				if(nodeids[i] == nodeids[j]){
+			Iterator<Integer> it2 = reading.keySet().iterator();
+			while(it2.hasNext()) {
+				int nodeid_j = it2.next();
+				if(nodeid_i == nodeid_j){
 					continue;
 				}	
 				try {
-					setPCA(nodeids[i], nodeids[j]);
+					setPCA(nodeid_i, nodeid_j);
 				} catch (Exception e2) {
 					logger.error(e2);
 					continue;
@@ -38,11 +40,19 @@ public class PatternGenerator {
 				double[][] direction = PCA.getInstance().getEigenVector();
 				double[] deviation = PCA.getInstance().getDeviations();		
 				besselCorrection(deviation);
-				content.put(nodeids[j], new EstimatedVariance(direction, deviation, referencereading));
+				double[] estimatedreading = new double[2];
+				setEstimatedReading(nodeid_i, nodeid_j, estimatedreading);
+				content.put(nodeid_j, new EstimatedVariance(direction, deviation, estimatedreading));
 			}
-			E.put(nodeids[i], content);
+			E.put(nodeid_i, content);
 		}
 		return E;
+	}
+
+	private void setEstimatedReading(int nodeid_i, int nodeie_j,
+			double[] estimatedreading) {
+		estimatedreading[0] = SMDB.getInstance().getEstimatedReading(nodeid_i);
+		estimatedreading[1] = SMDB.getInstance().getEstimatedReading(nodeie_j);
 	}
 
 	private void besselCorrection(double[] deviation) {
@@ -63,9 +73,6 @@ public class PatternGenerator {
 
 	private void setupReading(double[][] reading, LinkedList<Double> q1r, LinkedList<Double> q2r) {
 		int i = 0;
-		// TODO Rewrite referencereading use EWXX
-		referencereading[0] = q1r.getLast();
-		referencereading[1] = q2r.getLast();
 		while(q1r.size()!=0){
 			reading[0][i] = q1r.remove();
 			reading[1][i] = q2r.remove();
@@ -79,7 +86,7 @@ public class PatternGenerator {
 		while (it1.hasNext() && it2.hasNext()) {
 			Reading reading1 = it1.next();
 			Reading reading2 = it2.next();
-			if (reading1.isValid() && reading2.isValid()) {
+			if (reading1.isValid() == GD && reading2.isValid() == GD) {
 				q1r.add(reading1.value());
 				q2r.add(reading2.value());
 			}

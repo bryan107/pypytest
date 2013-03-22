@@ -3,9 +3,9 @@ package gad.core;
 public class Reading {
 	
 	private double readingvalue;
-	private boolean condition;
+	private short condition;
 	
-	public Reading(double value, boolean condition){
+	public Reading(double value, short condition){
 		this.readingvalue = value;
 		this.condition = condition;
 	}
@@ -13,7 +13,7 @@ public class Reading {
 	public double value(){
 		return readingvalue;
 	}
-	public boolean isValid(){
+	public short isValid(){
 		return condition;
 	}
 	

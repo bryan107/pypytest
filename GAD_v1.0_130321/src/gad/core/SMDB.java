@@ -16,7 +16,8 @@ public class SMDB {
 	private Queue<Boolean> eventcondition = new LinkedList<Boolean>();
 	private Map<Integer, Queue<Reading>> readingDB = new HashMap<Integer, Queue<Reading>>(); // Readings
 	private Map<Integer, Boolean> devicecondition = new HashMap<Integer, Boolean>();
-
+	private Map<Integer, Double> estimatedreading = new HashMap<Integer, Double>();
+	
 	private SMDB() {
 
 	}
@@ -29,6 +30,21 @@ public class SMDB {
 		return self;
 	}
 
+	public void resetnode(int nodeid){
+		readingDB.remove(nodeid);
+		devicecondition.remove(nodeid);
+		estimatedreading.remove(nodeid);
+		logger.info("Node["+ nodeid + "] has been reset...");
+	}
+	
+	public void resetSMDB(){
+		eventcondition.clear();
+		readingDB.clear();
+		devicecondition.clear();
+		estimatedreading.clear();
+		logger.info("SMDB has been reset...");
+	}
+	
 	// ***************** Reading Methods ******************//
 
 	public Queue<Reading> getReadings(int nodeid) {
@@ -62,6 +78,15 @@ public class SMDB {
 		}
 	}
 
+	public double getEstimatedReading(int nodeid){
+		if(estimatedreading.containsKey(nodeid)){
+			return estimatedreading.get(nodeid);
+		}
+		else{
+			logger.error("Device " + nodeid + "] does not exist");
+			return 0;
+		}
+	}
 	// ********* Not recommend to return the whole DB *************//
 	public Map<Integer, Queue<Reading>> getReadings() {
 		return readingDB;
@@ -69,11 +94,12 @@ public class SMDB {
 
 	// *************************************************************//
 	// *********************** Writing Methods *********************//
-	public void putReading(int nodeid, double value, boolean condition) {
-		// Check if key is already exist
+	public void putReading(int nodeid, double value, short condition) {
+		// If new node added
 		if (!readingDB.containsKey(nodeid)) {
 			readingDB.put(nodeid, new LinkedList<Reading>());
-			devicecondition.put(nodeid, true);
+//			devicecondition.put(nodeid, true);
+//			estimatedreading.put(nodeid, value);
 		}
 		// Check if queue if full
 		if (readingDB.get(nodeid).size() >= windowsize) {
@@ -89,5 +115,9 @@ public class SMDB {
 
 	public void putDeviceCondition(int nodeid, boolean condition) {
 		devicecondition.put(nodeid, condition);
+	}
+	
+	public void putEsimatedReading(int nodeid, double value){
+		estimatedreading.put(nodeid, value);
 	}
 }

@@ -18,7 +18,7 @@ public final class DFDEngine {
 	//
 	private double leastLGratio = 0.5;
 	private double faultneighbourthreshold = 0.5;
-	private Map<Integer, Map<Integer, Boolean>> correlationtable = new HashMap<Integer, Map<Integer, Boolean>>();
+//	private Map<Integer, Map<Integer, Boolean>> correlationtable = new HashMap<Integer, Map<Integer, Boolean>>();
 	private Map<Integer, Short> anomalycondition = new HashMap<Integer, Short>();
 	private Map<Integer, Short> finalanomalycondition = new HashMap<Integer, Short>();
 	
@@ -38,45 +38,39 @@ public final class DFDEngine {
 		this.faultneighbourthreshold = faultneighbourthreshold;
 	}
 	
-	public Map<Integer, Short> markCondition(Map<Integer, Map<Integer, Boolean>> correlationtable, Map<Integer, Boolean> devicecondition){
-		setupLocalCorrelationStrengthTable(correlationtable, devicecondition);
-		firstRoundVoting();
-		secondRoundVoting();
+	public Map<Integer, Short> markCondition(Map<Integer, Map<Integer, Boolean>> correlationtable){
+		setupLocalCorrelationTable(correlationtable);
+		firstRoundVoting(correlationtable);
+		secondRoundVoting(correlationtable);
 		return finalanomalycondition;
 	}
 	//----------------------------------------------------------------
 	//------------------------Private Functions-----------------------
-	private void setupLocalCorrelationStrengthTable(
-			Map<Integer, Map<Integer, Boolean>> correlationtable,
-			Map<Integer, Boolean> devicecondition) {
-		if(this.correlationtable.isEmpty() != true){
-			this.correlationtable.clear();
-		}
+	private void setupLocalCorrelationTable(Map<Integer, Map<Integer, Boolean>> correlationtable) {
+
+		// Memorize DC-fault node and remove their entries
 		List<Integer> nonGDnodelist = new ArrayList<Integer>();
-		Iterator<Integer> iterator1= devicecondition.keySet().iterator();
+		Iterator<Integer> iterator1= correlationtable.keySet().iterator();
 		while(iterator1.hasNext()){
 			int nodeid = iterator1.next();
-			if(!devicecondition.get(nodeid)){
-				nonGDnodelist.add(nodeid);
+			if(!SMDB.getInstance().getDeviceCondition(nodeid)){
+				nonGDnodelist.add(nodeid);			// memorize DC-fault node
+				correlationtable.remove(nodeid); 	// remove DC-fault entry
 			}
 		}
+		// Remove DF-fault nodes from normal ones entries
 		Iterator<Integer> iterator2= correlationtable.keySet().iterator();
 		while(iterator2.hasNext()){
 			int nodeid = iterator2.next();
-			if(devicecondition.get(nodeid)){
+			if(SMDB.getInstance().getDeviceCondition(nodeid)){
 				for(int id : nonGDnodelist){
 					correlationtable.get(nodeid).remove(id);
-				}
-				try {
-					this.correlationtable.put(nodeid, correlationtable.get(nodeid));
-				} catch (Exception e) {
-					logger.error("Error:" + e.toString());
 				}
 			}
 		}
 	}
 //
-	private void firstRoundVoting(){
+	private void firstRoundVoting(Map<Integer, Map<Integer, Boolean>> correlationtable){
 //		logger.info("Start first voting / size = " + correlationstrengthtable.size());
 		anomalycondition.clear();
 		Iterator<Integer> iterator = correlationtable.keySet().iterator();
@@ -105,7 +99,7 @@ public final class DFDEngine {
 //		logger.info("First voting complete");
 	}
 
-	private void secondRoundVoting(){
+	private void secondRoundVoting(Map<Integer, Map<Integer, Boolean>> correlationtable){
 		Iterator<Integer> iterator = correlationtable.keySet().iterator();
 		while(iterator.hasNext()){
 			int nodeid = iterator.next();

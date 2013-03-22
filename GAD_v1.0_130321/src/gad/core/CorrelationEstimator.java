@@ -1,6 +1,7 @@
 package gad.core;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -26,27 +27,30 @@ public class CorrelationEstimator {
 		this.Estimation = Estimation;
 	}
 
-	public Map<Integer, Map<Integer, Boolean>> assessCorrelation(int[] nodeid,
-			Map<Integer, Double> reading, Map<Integer, Map<Integer, EstimatedVariance>> Estimation) {
+	public Map<Integer, Map<Integer, Boolean>> assessCorrelation(Map<Integer, Double> reading, Map<Integer, Map<Integer, EstimatedVariance>> estimation) {
 		// Return Correlatoin Map
 		Map<Integer, Map<Integer, Boolean>> correlation = new HashMap<Integer, Map<Integer, Boolean>>();
 		// Setup Variables
-		setup(reading, Estimation);
+		setup(reading, estimation);
 		// Main function : Assert Correlation
-		for(int i = 0 ; i < nodeid.length ; i++){
+		Iterator<Integer> it1 = reading.keySet().iterator();
+		while(it1.hasNext()){
+			int nodeid_i = it1.next();
 			Map<Integer, Boolean> temp = new HashMap<Integer, Boolean>();
-			for(int j = 0 ; j < nodeid.length ; j++){
-				if(nodeid[i] == nodeid[j]){
+			Iterator<Integer> it2 = reading.keySet().iterator();
+			while(it2.hasNext()){
+				int nodeid_j = it2.next();
+				if(nodeid_i == nodeid_j){
 					continue;
 				}
 				try {
-					temp.put(nodeid[j], assessCorrelation(nodeid[i], nodeid[j]));
+					temp.put(nodeid_i, assessCorrelation(nodeid_i, nodeid_j));
 				} catch (Exception e) {
 					logger.error("No such Estimation Entry" + e);
 				}
 				
 			}
-			correlation.put(nodeid[i], temp);
+			correlation.put(nodeid_i, temp);
 		}
 		return correlation;
 	}

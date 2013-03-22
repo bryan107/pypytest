@@ -5,14 +5,11 @@ import java.text.DecimalFormat;
 public class MarkedReading {
 	private int nodeid;
 	private double reading;
-	private short devicecondition;
+	private boolean devicecondition;
 	private short readingcondition;
-	private final short FT = 0;
-	private final short GD = 3;
-	private final short UN = 4;
 	private final String[] faultcondition = { "FT", "LF", "LG", "GD", "UN" };
 	
-	public MarkedReading(int nodeid, double reading, double trustworthiness, short readingcondition, short devicecondition){
+	public MarkedReading(int nodeid, double reading, short readingcondition, boolean devicecondition){
 		this.nodeid = nodeid;
 		this.reading = reading;
 		this.devicecondition = devicecondition;
@@ -34,7 +31,7 @@ public class MarkedReading {
 	public short readingContidion(){
 		return readingcondition;
 	}
-	public short deviceCondition(){
+	public boolean deviceCondition(){
 		return devicecondition;
 	}
 	
@@ -44,7 +41,7 @@ public class MarkedReading {
 				+ nodeid
 				+ "] R:"+ df.format(reading())
 				+ "% RC:"+ faultcondition[readingContidion()] 
-				+ " DC:"+ faultcondition[deviceCondition()]);
+				+ " DC:"+ deviceCondition());
 		return reading;
 	}
 	

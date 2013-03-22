@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Diagnosis {
 	private boolean eventoccurrence;
-	private Map<Integer, Boolean> readingcondition = new HashMap<Integer, Boolean>();
+	private Map<Integer, Short> readingcondition = new HashMap<Integer, Short>();
 	private Map<Integer, Boolean> devicecondition = new HashMap<Integer, Boolean>();
 	public Diagnosis(){
 		
@@ -15,7 +15,7 @@ public class Diagnosis {
 		this.eventoccurrence = eventoccurrence;		
 	}
 	
-	public void putReadingCondition(int nodeid, boolean readingcondition){
+	public void putReadingCondition(int nodeid, short readingcondition){
 		this.readingcondition.put(nodeid, readingcondition);
 	}
 	
@@ -27,7 +27,7 @@ public class Diagnosis {
 		return eventoccurrence;
 	}
 	
-	public boolean readingCondition(int nodeid){
+	public short readingCondition(int nodeid){
 		return readingcondition.get(nodeid);
 	}
 	
@@ -35,7 +35,7 @@ public class Diagnosis {
 		return devicecondition.get(nodeid);
 	}
 	
-	public Map<Integer, Boolean> readingCondition(){
+	public Map<Integer, Short> readingCondition(){
 		return readingcondition;
 	}
 		

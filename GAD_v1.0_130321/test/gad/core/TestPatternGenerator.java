@@ -7,17 +7,25 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 public class TestPatternGenerator extends TestCase {
+	private final short GD = 3;
+	
 	public void testGetEstimate(){
 		int windowsize = 30;
 		int[] nodeids = {1,2,3,4,5};
 		SMDB.getInstance().setupWindowSize(windowsize);
 		for(int i = 0 ; i < windowsize ; i++){
 			for(int j = 1 ; j <= nodeids.length ; j++)
-			SMDB.getInstance().putReading(j, 20 * (1 + 0.05 * Math.random()), true);
+			SMDB.getInstance().putReading(j, 20 * (1 + 0.05 * Math.random()), GD);
 		}
+		
+		Map<Integer, Double> reading = new HashMap<Integer, Double>();
+		for(int i = 1 ; i <= 5 ; i++){
+			reading.put(i, 20 * (1 + 0.05 * Math.random()));
+		}
+		
 		PatternGenerator pg = new PatternGenerator(windowsize);
 		
-		Map<Integer, Map<Integer, EstimatedVariance>> e = pg.getEstimation(nodeids);
+		Map<Integer, Map<Integer, EstimatedVariance>> e = pg.getEstimation(reading);
 
 		for(int i = 0 ; i < nodeids.length ; i++){
 			for(int j = 0 ; j < nodeids.length ; j++){
@@ -35,13 +43,10 @@ public class TestPatternGenerator extends TestCase {
 			}
 		}
 
-		Map<Integer, Double> reading = new HashMap<Integer, Double>();
-		for(int i = 1 ; i <= 5 ; i++){
-			reading.put(i, 20 * (1 + 0.05 * Math.random()));
-		}
+
 	
 		CorrelationEstimator ce = new CorrelationEstimator(3);
-		Map<Integer, Map<Integer, Boolean>> correlation = ce.assessCorrelation(nodeids, reading,  e);
+		Map<Integer, Map<Integer, Boolean>> correlation = ce.assessCorrelation(reading,  e);
 		
 		Iterator<Integer> itc = correlation.keySet().iterator();
 		while(itc.hasNext()){
@@ -61,7 +66,7 @@ public class TestPatternGenerator extends TestCase {
 		for(int i = 1 ; i < 6 ; i++){
 			devicecondition.put(i, true);
 		}
-		Map<Integer, Short> readingcondition = dfd.markCondition(correlation, devicecondition);
+		Map<Integer, Short> readingcondition = dfd.markCondition(correlation);
 		System.out.println("Reading Conditions: ");
 		Iterator<Integer> itrc = readingcondition.keySet().iterator();
 		while(itrc.hasNext()){

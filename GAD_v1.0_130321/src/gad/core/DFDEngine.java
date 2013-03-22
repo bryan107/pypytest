@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 public final class DFDEngine {
@@ -16,94 +14,88 @@ public final class DFDEngine {
 	private final short LF = 1;
 	private final short LG = 2;
 	private final short GD = 3;
+	private final short UN = 4;
 	//
-	private double threshold; 
-	private double leastLGratio;
+	private double leastLGratio = 0.5;
 	private double faultneighbourthreshold = 0.5;
-	private Map<Integer, Map<Integer, Double>> correlationstrengthtable = new HashMap<Integer, Map<Integer, Double>>();
-	private Map<Integer, Short> faultycondition = new HashMap<Integer, Short>();
-	private Map<Integer, Short> finalfaultycondition = new HashMap<Integer, Short>();
+	private Map<Integer, Map<Integer, Boolean>> correlationtable = new HashMap<Integer, Map<Integer, Boolean>>();
+	private Map<Integer, Short> anomalycondition = new HashMap<Integer, Short>();
+	private Map<Integer, Short> finalanomalycondition = new HashMap<Integer, Short>();
 	
 	private static Log logger = LogFactory.getLog(DFDEngine.class);
 	//---------------------------------------------------------------
 	//-------------------------Constructor---------------------------
-	public DFDEngine(double threshold, double leastLGnumber){
-		updateThreshold(threshold);
-		updateLeastLGNumber(leastLGnumber);
+	public DFDEngine(){
 	}
 	//---------------------------------------------------------------
 	//------------------------Public Functions-----------------------
 
-	public void updateLeastLGNumber(double leastLGnumber){
-		this.leastLGratio = leastLGnumber;
+	public void updateLeastLGratio(double leastLGratio){
+		this.leastLGratio = leastLGratio;
 	}
-	public void updateThreshold(double threshold){
-		this.threshold = threshold;
+	
+	public void updateFaultNeighbourThreshold(double faultneighbourthreshold){
+		this.faultneighbourthreshold = faultneighbourthreshold;
 	}
-	public Map<Integer, Short> faultConditionalMarking(Map<Integer, Map<Integer, Double>> correlationstrengthtable, Map<Integer, Short> devicecondition){
-		
-		setupLocalCorrelationStrengthTable(correlationstrengthtable, devicecondition);
+	
+	public Map<Integer, Short> markCondition(Map<Integer, Map<Integer, Boolean>> correlationtable, Map<Integer, Boolean> devicecondition){
+		setupLocalCorrelationStrengthTable(correlationtable, devicecondition);
 		firstRoundVoting();
 		secondRoundVoting();
-		return finalfaultycondition;
+		return finalanomalycondition;
 	}
 	//----------------------------------------------------------------
 	//------------------------Private Functions-----------------------
 	private void setupLocalCorrelationStrengthTable(
-			Map<Integer, Map<Integer, Double>> correlationstrengthtable,
-			Map<Integer, Short> devicecondition) {
-		if(this.correlationstrengthtable.isEmpty() != true){
-			this.correlationstrengthtable.clear();
+			Map<Integer, Map<Integer, Boolean>> correlationtable,
+			Map<Integer, Boolean> devicecondition) {
+		if(this.correlationtable.isEmpty() != true){
+			this.correlationtable.clear();
 		}
 		List<Integer> nonGDnodelist = new ArrayList<Integer>();
-		Set<Integer> key1 = devicecondition.keySet();
-		Iterator<Integer> iterator1= key1.iterator();
+		Iterator<Integer> iterator1= devicecondition.keySet().iterator();
 		while(iterator1.hasNext()){
 			int nodeid = iterator1.next();
-			if(devicecondition.get(nodeid) != GD){
+			if(!devicecondition.get(nodeid)){
 				nonGDnodelist.add(nodeid);
 			}
 		}
-						
-		Set<Integer> key2 = correlationstrengthtable.keySet();
-		Iterator<Integer> iterator2= key2.iterator();
-		for(Map<Integer, Double> raw : correlationstrengthtable.values()){
+		Iterator<Integer> iterator2= correlationtable.keySet().iterator();
+		while(iterator2.hasNext()){
 			int nodeid = iterator2.next();
-			if(devicecondition.get(nodeid) != FT){
+			if(devicecondition.get(nodeid)){
 				for(int id : nonGDnodelist){
-					raw.remove(id);
+					correlationtable.get(nodeid).remove(id);
 				}
 				try {
-					this.correlationstrengthtable.put(nodeid, raw);
+					this.correlationtable.put(nodeid, correlationtable.get(nodeid));
 				} catch (Exception e) {
 					logger.error("Error:" + e.toString());
 				}
-				
 			}
 		}
 	}
 //
 	private void firstRoundVoting(){
 //		logger.info("Start first voting / size = " + correlationstrengthtable.size());
-		faultycondition.clear();
-		Set<Integer> key = correlationstrengthtable.keySet();
-		Iterator<Integer> iterator = key.iterator();
-		for(Map<Integer, Double> i : correlationstrengthtable.values()){;
+		anomalycondition.clear();
+		Iterator<Integer> iterator = correlationtable.keySet().iterator();
+		for(Map<Integer, Boolean> node : correlationtable.values()){;
 			int totalneighbournumber = 0;
 			int goodneighbournumber = 0;
 			//Count good neighbor number through all its correlation strength
-			for(double j : i.values()){
+			for(boolean correlation : node.values()){
 				totalneighbournumber++;
-				if(j >= threshold){
+				if(correlation){
 					goodneighbournumber++;
 				}
 			}
 			//setup up first voting result
 			try {
 				if ((double)goodneighbournumber/(double)totalneighbournumber >= faultneighbourthreshold) {//more then 1/2 neighbours think claim you are normal
-					faultycondition.put(iterator.next(), LG);
+					anomalycondition.put(iterator.next(), LG);
 				} else {
-					faultycondition.put(iterator.next(), LF);
+					anomalycondition.put(iterator.next(), LF);
 				}
 			} catch (Exception e2) {
 				logger.error("Error: No neighbour error in DFD process");
@@ -114,29 +106,26 @@ public final class DFDEngine {
 	}
 
 	private void secondRoundVoting(){
-//		logger.info("Second voting start");
-		Set<Integer> key = correlationstrengthtable.keySet();
-		Iterator<Integer> iterator = key.iterator();
-		for(Map<Integer, Double> i : correlationstrengthtable.values()){
-			int iteratenumber = iterator.next();
+		Iterator<Integer> iterator = correlationtable.keySet().iterator();
+		while(iterator.hasNext()){
+			int nodeid = iterator.next();
 			int totalneighbournumber = 0;
 			int goodneighbournumber = 0;
 			int LGneighbournumber = 0;
 			//iterate all its correlation strength
-			Set<Integer> key2 = i.keySet();
-			Iterator<Integer> iterator2 = key2.iterator();
-			for(double j : i.values()){
+			Iterator<Integer> iterator2 = correlationtable.get(nodeid).keySet().iterator();
+			while(iterator2.hasNext()){
 				totalneighbournumber++;
-				int neighbour = iterator2.next();
+				int neighbourid = iterator2.next();
 				try {
-					if (faultycondition.get(neighbour) == LG) { 
+					if (anomalycondition.get(neighbourid) == LG) { 
 						LGneighbournumber++;
-						if (j >= threshold) {
+						if (correlationtable.get(nodeid).get(neighbourid)) {
 							goodneighbournumber++;
 						}
 					}
 				} catch (Exception e) {
-					logger.error("Error: Correlation strength table does not symmetrically paired on Node[" + iteratenumber + "] with unknown Node[" + neighbour + "]");
+					logger.error("Error: Correlation strength table does not symmetrically paired on Node[" + nodeid + "] with unknown Node[" + neighbourid + "]");
 				}
 
 			}
@@ -144,17 +133,13 @@ public final class DFDEngine {
 			try {
 				if ((double)LGneighbournumber / (double)totalneighbournumber >= leastLGratio) {														
 					if ((double)goodneighbournumber/(double)LGneighbournumber >= faultneighbourthreshold) {
-						finalfaultycondition.put(iteratenumber, GD);
-					} else {
-						finalfaultycondition.put(iteratenumber, FT);
+						finalanomalycondition.put(nodeid, GD); // majority says you are normal
+					} else { 
+						finalanomalycondition.put(nodeid, FT); // Majority says you are fault
 					}
 				} 
-				else {
-//					if (LGneighbournumber >= leastLGratio) {
-//						finalfaultycondition.put(iteratenumber, FT);
-//					} else {
-						finalfaultycondition.put(iteratenumber, LF);
-//					}
+				else { 
+						finalanomalycondition.put(nodeid, UN); // Not have enough reference, indicate events
 				}
 			} catch (Exception e) {
 				logger.error("Error: divide zero error");

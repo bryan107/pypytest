@@ -57,12 +57,15 @@ public final class DFDEngine {
 		// Memorize DC-fault node and remove their entries
 		List<Integer> nonGDnodelist = new ArrayList<Integer>();
 		Iterator<Integer> iterator1= correlationtable.keySet().iterator();
+		iterator1= correlationtable.keySet().iterator();
 		while(iterator1.hasNext()){
-			int nodeid = iterator1.next();
+			int nodeid = iterator1.next();		
 			if(!SMDB.getInstance().getDeviceCondition(nodeid)){
 				nonGDnodelist.add(nodeid);			// memorize DC-fault node
-				correlationtable.remove(nodeid); 	// remove DC-fault entry
 			}
+		}
+		for(int nodeid: nonGDnodelist){
+			correlationtable.remove(nodeid); 	// remove DC-fault entry ***** Should not remove entries during iteration
 		}
 		// Remove DF-fault nodes from normal ones entries
 		Iterator<Integer> iterator2= correlationtable.keySet().iterator();

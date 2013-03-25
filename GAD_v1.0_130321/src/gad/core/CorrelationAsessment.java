@@ -7,13 +7,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class CorrelationEstimator {
-	private static Log logger = LogFactory.getLog(CorrelationEstimator.class);
+public class CorrelationAsessment {
+	private static Log logger = LogFactory.getLog(CorrelationAsessment.class);
 	private	Map<Integer, Double> reading;
 	private	Map<Integer, Map<Integer, EstimatedVariance>> Estimation;
 	private	double numberofdeviation;
 
-	public CorrelationEstimator(double numberofdeviation) {
+	public CorrelationAsessment(double numberofdeviation) {
 		setDeviation(numberofdeviation);
 	}
 
@@ -44,9 +44,16 @@ public class CorrelationEstimator {
 					continue;
 				}
 				try {
-					temp.put(nodeid_i, assessCorrelation(nodeid_i, nodeid_j));
+					// Only assess the correlations that has valid estimation
+					if(Estimation.get(nodeid_i).get(nodeid_j).isValid()){	
+						temp.put(nodeid_j, assessCorrelation(nodeid_i, nodeid_j));
+					}
+					else{// *Set default correlation as true if not valid estimation
+						temp.put(nodeid_j, true);
+					}
+
 				} catch (Exception e) {
-					logger.error("No such Estimation Entry" + e);
+					logger.error("No such Estimation Entry ["+ nodeid_i +"]["+ nodeid_j +"](" + e + ")");
 				}
 				
 			}
@@ -60,14 +67,16 @@ public class CorrelationEstimator {
 		double[] rotatedreading = new double[2];
 		double[][] newcoordinate = Estimation.get(nodei).get(nodej).direction();
 		double[] deviation = Estimation.get(nodei).get(nodej).deviation();
-		double[] previousreading = Estimation.get(nodei).get(nodej).previousReading();
+		double[] estimatedreading = Estimation.get(nodei).get(nodej).estimatedReading();
 		// ********************* Translating & rotation ******************** //
-		translatedreading[0] = reading.get(nodei) - previousreading[0];
-		translatedreading[1] = reading.get(nodej) - previousreading[1];
+		
+		translatedreading[0] = reading.get(nodei) - estimatedreading[0];
+		translatedreading[1] = reading.get(nodej) - estimatedreading[1];
 		for (int i = 0; i < 2; i++) {
 			rotatedreading[i] = translatedreading[0] * newcoordinate[i][0]
 					+ translatedreading[1] * newcoordinate[i][1];
 		}
+	
 		// ************************** Asserting *****************************//
 		double value = (Math.pow(rotatedreading[0], 2) / Math.pow(numberofdeviation * deviation[0], 2))
 				+ (Math.pow(rotatedreading[1], 2) / Math.pow(numberofdeviation	* deviation[1], 2));

@@ -1,6 +1,7 @@
 package gad.core;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
@@ -9,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class ConditionDiagnosis {
 	// faulty conditions
-	private final short FT = 1;
+	private final short FT = 0;
 	private final short GD = 3;
 	private final short UN = 4;
 	private double MAR;
@@ -48,15 +49,36 @@ public class ConditionDiagnosis {
 
 	private void checkEventOccurrence(Diagnosis d) {
 		Queue<Boolean> eq = SMDB.getInstance().getEventConditions();
+		if(eq.size() < windowsize){
+			d.putEventOccurrence(false);
+			return;
+		}
 		double eo = 0;
 		for (boolean event : eq) {
 			if (event == true) {
 				eo++;
 			}
 		}
-		if ((eo / windowsize) >= MER) {
+		if ((eo / windowsize) > MER) {
 			d.putEventOccurrence(true);
-			SMDB.getInstance().resetSMDB();
+			LinkedList<Integer> dcFT= new LinkedList<Integer>();
+			findAbnormalDC(dcFT);
+			SMDB.getInstance().resetSMDB(dcFT);
+			SMDB.getInstance().getDeviceCondition(3);
+			return;
+		}
+		d.putEventOccurrence(false);
+	}
+
+	private void findAbnormalDC(LinkedList<Integer> dcFT) {
+		Map<Integer, Queue<Reading>> reading = SMDB.getInstance().getReadings();
+		Iterator<Integer> it = reading.keySet().iterator();
+		while(it.hasNext()){
+			int nodeid = it.next();
+			boolean dc = SMDB.getInstance().getDeviceCondition(nodeid);
+			if(dc == false){
+				dcFT.add(nodeid);
+			}
 		}
 	}
 
@@ -66,13 +88,20 @@ public class ConditionDiagnosis {
 			int nodeid = it.next();
 			try {
 				Queue<Reading> rq = SMDB.getInstance().getReadings(nodeid);
+				boolean dc = SMDB.getInstance().getDeviceCondition(nodeid);
+				if(rq == null){	// If no reading is in queue
+					d.putDeviceContidion(nodeid, dc);
+					SMDB.getInstance().putDeviceCondition(nodeid, dc);
+					continue;
+				}
 				double acount = 0;
-				for (Reading r : rq) {
+				for (Reading r : rq) {	
 					if (r.isValid() == FT) {
 						acount++;
 					}
 				}
-				if ((acount / windowsize) >= MAR) {
+				
+				if ((acount / windowsize) > MAR) {
 					d.putDeviceContidion(nodeid, false);
 					SMDB.getInstance().putDeviceCondition(nodeid, false);
 				} else {
@@ -89,6 +118,7 @@ public class ConditionDiagnosis {
 
 	private void checkAbnormality(Map<Integer, Double> reading,
 			Map<Integer, Short> anomalycondition, Diagnosis d) {
+		
 		Iterator<Integer> it = reading.keySet().iterator();
 		while (it.hasNext()) {
 			int nodeid = it.next();
@@ -99,12 +129,7 @@ public class ConditionDiagnosis {
 				SMDB.getInstance().putEsimatedReading(nodeid,reading.get(nodeid));
 				continue;
 			}
-			// CASE: Device Condition Error
-			if(!anomalycondition.containsKey(nodeid)){ 
-				d.putReadingCondition(nodeid, UN);
-				SMDB.getInstance().putReading(nodeid, reading.get(nodeid), UN);
-				continue;
-			}
+			// CASE: node exists in SMDB
 			// CASE:Good Device
 			if (SMDB.getInstance().getDeviceCondition(nodeid)) { 
 				if (anomalycondition.get(nodeid) == GD) {// Good Reading
@@ -120,8 +145,8 @@ public class ConditionDiagnosis {
 					SMDB.getInstance().putReading(nodeid,reading.get(nodeid), FT);
 				}
 			} else { // Device Condition Error (for backup)
-				d.putReadingCondition(nodeid, UN);
-				SMDB.getInstance().putReading(nodeid, reading.get(nodeid), UN);
+				d.putReadingCondition(nodeid, FT);
+				SMDB.getInstance().putReading(nodeid, reading.get(nodeid), FT);
 			}
 		}
 	}
@@ -133,6 +158,10 @@ public class ConditionDiagnosis {
 	private boolean checkEventCondition(Map<Integer, Short> readingcondition) {
 		boolean eventcondition = false;
 		int size = readingcondition.size();
+		if(size < 3){
+			SMDB.getInstance().putEventConditions(eventcondition);
+			return false;
+		}
 		int UNcount = 0;
 		for (short condition : readingcondition.values()) {
 			if (condition == UN) {

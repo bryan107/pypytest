@@ -15,7 +15,9 @@ public final class DFDEngine {
 	private final short LG = 2;
 	private final short GD = 3;
 	private final short UN = 4;
+	private final int minimalneighbournumber = 3;
 	//
+	
 	private double leastLGratio = 0.5;
 	private double faultneighbourthreshold = 0.5;
 //	private Map<Integer, Map<Integer, Boolean>> correlationtable = new HashMap<Integer, Map<Integer, Boolean>>();
@@ -40,6 +42,10 @@ public final class DFDEngine {
 	
 	public Map<Integer, Short> markCondition(Map<Integer, Map<Integer, Boolean>> correlationtable){
 		setupLocalCorrelationTable(correlationtable);
+		if(correlationtable.size() < minimalneighbournumber){
+			logger.warn("Not enough references, unable to detect");
+			return new HashMap<Integer, Short>();			
+		}
 		firstRoundVoting(correlationtable);
 		secondRoundVoting(correlationtable);
 		return finalanomalycondition;
@@ -86,6 +92,9 @@ public final class DFDEngine {
 			}
 			//setup up first voting result
 			try {
+				if(totalneighbournumber == 0){
+					continue;
+				}
 				if ((double)goodneighbournumber/(double)totalneighbournumber >= faultneighbourthreshold) {//more then 1/2 neighbours think claim you are normal
 					anomalycondition.put(iterator.next(), LG);
 				} else {
@@ -101,6 +110,7 @@ public final class DFDEngine {
 
 	private void secondRoundVoting(Map<Integer, Map<Integer, Boolean>> correlationtable){
 		Iterator<Integer> iterator = correlationtable.keySet().iterator();
+		finalanomalycondition.clear();
 		while(iterator.hasNext()){
 			int nodeid = iterator.next();
 			int totalneighbournumber = 0;
@@ -131,8 +141,7 @@ public final class DFDEngine {
 					} else { 
 						finalanomalycondition.put(nodeid, FT); // Majority says you are fault
 					}
-				} 
-				else { 
+				} else { 
 						finalanomalycondition.put(nodeid, UN); // Not have enough reference, indicate events
 				}
 			} catch (Exception e) {

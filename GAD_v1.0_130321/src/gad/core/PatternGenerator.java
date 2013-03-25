@@ -32,9 +32,18 @@ public class PatternGenerator {
 					continue;
 				}	
 				try {
-					setPCA(nodeid_i, nodeid_j);
-				} catch (Exception e2) {
-					logger.error(e2);
+					boolean dc1 = SMDB.getInstance().getDeviceCondition(nodeid_i);
+					boolean dc2 = SMDB.getInstance().getDeviceCondition(nodeid_j);
+					Queue<Reading> q1 = SMDB.getInstance().getReadings(nodeid_i);
+					Queue<Reading> q2 = SMDB.getInstance().getReadings(nodeid_j);
+					if(q1 == null || q2 == null || dc1 == false || dc2 == false){
+						content.put(nodeid_j, new EstimatedVariance(null, null, null, false));
+						continue;
+					}
+					setPCA(q1, q2);
+				} catch (Exception e2) {	// Without enough data for generate estimations
+					logger.warn("No data for estimation (" + e2 +")");
+					content.put(nodeid_j, new EstimatedVariance(null, null, null, false));
 					continue;
 				}
 				double[][] direction = PCA.getInstance().getEigenVector();
@@ -42,7 +51,7 @@ public class PatternGenerator {
 				besselCorrection(deviation);
 				double[] estimatedreading = new double[2];
 				setEstimatedReading(nodeid_i, nodeid_j, estimatedreading);
-				content.put(nodeid_j, new EstimatedVariance(direction, deviation, estimatedreading));
+				content.put(nodeid_j, new EstimatedVariance(direction, deviation, estimatedreading, true));
 			}
 			E.put(nodeid_i, content);
 		}
@@ -61,9 +70,7 @@ public class PatternGenerator {
 	}
 
 
-	private void setPCA(int nodei, int nodej) {
-		Queue<Reading> q1 = SMDB.getInstance().getReadings(nodei);
-		Queue<Reading> q2 = SMDB.getInstance().getReadings(nodej);
+	private void setPCA(Queue<Reading> q1, Queue<Reading> q2) {
 		LinkedList<Double> q1r = new LinkedList<Double>() , q2r = new LinkedList<Double>();
 		extractValids(q1, q2, q1r, q2r);
 		double[][] reading = new double[2][q1r.size()];

@@ -16,17 +16,17 @@ public class GAD {
 	private double numberofdeviation;
 	private double MAR, MER;
 	PatternGenerator pattern;
-	CorrelationEstimator ce;
+	CorrelationAsessment ce;
 	DFDEngine dfd;
 	ConditionDiagnosis cd;
 
 	public GAD() {
 		loadConfig();
 		pattern = new PatternGenerator(windowsize);
-		ce = new CorrelationEstimator(numberofdeviation);
+		ce = new CorrelationAsessment(numberofdeviation);
 		dfd = new DFDEngine();
 		cd = new ConditionDiagnosis(MAR, MER, windowsize);
-		System.out.println("=GAD initiated=");
+		logger.info("=GAD initiated=");
 	}
 
 	public void loadConfig() {
@@ -78,6 +78,7 @@ public class GAD {
 		// ************************ PHASE 2 ****************************//
 		// STEP 3. Trust-base Voting
 		Map<Integer, Short> anomalycondition = dfd.markCondition(correlation);
+		
 		// STEP 4. Abnormality/Event Condition Diagnosis + Storing messages
 		Diagnosis diagnosis = cd.diagnose(reading, anomalycondition);
 

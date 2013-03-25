@@ -45,12 +45,24 @@ public class SMDB {
 		logger.info("SMDB has been reset...");
 	}
 	
+	public void resetSMDB(LinkedList<Integer> dcFT){
+		eventcondition.clear();
+		readingDB.clear();
+		devicecondition.clear();
+		estimatedreading.clear();
+		for(int nodeid: dcFT){
+			devicecondition.put(nodeid, false);
+		}		
+		
+		logger.info("SMDB has been reset...");
+	}
+	
 	// ***************** Reading Methods ******************//
 
 	public Queue<Reading> getReadings(int nodeid) {
 		if (readingDB.containsKey(nodeid)) {
 			if (readingDB.get(nodeid).size() < windowsize) {
-				logger.warn("Node" + nodeid + " reading is not ready.");
+				//logger.warn("Node" + nodeid + " reading is not ready.");
 				return null;
 			}
 			return readingDB.get(nodeid);
@@ -63,7 +75,6 @@ public class SMDB {
 	public Queue<Boolean> getEventConditions() {
 		if (eventcondition.size() < windowsize) {
 			logger.warn("Event condition not ready.");
-			return null;
 		}
 		return eventcondition;
 	}
@@ -73,8 +84,8 @@ public class SMDB {
 			return devicecondition.get(nodeid);
 		}
 		else{
-			logger.error("Device " + nodeid + "] does not exist");
-			return false;
+			logger.error("Device [" + nodeid + "] does not exist");
+			return true;
 		}
 	}
 
@@ -83,7 +94,7 @@ public class SMDB {
 			return estimatedreading.get(nodeid);
 		}
 		else{
-			logger.error("Device " + nodeid + "] does not exist");
+			logger.error("Device [" + nodeid + "] does not exist");
 			return 0;
 		}
 	}
@@ -98,8 +109,8 @@ public class SMDB {
 		// If new node added
 		if (!readingDB.containsKey(nodeid)) {
 			readingDB.put(nodeid, new LinkedList<Reading>());
-//			devicecondition.put(nodeid, true);
-//			estimatedreading.put(nodeid, value);
+			//putDeviceCondition(nodeid, true); // Default good device
+			putEsimatedReading(nodeid, value);
 		}
 		// Check if queue if full
 		if (readingDB.get(nodeid).size() >= windowsize) {

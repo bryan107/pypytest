@@ -40,7 +40,7 @@ public class MarkedReading {
 		String reading = ("["
 				+ nodeid
 				+ "] R:"+ df.format(reading())
-				+ "% RC:"+ faultcondition[readingContidion()] 
+				+ " RC:"+ faultcondition[readingContidion()] 
 				+ " DC:"+ deviceCondition());
 		return reading;
 	}

@@ -26,6 +26,8 @@ public class GAD {
 		ce = new CorrelationAsessment(numberofdeviation);
 		dfd = new DFDEngine();
 		cd = new ConditionDiagnosis(MAR, MER, windowsize);
+		SMDB.getInstance().resetSMDB();
+		SMDB.getInstance().setupWindowSize(windowsize);
 		logger.info("=GAD initiated=");
 	}
 
@@ -66,6 +68,11 @@ public class GAD {
 		logger.info("Load MER: " + MER);
 	}
 
+	public void resetNode(int nodeid){
+		SMDB.getInstance().resetnode(nodeid);
+		logger.info("Node [" + nodeid + "] has been reset");
+	}
+	
 	public ProcessedReadingPack markReading(Map<Integer, Double> reading) {
 		// *********************** PHASE 1 ****************************//
 		// STEP 1. Pattern Estimation, include estimation value , directions and

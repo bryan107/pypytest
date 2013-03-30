@@ -16,6 +16,7 @@ public class ConditionDiagnosis {
 	private double MAR;
 	private double MER;
 	private double windowsize;
+	private int eventcount = 0;
 	private static Log logger = LogFactory.getLog(ConditionDiagnosis.class);
 
 	public ConditionDiagnosis(double MAR, double MER, int windowsize) {
@@ -48,18 +49,18 @@ public class ConditionDiagnosis {
 	}
 
 	private void checkEventOccurrence(Diagnosis d) {
-		Queue<Boolean> eq = SMDB.getInstance().getEventConditions();
-		if(eq.size() < windowsize){
-			d.putEventOccurrence(false);
-			return;
-		}
-		double eo = 0;
-		for (boolean event : eq) {
-			if (event == true) {
-				eo++;
-			}
-		}
-		if ((eo / windowsize) > MER) {
+//		Queue<Boolean> eq = SMDB.getInstance().getEventConditions();
+//		if(eq.size() < windowsize){
+//			d.putEventOccurrence(false);
+//			return;
+//		}
+//		double eo = 0;
+//		for (boolean event : eq) {
+//			if (event == true) {
+//				eo++;
+//			}
+//		}
+		if ((eventcount / windowsize) > MER) {
 			d.putEventOccurrence(true);
 			LinkedList<Integer> dcFT= new LinkedList<Integer>();
 			findAbnormalDC(dcFT);
@@ -67,6 +68,14 @@ public class ConditionDiagnosis {
 			SMDB.getInstance().getDeviceCondition(3);
 			return;
 		}
+//		if ((eo / windowsize) > MER) {
+//			d.putEventOccurrence(true);
+//			LinkedList<Integer> dcFT= new LinkedList<Integer>();
+//			findAbnormalDC(dcFT);
+//			SMDB.getInstance().resetSMDB(dcFT);
+//			SMDB.getInstance().getDeviceCondition(3);
+//			return;
+//		}
 		d.putEventOccurrence(false);
 	}
 
@@ -170,6 +179,10 @@ public class ConditionDiagnosis {
 		}
 		if ((UNcount / size) > 0.5) {
 			eventcondition = true;
+			eventcount++;
+		}
+		else{
+			eventcount = 0;
 		}
 		SMDB.getInstance().putEventConditions(eventcondition);
 		return eventcondition;

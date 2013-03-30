@@ -90,6 +90,19 @@ public class PatternGenerator {
 	private void extractValids(Queue<Reading> q1, Queue<Reading> q2, LinkedList<Double> q1r, LinkedList<Double> q2r) {
 		Iterator<Reading> it1 = q1.iterator();
 		Iterator<Reading> it2 = q2.iterator();
+		
+//		TODO remove debug code
+//		System.out.println("Q1:");
+//		for(Reading r: q1){
+//			System.out.print(" R:" + r.value() + "C:" + r.isValid());
+//		}
+//		System.out.println();
+//		System.out.println("Q2:");
+//		for(Reading r: q2){
+//			System.out.print(" R:" + r.value() + "C:" + r.isValid());
+//		}
+//		System.out.println();
+//		
 		while (it1.hasNext() && it2.hasNext()) {
 			Reading reading1 = it1.next();
 			Reading reading2 = it2.next();
@@ -98,6 +111,16 @@ public class PatternGenerator {
 				q2r.add(reading2.value());
 			}
 		}
+//		 TODO remove debug code
+//		System.out.println("Q1R:");
+//		for(double r : q1r){
+//			System.out.print(" " + r);
+//		}
+//		System.out.println();
+//		System.out.println("Q2R:");
+//		for(double r : q2r){
+//			System.out.print(" " + r);
+//		}
+//		System.out.println();
 	}
-
 }

@@ -20,16 +20,12 @@ public class PCA {
 		return self;
 	}
 	
-	public void setReading(double[][] reading){
-		
-		
-		
-		
-		
+	public void setReading(double[][] reading){	
 		covariance = new double[reading.length][reading.length]; 
 		for(int i = 0 ; i < reading.length ; i++){
 			for(int j = 0 ; j < reading.length ; j++){
 				covariance[i][j] = Stat.covariance(reading[i], reading[j]);
+				
 			}
 		}
 		m = new Matrix(covariance);

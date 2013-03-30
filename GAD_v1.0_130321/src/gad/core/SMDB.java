@@ -67,14 +67,14 @@ public class SMDB {
 			}
 			return readingDB.get(nodeid);
 		} else {
-			logger.warn("Node" + nodeid + " does not exist");
+//			logger.warn("Node" + nodeid + " does not exist");
 			return null;
 		}
 	}
 
 	public Queue<Boolean> getEventConditions() {
 		if (eventcondition.size() < windowsize) {
-			logger.warn("Event condition not ready.");
+//			logger.warn("Event condition not ready.");
 		}
 		return eventcondition;
 	}
@@ -84,7 +84,7 @@ public class SMDB {
 			return devicecondition.get(nodeid);
 		}
 		else{
-			logger.error("Device [" + nodeid + "] does not exist");
+//			logger.error("Device [" + nodeid + "] does not exist");
 			return true;
 		}
 	}

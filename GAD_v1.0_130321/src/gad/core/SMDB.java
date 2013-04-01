@@ -34,7 +34,8 @@ public class SMDB {
 		readingDB.remove(nodeid);
 		devicecondition.remove(nodeid);
 		estimatedreading.remove(nodeid);
-		logger.info("Node["+ nodeid + "] has been reset...");
+		//TODO Turned on 
+//		logger.info("Node["+ nodeid + "] has been reset...");
 	}
 	
 	public void resetSMDB(){

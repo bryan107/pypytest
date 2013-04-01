@@ -1,13 +1,13 @@
 package experiment;
 
-public class ProcessContainer02 {
+public class ProcessContainer04 {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String filewritelocation = "C:\\TEST\\GAD\\FaultType\\Results";
-		String filereadlocation = "C:\\TEST\\GAD\\FaultType\\Non-Diffusive_Event";
+		String filewritelocation = "C:\\TEST\\GAD\\FaultType\\Results\\Exp_Event";
+		String filereadlocation = "C:\\TEST\\GAD\\FaultType\\Exp_Event";
 //		String abnormaltype = "Deviation";
 		String abnormaltype = "Deviation";  
 		AbnormalDetectionCore core = new AbnormalDetectionCore(	

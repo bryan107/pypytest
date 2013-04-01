@@ -61,10 +61,11 @@ public class ConditionDiagnosis {
 //			}
 //		}
 		if ((eventcount / windowsize) > MER) {
+			// TODO FIX resetSMDb dcFT
 			d.putEventOccurrence(true);
 			LinkedList<Integer> dcFT= new LinkedList<Integer>();
 			findAbnormalDC(dcFT);
-			SMDB.getInstance().resetSMDB(dcFT);
+			SMDB.getInstance().resetSMDB();
 			SMDB.getInstance().getDeviceCondition(3);
 			return;
 		}

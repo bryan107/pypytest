@@ -14,7 +14,7 @@ import gad.core.GAD;
 import gad.core.MarkedReading;
 import gad.core.ProcessedReadingPack;
 
-public class AbnormalDetectionCore {
+public class Event_AbnormalDetectionCoreLOG {
 	private final short FT = 0;
 	private final short GD = 3;
 	
@@ -23,14 +23,16 @@ public class AbnormalDetectionCore {
 	private double totalfalsenegetive = 0;
 	private double totalfalsepositive = 0;
 	private double abnormalnumber = 0;
+	private double event_detect = 0;
+	private double event_real = 0;
 	private LinkedList<String> checklist = new LinkedList<String>();
-	private static Log logger = LogFactory.getLog(AbnormalDetectionCore.class);
+	private static Log logger = LogFactory.getLog(Event_AbnormalDetectionCoreLOG.class);
 	private String filewritelocation, filereadlocation, abnormaltype;
 
 	// -----------User setup--------------
 
 	// ------------------------------------
-	public AbnormalDetectionCore(String filewritelocation,
+	public Event_AbnormalDetectionCoreLOG(String filewritelocation,
 			String filereadlocation, String abnormaltype) {
 		updateFileWriteLocation(filewritelocation);
 		updateFileReadLocation(filereadlocation);
@@ -42,15 +44,15 @@ public class AbnormalDetectionCore {
 				"C:\\TEST\\NULL.txt");
 		agent.updatewritingpath(filewritelocation + "\\Result_1__"
 				+ abnormaltype + "__NUM_"+ num +".csv");
-		for (double faultratio = lowerratio; faultratio < upperratio + 0.00001; faultratio += 0.01) {
+		for (double faultratio = lowerratio; faultratio < upperratio + 0.00001; faultratio *= 10) {
 			runRoundSet(num, faultratio, agent);
-			DecimalFormat df = new DecimalFormat("0.00");
+			DecimalFormat df = new DecimalFormat("0.0000");
 			String writeline = "";
-			writeline = "Fault Ratio:," + df.format(faultratio) + ",Total Check:," + df.format(totalcheck); 
-			writeline = writeline + ",Total False-Negetive:," + totalfalsenegetive;
-			writeline = writeline + ",Total False-Positive:," + totalfalsepositive;
-			writeline = writeline + ",Total False-Negetive (%):," + totalfalsenegetive * 100/totalabnormal + ",%";
-			writeline = writeline + ",Total False-Positive (%):," + totalfalsepositive* 100/(10800*10*num-totalabnormal) + ",%";
+			writeline = "Fault Ratio:," + df.format(faultratio) + ",Total Real:," + event_real; 
+			writeline = writeline + ",Total Detect:," + event_detect;
+//			writeline = writeline + ",Total False-Positive:," + totalfalsepositive;
+			writeline = writeline + ",Total Detection (%):," + event_detect * 100/event_real + ",%";
+//			writeline = writeline + ",Total False-Positive (%):," + totalfalsepositive* 100/(10800*10*num-totalabnormal) + ",%";
 			agent.writeLineToFile(writeline);
 			logger.info("Processed..." + df.format(faultratio * 100 / upperratio) + "%");
 		}
@@ -61,7 +63,9 @@ public class AbnormalDetectionCore {
 		totalabnormal = 0;
 		totalfalsenegetive = 0;
 		totalfalsepositive = 0;
-		DecimalFormat df = new DecimalFormat("0.00");
+		event_detect = 0;
+		event_real = 0;
+		DecimalFormat df = new DecimalFormat("0.0000");
 //		agent.updatewritingpath(filewritelocation + "\\Result_1__"
 //				+ abnormaltype + "__" + df.format(faultratio) + ".csv");
 
@@ -108,10 +112,10 @@ public class AbnormalDetectionCore {
 				reading.put(i - 1, Double.valueOf(split[i]));
 			}
 			// Process readings
-			if(inrounds == 30){
-				System.out.println("ss");
-			}
 			ProcessedReadingPack prp = gad.markReading(reading);
+			if(prp.newEventOccurs()){
+				event_detect ++;
+			}
 			Map<Integer, MarkedReading> mrp = prp.markedReadingPack();
 			Iterator<Integer> it = mrp.keySet().iterator();
 			while (it.hasNext()) {
@@ -119,19 +123,10 @@ public class AbnormalDetectionCore {
 				if(!mrp.get(nodeid).deviceCondition()){
 					gad.resetNode(nodeid);
 				}
-				if (mrp.get(nodeid).readingContidion() != GD) {
-					totalcheck++;
-					if(checklist.contains(inrounds + "::" + nodeid)){
-						checklist.remove(inrounds + "::" + nodeid);
-						abnormalnumber--;
-					} else if (mrp.get(nodeid).readingContidion() == FT){
-						totalfalsepositive++;
-					}
-				}
 			}
 			line = agent.readLineFromFile();
 		}
-		totalfalsenegetive += abnormalnumber;
+//		totalfalsenegetive += abnormalnumber;
 
 	}
 
@@ -146,12 +141,7 @@ public class AbnormalDetectionCore {
 		}
 		// process info
 		line = agent.readLineFromFile();
-		String[] ABround = line.split(",");
-		abnormalnumber = ABround.length;
-		totalabnormal += abnormalnumber;
-		for (int round = 0; round < ABround.length; round++) {
-			checklist.add(ABround[round]);
-		}
+		event_real += Integer.valueOf(line);
 	}
 
 	public void updateFileWriteLocation(String filewritelocation) {

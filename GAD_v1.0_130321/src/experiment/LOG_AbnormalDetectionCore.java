@@ -16,7 +16,7 @@ import gad.core.ProcessedReadingPack;
 
 public class LOG_AbnormalDetectionCore {
 	private final short FT = 0;
-
+	private final short GD = 3;
 	
 	private double totalcheck = 0;
 	private double totalabnormal = 0;
@@ -47,11 +47,9 @@ public class LOG_AbnormalDetectionCore {
 			DecimalFormat df = new DecimalFormat("0.0000");
 			String writeline = "";
 			writeline = "Fault Ratio:," + df.format(faultratio) + ",Total Check:," + df.format(totalcheck); 
-			agent.writeLineToFile(writeline);
-			writeline = "Total False-Negetive:," + totalfalsenegetive;
+			writeline = writeline + ",Total False-Negetive:," + totalfalsenegetive;
 			writeline = writeline + ",Total False-Positive:," + totalfalsepositive;
-			agent.writeLineToFile(writeline);
-			writeline = ",Total False-Negetive (%):," + totalfalsenegetive * 100/totalabnormal + ",%";
+			writeline = writeline + ",Total False-Negetive (%):," + totalfalsenegetive * 100/totalabnormal + ",%";
 			writeline = writeline + ",Total False-Positive (%):," + totalfalsepositive* 100/(10800*10*num-totalabnormal) + ",%";
 			agent.writeLineToFile(writeline);
 			logger.info("Processed..." + df.format(faultratio * 100 / upperratio) + "%");
@@ -118,12 +116,12 @@ public class LOG_AbnormalDetectionCore {
 				if(!mrp.get(nodeid).deviceCondition()){
 					gad.resetNode(nodeid);
 				}
-				if (mrp.get(nodeid).readingContidion() == FT) {
+				if (mrp.get(nodeid).readingContidion() != GD) {
 					totalcheck++;
 					if(checklist.contains(inrounds + "::" + nodeid)){
 						checklist.remove(inrounds + "::" + nodeid);
 						abnormalnumber--;
-					} else{
+					} else if(mrp.get(nodeid).readingContidion() == FT){
 						totalfalsepositive++;
 					}
 				}

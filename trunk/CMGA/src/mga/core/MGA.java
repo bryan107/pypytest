@@ -10,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 
 import fileAccessInterface.PropertyAgent;
 
-// TODO TEST FUNCTIONS
 public class MGA {
 	private static Log logger = LogFactory.getLog(MGA.class);
 	// ------------ Data Structures --------------
@@ -94,8 +93,6 @@ public class MGA {
 	}
 
 	// ------------------------------------------------------------ /
-	// TODO current version does not consider the minimum requirement of
-	// correlation strength between clusters
 	public Map<Integer, LinkedList<Integer>> pairing(
 			Map<Integer, LinkedList<Integer>> cluster,
 			Map<Integer, LinkedList<Integer>> clustergrade) {
@@ -106,6 +103,7 @@ public class MGA {
 		}
 		if (clustergrade.size() != 0) {
 			logger.info(clustergrade.size() + " residual cluster exist");
+			joinResiduals(cluster, clustergrade, pairings);
 			// TODO pair the residuals with other clustered clusters.
 		}
 		return pairings;
@@ -165,5 +163,93 @@ public class MGA {
 			clustergrade.remove(id);
 		}
 	}
-	// Sort each node with their own priority
+	
+	private void joinResiduals(Map<Integer, LinkedList<Integer>> cluster,
+			Map<Integer, LinkedList<Integer>> clustergrade,
+			Map<Integer, LinkedList<Integer>> pairings){
+		Map<Integer, LinkedList<Integer>> result = new HashMap<Integer, LinkedList<Integer>>();
+		
+		// STEP 1: Find residual cluster (remainings)
+		Map<Integer, LinkedList<Integer>> remainings = new HashMap<Integer, LinkedList<Integer>>();
+		findRemainings(cluster, clustergrade, remainings);
+		
+		// STEP 2: Merge two clusters into one
+		Map<Integer, LinkedList<Integer>> tempcluster = new HashMap<Integer, LinkedList<Integer>>();
+		mergeRemains(pairings, remainings, tempcluster);
+		
+		// STEP 3: Get TempGrade
+		Map<Integer, LinkedList<Integer>> tempgrade = clustermanager
+				.getClusterGrade(tempcluster);
+		serachPair(tempcluster, tempgrade, result);
+		
+		// STEP 4: Remove false-grades
+		removeFalseGrades(remainings, tempgrade);
+		
+		// STEP 5: Search Pairs // 
+		// TODO fix this function as this does not only consider those remainings.
+		while (tempgrade.size() > 0) {
+			serachPair(tempcluster, tempgrade, pairings);
+		}
+		
+	}
+
+	private void findRemainings(Map<Integer, LinkedList<Integer>> cluster,
+			Map<Integer, LinkedList<Integer>> clustergrade,
+			Map<Integer, LinkedList<Integer>> remainings) {
+		Iterator<Integer> it = clustergrade.keySet().iterator();
+		while(it.hasNext()){
+			int clusterid = it.next();
+			Iterator<Integer>it1 = cluster.get(clusterid).iterator();
+			while(it1.hasNext()){
+				int nodeid = it1.next();
+				LinkedList<Integer> subcluster = new LinkedList<Integer>();
+				subcluster.add(nodeid);
+				remainings.put(index, subcluster);
+			}
+		}
+	}
+
+	private void mergeRemains(Map<Integer, LinkedList<Integer>> pairings,
+			Map<Integer, LinkedList<Integer>> remainings,
+			Map<Integer, LinkedList<Integer>> tempcluster) {
+		Iterator<Integer> it;
+		it = remainings.keySet().iterator();
+		while(it.hasNext()){
+			int index = it.next();
+			tempcluster.put(index, remainings.get(index));
+		}
+		it = pairings.keySet().iterator();
+		while(it.hasNext()){
+			int index = it.next();
+			tempcluster.put(index + remainings.size(), pairings.get(index));
+		}
+	}
+
+	private void removeFalseGrades(
+			Map<Integer, LinkedList<Integer>> remainings,
+			Map<Integer, LinkedList<Integer>> tempgrade) {
+		Iterator<Integer> it;
+		it = tempgrade.keySet().iterator();
+		while(it.hasNext()){
+			int key= it.next();
+			if(key < remainings.size()){ // Remaining clusters
+				Iterator<Integer> it2 = tempgrade.get(key).iterator();
+				while(it2.hasNext()){
+					int index= it2.next();
+					if(index < remainings.size()){ // If it contains grading clusters that are remainings
+						tempgrade.get(key).remove(index);
+					}
+				}
+			}
+			else{ // Pairing clusters
+				Iterator<Integer> it2 = tempgrade.get(key).iterator();
+				while(it2.hasNext()){
+					int index = it2.next();
+					if(index >= remainings.size()){ // If it contains grading clusters that are pairings
+						tempgrade.get(key).remove(index);
+					}
+				}
+			}
+		}
+	}
 }

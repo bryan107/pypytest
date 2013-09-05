@@ -12,7 +12,7 @@ public class TestMGA extends TestCase {
 	public void testClustering(){
 		Map<Integer, Node> nodemap = generateNodeMap();
 		MGA mga = new MGA(nodemap);
-		Map<Integer, LinkedList<Integer>> cluster = mga.clustering(1);
+		Map<Integer, LinkedList<Integer>> cluster = mga.clustering(2);
 		printCluster(cluster);
 	}
 	

@@ -11,6 +11,14 @@ public class Node {
 		updateID(id);
 	}
 	
+	public void addValue(double value){
+		this.values.add(value);
+	}
+	
+	public void addValue(LinkedList<Double> values){
+		this.values.addAll(values);
+	}
+	
 	public void updateID(int id){
 		this.id = id;
 	}

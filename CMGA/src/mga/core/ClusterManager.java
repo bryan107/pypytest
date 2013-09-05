@@ -11,12 +11,12 @@ public class ClusterManager {
 
 	// --------------------- Variables ---------------------------/
 	private NodeManager nmanager;
-	private Correlation correlation;
+	private CorrelationEstimator correlation;
 	private double mincorrelation;
 	// --------------------- Constructor -------------------------/
-	public ClusterManager(NodeManager nmanager, Correlation correlation, double mincorrelation){
+	public ClusterManager(NodeManager nmanager, CorrelationEstimator cestimator, double mincorrelation){
 		updateCManager(nmanager);
-		updateCorrelation(correlation);
+		updateCorrelation(cestimator);
 	}
 	// --------------------- Update Variables --------------------/
 	
@@ -24,7 +24,7 @@ public class ClusterManager {
 		this.nmanager = nmanager;
 	}
 	
-	public void updateCorrelation(Correlation correlation){
+	public void updateCorrelation(CorrelationEstimator correlation){
 		this.correlation = correlation;
 	}
 	

@@ -3,7 +3,7 @@ package mga.core;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class SimpleCorrelation implements Correlation {
+public class SimpleCEstimator implements CorrelationEstimator {
 
 	@Override
 	public boolean hasLink(NodeManager nmanager, LinkedList<Integer> cluster1,

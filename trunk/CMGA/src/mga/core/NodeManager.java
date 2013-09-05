@@ -10,7 +10,9 @@ import org.apache.commons.logging.LogFactory;
 
 import flanagan.analysis.Stat;
 
-//TODO TEST FUNCTIONS
+// this class performs as a database of both node readings and correlation between nodes.
+// The correlation estimation function can be extent to other more specific methods.
+
 public class NodeManager {
 	// ------------------- Logger---------------------------- //
 	private static Log logger = LogFactory.getLog(NodeManager.class);
@@ -30,7 +32,13 @@ public class NodeManager {
 	}
 	
 	public double getCorrelation(int id1, int id2){
-		return correlationmap.get(id1).get(id2);
+		try {
+			return correlationmap.get(id1).get(id2);
+		} catch (Exception e) {
+			logger.warn("Correlation of Node(" + id1 + ") and Node(" + id2 + ") does not exist");
+			return 0;
+		}
+		
 	}
 	
 	public Map<Integer, LinkedList<Integer>> getInitCluster(){

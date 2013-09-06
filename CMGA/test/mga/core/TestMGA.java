@@ -12,8 +12,20 @@ public class TestMGA extends TestCase {
 	public void testClustering(){
 		Map<Integer, Node> nodemap = generateNodeMap();
 		MGA mga = new MGA(nodemap);
-		Map<Integer, LinkedList<Integer>> cluster = mga.clustering(2);
+		System.out.println("Level 1:");
+		Map<Integer, LinkedList<Integer>> cluster = mga.clustering(1);
 		printCluster(cluster);
+		System.out.println("Level 2:");
+		cluster = mga.clustering(2);
+		printCluster(cluster);
+		// TODO error occurs at level 3
+		System.out.println("Level 3:");
+		cluster = mga.clustering(3);
+		printCluster(cluster);
+		System.out.println("Level 4:");
+		cluster = mga.clustering(4);
+		printCluster(cluster);
+
 	}
 	
 	private void printCluster(Map<Integer, LinkedList<Integer>> cluster){
@@ -31,7 +43,7 @@ public class TestMGA extends TestCase {
 	
 	private Map<Integer, Node> generateNodeMap() {
 		Map<Integer, Node> nodemap = new HashMap<Integer, Node>();
-		for(int i = 1 ; i < 11 ; i++){
+		for(int i = 1 ; i < 21 ; i++){
 			Node node = new Node(i);
 			for(int j = 0 ; j < 20 ; j++){
 				node.addValue(i + j*10 + Math.random()*10);	

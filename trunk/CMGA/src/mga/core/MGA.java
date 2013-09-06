@@ -19,6 +19,7 @@ public class MGA {
 	private double mincorrelation;
 	private int coption;
 	private int index;
+
 	// -------------------------------------------
 
 	public MGA(Map<Integer, Node> nodemap) {
@@ -102,9 +103,9 @@ public class MGA {
 			serachPair(cluster, clustergrade, pairings);
 		}
 		if (clustergrade.size() != 0) {
-			logger.info(clustergrade.size() + " residual cluster exist");
+			index = 0;
+			logger.info(clustergrade.size() + " residual cluster exist. Rejoin residuals");
 			joinResiduals(cluster, clustergrade, pairings);
-			// TODO pair the residuals with other clustered clusters.
 		}
 		return pairings;
 	}
@@ -127,8 +128,8 @@ public class MGA {
 				clustergrade.get(id).remove();
 				continue;
 			}
-			
-			if(clustergrade.get(id_2).isEmpty()){
+
+			if (clustergrade.get(id_2).isEmpty()) {
 				clustergrade.get(id).remove();
 				continue;
 			}
@@ -147,64 +148,68 @@ public class MGA {
 		removeEmptyClusters(clustergrade);
 	}
 
-	private void removeEmptyClusters(Map<Integer, LinkedList<Integer>> clustergrade) {
+	private void removeEmptyClusters(
+			Map<Integer, LinkedList<Integer>> clustergrade) {
 		LinkedList<Integer> emptycluster = new LinkedList<Integer>();
 		// Search for empty clusters (which has been successfully paired)
 		Iterator<Integer> it = clustergrade.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			int id = it.next();
-			if(clustergrade.get(id).isEmpty()){
+			if (clustergrade.get(id).isEmpty()) {
 				emptycluster.add(id);
 			}
 		}
 		// Remove empty clusters from clustergrade (for further pairing).
-		while(!emptycluster.isEmpty()){
+		while (!emptycluster.isEmpty()) {
 			int id = emptycluster.remove();
 			clustergrade.remove(id);
 		}
 	}
-	
+
 	private void joinResiduals(Map<Integer, LinkedList<Integer>> cluster,
 			Map<Integer, LinkedList<Integer>> clustergrade,
-			Map<Integer, LinkedList<Integer>> pairings){
+			Map<Integer, LinkedList<Integer>> pairings) {
 		Map<Integer, LinkedList<Integer>> result = new HashMap<Integer, LinkedList<Integer>>();
-		
+
 		// STEP 1: Find residual cluster (remainings)
 		Map<Integer, LinkedList<Integer>> remainings = new HashMap<Integer, LinkedList<Integer>>();
 		findRemainings(cluster, clustergrade, remainings);
-		
+
 		// STEP 2: Merge two clusters into one
 		Map<Integer, LinkedList<Integer>> tempcluster = new HashMap<Integer, LinkedList<Integer>>();
 		mergeRemains(pairings, remainings, tempcluster);
-		
+
 		// STEP 3: Get TempGrade
 		Map<Integer, LinkedList<Integer>> tempgrade = clustermanager
 				.getClusterGrade(tempcluster);
-		serachPair(tempcluster, tempgrade, result);
-		
-		// STEP 4: Remove false-grades
+		// serachPair(tempcluster, tempgrade, result);
+
+		// STEP 4: Remove false-grades, in which pairings include pairings,
+		// remains include remains
 		removeFalseGrades(remainings, tempgrade);
-		
-		// STEP 5: Search Pairs // 
-		// TODO fix this function as this does not only consider those remainings.
-		while (tempgrade.size() > 0) {
+
+		// STEP 5: Search Pairs //
+		int totalsize = tempgrade.size();
+		while (tempgrade.size() > (totalsize - remainings.size() * 2)) {
 			serachPair(tempcluster, tempgrade, pairings);
 		}
-		
+
 	}
 
 	private void findRemainings(Map<Integer, LinkedList<Integer>> cluster,
 			Map<Integer, LinkedList<Integer>> clustergrade,
 			Map<Integer, LinkedList<Integer>> remainings) {
+		int index = 0;
 		Iterator<Integer> it = clustergrade.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			int clusterid = it.next();
-			Iterator<Integer>it1 = cluster.get(clusterid).iterator();
-			while(it1.hasNext()){
+			Iterator<Integer> it1 = cluster.get(clusterid).iterator();
+			while (it1.hasNext()) {
 				int nodeid = it1.next();
 				LinkedList<Integer> subcluster = new LinkedList<Integer>();
 				subcluster.add(nodeid);
 				remainings.put(index, subcluster);
+				index++;
 			}
 		}
 	}
@@ -214,12 +219,12 @@ public class MGA {
 			Map<Integer, LinkedList<Integer>> tempcluster) {
 		Iterator<Integer> it;
 		it = remainings.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			int index = it.next();
 			tempcluster.put(index, remainings.get(index));
 		}
 		it = pairings.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			int index = it.next();
 			tempcluster.put(index + remainings.size(), pairings.get(index));
 		}
@@ -228,27 +233,39 @@ public class MGA {
 	private void removeFalseGrades(
 			Map<Integer, LinkedList<Integer>> remainings,
 			Map<Integer, LinkedList<Integer>> tempgrade) {
+		Map<Integer, LinkedList<Integer>> removegrades = new HashMap<Integer, LinkedList<Integer>>();
 		Iterator<Integer> it;
 		it = tempgrade.keySet().iterator();
-		while(it.hasNext()){
-			int key= it.next();
-			if(key < remainings.size()){ // Remaining clusters
-				Iterator<Integer> it2 = tempgrade.get(key).iterator();
-				while(it2.hasNext()){
-					int index= it2.next();
-					if(index < remainings.size()){ // If it contains grading clusters that are remainings
-						tempgrade.get(key).remove(index);
+		while (it.hasNext()) {
+			int key = it.next();
+			LinkedList<Integer> removelist = new LinkedList<Integer>();
+			// Remaining clusters
+			Iterator<Integer> it2 = tempgrade.get(key).iterator();
+			int listindex = 0;
+			while (it2.hasNext()) {
+				int clusterid = it2.next();
+				if (key < remainings.size()) {
+					if (clusterid < remainings.size()) { // If it contains grading clusters that are remainings
+						removelist.add(listindex);
+					}
+				} 
+				else {
+					if (clusterid >= remainings.size()) { // If it contains grading clusters that are pairings
+						removelist.add(listindex);
 					}
 				}
+				listindex++;
 			}
-			else{ // Pairing clusters
-				Iterator<Integer> it2 = tempgrade.get(key).iterator();
-				while(it2.hasNext()){
-					int index = it2.next();
-					if(index >= remainings.size()){ // If it contains grading clusters that are pairings
-						tempgrade.get(key).remove(index);
-					}
-				}
+			removegrades.put(key,removelist);
+		}
+		
+		it = removegrades.keySet().iterator();
+		while(it.hasNext()){
+			int key = it.next();
+			Iterator<Integer> it2 = removegrades.get(key).iterator();
+			while(it2.hasNext()){
+				int listindex = it2.next();
+				tempgrade.get(key).remove(listindex);
 			}
 		}
 	}

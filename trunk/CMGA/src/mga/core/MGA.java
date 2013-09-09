@@ -102,7 +102,8 @@ public class MGA {
 		while (clustergrade.size() > 1) {
 			serachPair(cluster, clustergrade, pairings);
 		}
-		if (clustergrade.size() != 0) {
+		while (clustergrade.size() != 0) {
+			// TODO TOFIX: clustergrade object is not returned to this function...
 			index = 0;
 			logger.info(clustergrade.size() + " residual cluster exist. Rejoin residuals");
 			joinResiduals(cluster, clustergrade, pairings);
@@ -176,25 +177,39 @@ public class MGA {
 		findRemainings(cluster, clustergrade, remainings);
 
 		// STEP 2: Merge two clusters into one
-		Map<Integer, LinkedList<Integer>> tempcluster = new HashMap<Integer, LinkedList<Integer>>();
-		mergeRemains(pairings, remainings, tempcluster);
+//		Map<Integer, LinkedList<Integer>> tempcluster = new HashMap<Integer, LinkedList<Integer>>();
+		mergeRemains(pairings, remainings, cluster);
 
 		// STEP 3: Get TempGrade
-		Map<Integer, LinkedList<Integer>> tempgrade = clustermanager
-				.getClusterGrade(tempcluster);
+//		Map<Integer, LinkedList<Integer>> tempgrade = clustermanager
+//				.getClusterGrade(tempcluster);
+		
+		clustergrade = clustermanager // Test Version
+				.getClusterGrade(cluster);
+		
 		// serachPair(tempcluster, tempgrade, result);
 
 		// STEP 4: Remove false-grades, in which pairings include pairings,
 		// remains include remains
-		removeFalseGrades(remainings, tempgrade);
+		removeFalseGrades(remainings, clustergrade);
 
 		// STEP 5: Search Pairs //
-		int totalsize = tempgrade.size();
-		// TODO FIX: when remainings is more than pairings in number
-		while (tempgrade.size() > (totalsize - remainings.size() * 2)) {
-			serachPair(tempcluster, tempgrade, pairings);
+		int pairnumber = clustergrade.size() - remainings.size() * 2;
+		
+		// TODO FIX: when remainings are more than pairings in number
+//		while (clustergrade.size() > (totalsize - remainings.size() * 2)) {
+//			serachPair(tempcluster, clustergrade, pairings);
+//		}
+		if(pairnumber > 0){
+			while (clustergrade.size() > pairnumber) {
+				serachPair(cluster, clustergrade, pairings);
+			}
 		}
-
+		else{
+			while (clustergrade.size() > -pairnumber) {
+				serachPair(cluster, clustergrade, pairings);
+			}
+		}
 	}
 
 	private void findRemainings(Map<Integer, LinkedList<Integer>> cluster,

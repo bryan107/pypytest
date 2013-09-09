@@ -190,6 +190,7 @@ public class MGA {
 
 		// STEP 5: Search Pairs //
 		int totalsize = tempgrade.size();
+		// TODO FIX: when remainings is more than pairings in number
 		while (tempgrade.size() > (totalsize - remainings.size() * 2)) {
 			serachPair(tempcluster, tempgrade, pairings);
 		}
@@ -262,7 +263,8 @@ public class MGA {
 		it = removegrades.keySet().iterator();
 		while(it.hasNext()){
 			int key = it.next();
-			Iterator<Integer> it2 = removegrades.get(key).iterator();
+			Iterator<Integer> it2 = removegrades.get(key).descendingIterator(); 
+			// List in a decend order to avoid list index error
 			while(it2.hasNext()){
 				int listindex = it2.next();
 				tempgrade.get(key).remove(listindex);

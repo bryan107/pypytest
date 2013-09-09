@@ -18,7 +18,6 @@ public class TestMGA extends TestCase {
 		System.out.println("Level 2:");
 		cluster = mga.clustering(2);
 		printCluster(cluster);
-		// TODO error occurs at level 3
 		System.out.println("Level 3:");
 		cluster = mga.clustering(3);
 		printCluster(cluster);

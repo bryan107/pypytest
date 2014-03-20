@@ -1,10 +1,10 @@
 package kernelfunction.core;
 
-import gad.fileAccessInterface.PropertyAgent;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import kernelfunction.fileaccessinterface.PropertyAgent;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,11 +14,11 @@ public class Kernel {
 	//	File Access Agent
 	private PropertyAgent propagent = new PropertyAgent("conf");
 	//
-	KernelEngine ve;
+	KernelEngine ke;
 	ConditionDiagnosis cd;
 	//Parameters
 	private int windowsize;
-	private double numberofdeviation;
+	private double threshold_r, threshold_p;
 	private double MAR, MER;
 	private SMDB smdb;
 
@@ -27,23 +27,23 @@ public class Kernel {
 		smdb = new SMDB();
 		smdb.resetSMDB();
 		smdb.setupWindowSize(windowsize);
-		this.ve = new KernelEngine(numberofdeviation, smdb);
+		this.ke = new KernelEngine(threshold_r, threshold_p, smdb);
 		this.cd = new ConditionDiagnosis(MAR, MER, windowsize, smdb);
 	}
 	// ** BE AWARE, EWMA share the same property file as GAD **
 	public void loadConfig() {
 		// Retrieve properties from property file
-		int windowsize = Integer.valueOf(propagent.getProperties("EWMA",
+		int windowsize = Integer.valueOf(propagent.getProperties("Kernel",
 				"WindowSize"));
-		double numberofdeviation = Double.valueOf(propagent.getProperties(
-				"EWMA", "NumberofDeviation"));
-		double MAR = Double.valueOf(propagent.getProperties("EWMA",
+		double threshold_r = Double.valueOf(propagent.getProperties("Kernel", "Threshold_r"));
+		double threshold_p = Double.valueOf(propagent.getProperties("Kernel", "Threshold_p"));
+		double MAR = Double.valueOf(propagent.getProperties("Kernel",
 				"MaxAbnormalRatio"));
-		double MER = Double.valueOf(propagent.getProperties("EWMA",
+		double MER = Double.valueOf(propagent.getProperties("Kernel",
 				"MaxEventRatio"));
 		// Load values to variables
 		updateWindowSize(windowsize);
-		updateNumberofDeviation(numberofdeviation);
+		updateThresholds(threshold_r, threshold_p);
 		updateMAR(MAR);
 		updateMER(MER);
 	}
@@ -53,9 +53,11 @@ public class Kernel {
 		logger.info("Load Windowsize: " + windowsize);
 	}
 
-	public void updateNumberofDeviation(double numberofdeviation) {
-		this.numberofdeviation = numberofdeviation;
-		logger.info("Load Number of Deviation: " + numberofdeviation);
+	public void updateThresholds(double threshold_r, double threshold_p) {
+		this.threshold_r = threshold_r;
+		this.threshold_p = threshold_p;
+		logger.info("Load Threshold_r: " + threshold_r);
+		logger.info("Load Threshold_p: " + threshold_p);
 	}
 
 	public void updateMAR(double MAR) {
@@ -68,13 +70,9 @@ public class Kernel {
 		logger.info("Load MER: " + MER);
 	}
 	
-	public void updateThreshold(double threshold){
-		ve.updateThreshold(threshold);
-	}
-
 	public ProcessedReadingPack markReading(Map<Integer, Double> reading) {
 		//STEP 1: Mark anomaly condition to each reading
-		Map<Integer, Short> condition = ve.markCondition(reading);
+		Map<Integer, Short> condition = ke.markCondition(reading);
 		//STEP 2: Get diagnosis and update SMDB with new observations
 		Diagnosis diagnosis = cd.diagnose(reading, condition);
 		//STEP 3: Make output marked reading pack

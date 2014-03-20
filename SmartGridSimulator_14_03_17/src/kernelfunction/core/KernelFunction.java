@@ -13,11 +13,11 @@ import flanagan.analysis.Stat;
 
 public class KernelFunction implements UnivariateFunction {
 	private static Log logger = LogFactory.getLog(KernelFunction.class);
-	private Queue<Reading> readings;
-	private Queue<Double> unireadings;
-	public KernelFunction(Queue<Reading> readings){
-		this.readings = readings;
-		this.unireadings = unitIntervalMapping();
+	private Queue<Double> rdq;   //Relative distance between readings 
+	private Queue<Double> unirdq; // united Relative distance between readings 
+	public KernelFunction(Queue<Double> rdq){
+		this.rdq = rdq;
+		this.unirdq = unitIntervalMapping();
 	}
 	@Override
 	public double value(double x) {
@@ -36,32 +36,32 @@ public class KernelFunction implements UnivariateFunction {
 //		f = epanechnikovKernel(x);
 		
 		// Real Integration Function
-		Iterator<Double> it = unireadings.iterator();
+		Iterator<Double> it = unirdq.iterator();
 		while(it.hasNext()){
 			double value = it.next();
 			f += epanechnikovKernel(x - value);
 		}
-		f = f/unireadings.size();
+		f = f/unirdq.size();
 		return f;
 	}
 	
 	private Queue<Double> unitIntervalMapping(){
 		Queue<Double> unireadings = new LinkedList<Double>();
-		double[] temparray = new double[readings.size()];
+		double[] temparray = new double[rdq.size()];
 		//Get min and Max
 		int i = 0;
-		Iterator<Reading> it = readings.iterator();
+		Iterator<Double> it = rdq.iterator();
 		while(it.hasNext()){
-			temparray[i] = it.next().value();
+			temparray[i] = it.next();
 			i++;
 		}
 		Arrays.sort(temparray);
-		double maxinterval = temparray[readings.size()-1] - temparray[0];
+		double maxinterval = temparray[rdq.size()-1] - 0;
 		// Map into uniinterval
 		try {
-			it = readings.iterator();
+			it = rdq.iterator();
 			while(it.hasNext()){
-				double value = (it.next().value() - temparray[0])/maxinterval;
+				double value = (it.next() - 0)/maxinterval;
 				unireadings.add(value);
 			}
 		} catch (Exception e) {
@@ -73,7 +73,7 @@ public class KernelFunction implements UnivariateFunction {
 	
 	public double epanechnikovKernel(double xp){
 		double sd = getStandardDeviation(); // extract standard deviation
-		double B = Math.sqrt(5) * sd * Math.pow(unireadings.size(), -0.2);
+		double B = Math.sqrt(5) * sd * Math.pow(unirdq.size(), -0.2);
 		if(Math.abs(xp/B) < 1){
 			return 0.75*(1/B)*(1-Math.pow((xp/B), 2));
 		}
@@ -84,8 +84,8 @@ public class KernelFunction implements UnivariateFunction {
 	
 	private double getStandardDeviation() {
 		int index = 0;
-		double[] values = new double[unireadings.size()];
-		Iterator<Double> it2 = unireadings.iterator();
+		double[] values = new double[unirdq.size()];
+		Iterator<Double> it2 = unirdq.iterator();
 		while(it2.hasNext()){
 			values[index] = it2.next();
 			index++;

@@ -1,7 +1,5 @@
 package smartgrid.component;
 
-import fileAccessInterface.PropertyAgentT;
-
 public class FaultDeviationConstant implements Fault {
 
 	private double impactvalue;

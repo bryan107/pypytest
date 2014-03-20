@@ -51,17 +51,6 @@ public class ConditionDiagnosis {
 	}
 
 	private void checkEventOccurrence(Diagnosis d) {
-//		Queue<Boolean> eq = SMDB.getInstance().getEventConditions();
-//		if(eq.size() < windowsize){
-//			d.putEventOccurrence(false);
-//			return;
-//		}
-//		double eo = 0;
-//		for (boolean event : eq) {
-//			if (event == true) {
-//				eo++;
-//			}
-//		}
 		if ((eventcount / windowsize) > MER) {
 			// TODO FIX resetSMDb dcFT
 			d.putEventOccurrence(true);
@@ -71,14 +60,6 @@ public class ConditionDiagnosis {
 			smdb.getDeviceCondition(3);
 			return;
 		}
-//		if ((eo / windowsize) > MER) {
-//			d.putEventOccurrence(true);
-//			LinkedList<Integer> dcFT= new LinkedList<Integer>();
-//			findAbnormalDC(dcFT);
-//			SMDB.getInstance().resetSMDB(dcFT);
-//			SMDB.getInstance().getDeviceCondition(3);
-//			return;
-//		}
 		d.putEventOccurrence(false);
 	}
 
@@ -138,7 +119,8 @@ public class ConditionDiagnosis {
 			if (!smdb.getReadings().containsKey(nodeid)) { 
 				d.putReadingCondition(nodeid, GD);
 				smdb.putReading(nodeid, reading.get(nodeid), GD);
-				smdb.putEsimatedReading(nodeid,reading.get(nodeid));
+//				// *** Estimation not use in Kernel Function ***
+//				smdb.putEsimatedReading(nodeid,reading.get(nodeid));
 				continue;
 			}
 			// CASE: node exists in SMDB
@@ -147,8 +129,9 @@ public class ConditionDiagnosis {
 				if (anomalycondition.get(nodeid) == GD) {// Good Reading
 					d.putReadingCondition(nodeid, GD);
 					smdb.putReading(nodeid, reading.get(nodeid),GD);
-					double estimatedreading = EWMA(reading.get(nodeid), smdb.getEstimatedReading(nodeid));
-					smdb.putEsimatedReading(nodeid, estimatedreading);
+//					//*** Estimation not use in Kernel Function ***
+//					double estimatedreading = EWMA(reading.get(nodeid), smdb.getEstimatedReading(nodeid));
+//					smdb.putEsimatedReading(nodeid, estimatedreading);
 				}else if(anomalycondition.get(nodeid) == UN){// Potential Event detected
 					d.putReadingCondition(nodeid, UN);
 					smdb.putReading(nodeid, reading.get(nodeid),UN);
@@ -163,9 +146,9 @@ public class ConditionDiagnosis {
 		}
 	}
 
-	private double EWMA(double newreading, double estimatedreading){
-		return (newreading + estimatedreading)/2;
-	}
+//	private double EWMA(double newreading, double estimatedreading){
+//		return (newreading + estimatedreading)/2;
+//	}
 	
 	private boolean checkEventCondition(Map<Integer, Short> readingcondition) {
 		boolean eventcondition = false;

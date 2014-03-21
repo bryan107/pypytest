@@ -26,7 +26,7 @@ public class SimulatorWithGAD {
 		GridSimulatorWithGAD grid;
 		DecimalFormat df = new DecimalFormat("0.000");
 		
-		for (double ratio = 0.000; ratio < 0.011; ratio += 0.001) {
+		for (double ratio = 0.010; ratio < 0.011; ratio += 0.001) {
 //			DEMANDS
 			for (int i = 0; i < demands.length; i++) {
 				detaileddemands[i][0] = 20 + (180 * Math.random());

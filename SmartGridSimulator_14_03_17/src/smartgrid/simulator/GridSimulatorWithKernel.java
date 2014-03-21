@@ -5,6 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
+
+
+import kernelfunction.core.Kernel;
+import kernelfunction.core.ProcessedReadingPack;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,13 +25,10 @@ import smartgrid.component.PatternRandom;
 import smartgrid.component.PatternSin;
 import smartgrid.component.PatternStable;
 import smartgrid.component.Supplier;
-
 import fileAccessInterface.FileAccessAgentT;
 import fileAccessInterface.PropertyAgentT;
-import gad.core.GAD;
-import gad.core.ProcessedReadingPack;
 
-public class GridSimulatorWithGAD {
+public class GridSimulatorWithKernel {
 
 	//Net Attribute
 	int suppliernumber, consumernumber;
@@ -40,18 +43,17 @@ public class GridSimulatorWithGAD {
 	String supplierpattern;
 	double[][] supplierpatternattribute;
 	int supplierfault;
-	GAD gads = new GAD();
-	
+	Kernel ks = new Kernel();
 	//Consumer Props Attribute
 	double averageconsumption, consumerpatternvariation, consumernoise, cfchance;
 	String consumerpattern;
 	double[][] consumerpatternattrubute;
 	int consumerfault;
-	GAD gadc = new GAD();
+	Kernel kc = new Kernel();
 	
 	//File Access Interface
 	private FileAccessAgentT fagent;
-	private static Log logger = LogFactory.getLog(GridSimulatorWithGAD.class);
+	private static Log logger = LogFactory.getLog(GridSimulatorWithKernel.class);
 	
 	//Result Info
 	// Attack added
@@ -61,7 +63,7 @@ public class GridSimulatorWithGAD {
 	private String cfdetected = new String();
 	private String sfdetected = new String();
 	
-	public GridSimulatorWithGAD(String writtingaddress, double averagegeneration, double averageconsumption){
+	public GridSimulatorWithKernel(String writtingaddress, double averagegeneration, double averageconsumption){
 		updateWriteFileAddress(writtingaddress);
 		updateAverageConsumption(averageconsumption);
 		updateAverageGeneration(averagegeneration);
@@ -175,13 +177,13 @@ public class GridSimulatorWithGAD {
 			double value = consumercluster.get(key).getDemand(totalround, round);
 			readingpack.put(key, value);
 		}
-		ProcessedReadingPack prpack= gadc.markReading(readingpack);
+		ProcessedReadingPack prpack= kc.markReading(readingpack);
 		for(int i = 0 ; i < suppliercluster.size(); i++){
 			if (!prpack.markedReadingPack().get(i).deviceCondition()){ //If a "permanent" attack is detected, reset node
 				cfdetected += " [" + i + "]:" + round;
 				// Reset detected node into normal state.
 				// TODO fix the not stop problem
-				gadc.resetNode(i); 
+				kc.resetNode(i); 
 				consumercluster.get(i).updateFault(new FaultNull());
 			}
 			DecimalFormat df = new DecimalFormat("0.0000");
@@ -208,12 +210,12 @@ public class GridSimulatorWithGAD {
 			double value = suppliercluster.get(key).supplyValue(totalround, round);
 			readingpack.put(key, value);
 		}
-		ProcessedReadingPack prpack = gads.markReading(readingpack);
+		ProcessedReadingPack prpack = ks.markReading(readingpack);
 		for(int i = 0 ; i < suppliercluster.size(); i++){
 			if (!prpack.markedReadingPack().get(i).deviceCondition()){ //If a "permanent" attack is detected, reset node
 				sfdetected += " [" + i + "]:" + round;
 				//
-				gads.resetNode(i);
+				ks.resetNode(i);
 				suppliercluster.get(i).updateFault(new FaultNull());
 			}
 			DecimalFormat df = new DecimalFormat("0.0000");

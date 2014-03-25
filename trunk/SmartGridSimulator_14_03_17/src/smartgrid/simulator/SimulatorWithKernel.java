@@ -10,10 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 
-public class SimulatorWithGAD {
+public class SimulatorWithKernel {
 
 	public static void main(String[] args) {
-		Log logger = LogFactory.getLog(SimulatorWithGAD.class);
+		Log logger = LogFactory.getLog(SimulatorWithKernel.class);
 		final int totalround = 365;
 		double[] demands = { 396, 2671, 153, 122, 78, 337, 386, 701, 114, 392,
 				92, 568, 903, 43, 690, 245, 785, 1483, 664, 241, 622, 446 };
@@ -25,17 +25,19 @@ public class SimulatorWithGAD {
 		Map<Integer, GridSimulatorWithGAD> demandermap = new HashMap<Integer, GridSimulatorWithGAD>();
 		Map<Integer, GridSimulatorWithGAD> suppliermap = new HashMap<Integer, GridSimulatorWithGAD>();
 		double count = 0;
-		GridSimulatorWithGAD grid;
+		GridSimulatorWithKernel grid;
 		DecimalFormat df = new DecimalFormat("0.000");
-		
-		for (double ratio = 0.000; ratio < 0.011; ratio += 0.001) {
-//			DEMANDS
+
+		for (double ratio = 0.000; ratio < 0.002; ratio += 0.001) {
+			// DEMANDS
 			for (int i = 0; i < demands.length; i++) {
 				detaileddemands[i][0] = 20 + (180 * Math.random());
 				detaileddemands[i][1] = detaileddemands[i][0] + demands[i];
-				grid = new GridSimulatorWithGAD("C:\\TEST\\GRID\\OUTAGE\\DEMANDER_GAD_V_1.00\\demander_G_"
-						+ i + "_R_"+ df.format(ratio) +".txt", (detaileddemands[i][0])/10,
-						(detaileddemands[i][1])/10);
+				grid = new GridSimulatorWithKernel(
+						"C:\\TEST\\GRID\\OUTAGE\\DEMANDER_Kernel_V_2.00\\demander_G_"
+								+ i + "_R_" + df.format(ratio) + ".txt",
+						(detaileddemands[i][0]) / 10,
+						(detaileddemands[i][1]) / 10);
 				// CONSUMER FAULT CHANCE
 				grid.updateConsumerFaultChance(ratio);
 				grid.run(totalround);
@@ -43,16 +45,20 @@ public class SimulatorWithGAD {
 						+ " D: " + detaileddemands[i][1] + " D-S: "
 						+ (detaileddemands[i][1] - detaileddemands[i][0]));
 				count++;
-				logger.info(df.format(count * 100 / ((demands.length + supplys.length) *11)) + "% Complete");
+				logger.info(df.format(count * 100
+						/ ((demands.length + supplys.length) * 11))
+						+ "% Complete");
 			}
 
-			//SUPPLIERS
+			// SUPPLIERS
 			for (int i = 0; i < supplys.length; i++) {
 				detailedsupplys[i][1] = 20 + (180 * Math.random());
 				detailedsupplys[i][0] = detailedsupplys[i][1] + supplys[i];
-				grid = new GridSimulatorWithGAD("C:\\TEST\\GRID\\OUTAGE\\SUPPLIER_GAD_V_1.00\\supplier_G_"
-						+ i + "_R_"+ df.format(ratio) + ".txt", (detailedsupplys[i][0])/10,
-						(detailedsupplys[i][1])/10);
+				grid = new GridSimulatorWithKernel(
+						"C:\\TEST\\GRID\\OUTAGE\\SUPPLIER_Kernel_V_2.00\\supplier_G_"
+								+ i + "_R_" + df.format(ratio) + ".txt",
+						(detailedsupplys[i][0]) / 10,
+						(detailedsupplys[i][1]) / 10);
 				// SUPPLIER FAULT CHANCE
 				grid.updateSupplierFaultChance(ratio);
 				grid.run(totalround);
@@ -60,7 +66,9 @@ public class SimulatorWithGAD {
 						+ " D: " + detailedsupplys[i][1] + " S-D: "
 						+ (detailedsupplys[i][0] - detailedsupplys[i][1]));
 				count++;
-				logger.info(df.format(count * 100 / ((demands.length + supplys.length) *11)) + "% Complete");
+				logger.info(df.format(count * 100
+						/ ((demands.length + supplys.length) * 11))
+						+ "% Complete");
 			}
 		}
 		Calendar cal = Calendar.getInstance();

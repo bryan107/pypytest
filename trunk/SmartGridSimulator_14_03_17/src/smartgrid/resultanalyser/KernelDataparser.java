@@ -7,7 +7,7 @@ import java.util.Map;
 
 import fileAccessInterface.FileAccessAgentT;
 
-public class Dataparser {
+public class KernelDataparser {
 
 	// ** This Parser is the up-to-date version
 	/**
@@ -22,9 +22,9 @@ public class Dataparser {
 		FileAccessAgentT fagent = new FileAccessAgentT(
 				"C:\\TEST\\GRID\\NULL.csv", "C:\\TEST\\GRID\\NULL.csv");
 		// User setup values and locations
-		final double attackvaluedemand = 0.30;
-		final double attackvaluesupply = 0.30;
-		final String location = "TRANSMISSION";
+		final double attackvaluedemand = 2.00;
+		final double attackvaluesupply = 2.00;
+		final String location = "OUTAGE";
 		//
 		int demandernumber = 22;
 		int suppliernumber = 26;
@@ -34,11 +34,11 @@ public class Dataparser {
 		System.out.println("Start");
 		// Demander Analysis
 		performAnalysis(fagent, attackvaluedemand, location, demandernumber,
-				demandervalues, df2, "", "DEMANDER", "demander" , "DE");
+				demandervalues, df2, "Kernel", "DEMANDER", "demander" , "DE");
 		System.out.println("50%......");
 		// Supplier Analysis
 		performAnalysis(fagent, attackvaluesupply, location, suppliernumber,
-				suppliervalues, df2, "", "SUPPLIER", "supplier" , "SU");
+				suppliervalues, df2, "Kernel", "SUPPLIER", "supplier" , "SU");
 		System.out.println("Complete");
 		// for(double r = 0 ; r < 0.011 ; r += 0.001){
 		// DecimalFormat df1 = new DecimalFormat("0.000");
@@ -84,35 +84,34 @@ public class Dataparser {
 						+ df2.format(attackvaluedemand) + "\\"+ nodetype2 +"_G_" + g
 						+ "_R_" + df1.format(r) + ".txt");
 				// Parse Supplier Attacks
-//				while (!fagent.readLineFromFile()
-//						.equals("SupplierAttackRound:"))
-//					;
-//				String str = fagent.readLineFromFile();
-//				extractAtkInfo(str, strmap);
-//				while (!fagent.readLineFromFile().equals("S FDI detected:"))
-//					;
-//				String sdt = fagent.readLineFromFile();
-//				extractAtkInfo(sdt, sdtmap);
-//
-//				// Parse Consumer Attacks
-//				while (!fagent.readLineFromFile()
-//						.equals("ConsumerAttackRound:"))
-//					;
-//				String ctr = fagent.readLineFromFile();
-//				extractAtkInfo(ctr, ctrmap);
-//				while (!fagent.readLineFromFile().equals("C FDI detected:"))
-//					;
-//				String cdt = fagent.readLineFromFile();
-//				extractAtkInfo(cdt, cdtmap);
+				while (!fagent.readLineFromFile()
+						.equals("SupplierAttackRound:"));
+				String str = fagent.readLineFromFile();
+				extractAtkInfo(str, strmap);
+				while (!fagent.readLineFromFile().equals("S FDI detected:"))
+					;
+				String sdt = fagent.readLineFromFile();
+				extractAtkInfo(sdt, sdtmap);
+
+				// Parse Consumer Attacks
+				while (!fagent.readLineFromFile()
+						.equals("ConsumerAttackRound:"))
+					;
+				String ctr = fagent.readLineFromFile();
+				extractAtkInfo(ctr, ctrmap);
+				while (!fagent.readLineFromFile().equals("C FDI detected:"))
+					;
+				String cdt = fagent.readLineFromFile();
+				extractAtkInfo(cdt, cdtmap);
 				// Parse Total Energy
 				while (!fagent.readLineFromFile().equals(
 						"Total Average Energy:"))
 					;
 				demandervalues[g] = Double.valueOf(fagent.readLineFromFile());
 				// Calculate sub-suppliers
-//				updateSupplierResult(strmap, sdtmap, sdt);
-//				// Calculate sub-consumers
-//				updateConsummerResult(sdtmap, ctrmap, cdtmap, sdt);
+				updateSupplierResult(strmap, sdtmap, sdt);
+				// Calculate sub-consumers
+				updateConsummerResult(sdtmap, ctrmap, cdtmap, sdt);
 			}
 			String writeline = "";
 			for (double value : demandervalues) {

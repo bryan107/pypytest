@@ -1,6 +1,8 @@
 package smartgrid.simulator;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +33,7 @@ public class Simulator {
 			for (int i = 0; i < demands.length; i++) {
 				detaileddemands[i][0] = 20 + (180 * Math.random());
 				detaileddemands[i][1] = detaileddemands[i][0] + demands[i];
-				grid = new GridSimulator("C:\\TEST\\GRID\\DEMANDER\\demander_G_"
+				grid = new GridSimulator("C:\\TEST\\GRID\\TRANSMISSION\\DEMANDER_V_2.00\\demander_G_"
 						+ i + "_R_"+ df.format(ratio) +".txt", (detaileddemands[i][0])/10,
 						(detaileddemands[i][1])/10);
 				// CONSUMER FAULT CHANCE
@@ -48,7 +50,7 @@ public class Simulator {
 			for (int i = 0; i < supplys.length; i++) {
 				detailedsupplys[i][1] = 20 + (180 * Math.random());
 				detailedsupplys[i][0] = detailedsupplys[i][1] + supplys[i];
-				grid = new GridSimulator("C:\\TEST\\GRID\\SUPPLIER\\supplier_G_"
+				grid = new GridSimulator("C:\\TEST\\GRID\\TRANSMISSION\\SUPPLIER_V_2.00\\supplier_G_"
 						+ i + "_R_"+ df.format(ratio) + ".txt", (detailedsupplys[i][0])/10,
 						(detailedsupplys[i][1])/10);
 				// SUPPLIER FAULT CHANCE
@@ -58,18 +60,13 @@ public class Simulator {
 						+ " D: " + detailedsupplys[i][1] + " S-D: "
 						+ (detailedsupplys[i][0] - detailedsupplys[i][1]));
 				count++;
-				logger.info(df.format(count * 100 / (supplys.length *11)) + "% Complete");
+				logger.info(df.format(count * 100 / ((demands.length + supplys.length) *11)) + "% Complete");
 			}
 		}
-
-//		double dtemp = 0, stemp = 0;
-//		for (double value : demands) {
-//			dtemp += value;
-//		}
-//		for (double value : supplys) {
-//			stemp += value;
-//		}
-//		System.out.println("D: " + dtemp + " S: " + stemp);
+		Calendar cal = Calendar.getInstance();
+    	cal.getTime();
+    	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    	System.out.println( sdf.format(cal.getTime()) );
 	}
 
 }

@@ -4,18 +4,14 @@ import java.text.DecimalFormat;
 
 import fileAccessInterface.FileAccessAgentT;
 
-public class STEMPDataparser {
+public class BAK_Dataparser {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		FileAccessAgentT fagent = new FileAccessAgentT("C:\\TEST\\GRID\\NULL.csv", "C:\\TEST\\GRID\\NULL.csv");
-		// User setup values and locations
-		final double attackvaluedemand = 0.15;
-		final double attackvaluesupply = 0.15;
-		final String location = "TRANSMISSION";
-		//
+		final double attackvalue = 0.15;
 		int demandernumber = 22;
 		int suppliernumber = 26;
 		double[] demandervalues = new double[demandernumber];
@@ -24,34 +20,31 @@ public class STEMPDataparser {
 		//Demander Analysis
 		for(double r = 0 ; r < 0.011 ; r += 0.001){
 			DecimalFormat df1 = new DecimalFormat("0.000");
-			fagent.updatewritingpath("C:\\TEST\\GRID\\result_demander_GAD_V_" + df2.format(attackvaluedemand) + ".txt");
+			fagent.updatewritingpath("C:\\TEST\\GRID\\result_demander_STEMP_V_" + df2.format(attackvalue) + ".txt");
 			for(int g = 0 ; g < demandernumber ; g++){
-				fagent.updatereadingpath("C:\\TEST\\GRID\\" + location +"\\DEMANDER_GAD_V_"+ df2.format(attackvaluedemand) +"\\demander_G_" + g + "_R_" + df1.format(r) + ".txt");
-//				fagent.updatereadingpath("C:\\TEST\\GRID\\" + location +"\\DEMANDER_EWMA_V_" + df2.format(attackvaluedemand) + "\\demander_G_" + g + "_R_" + df1.format(r) + ".txt");	
+				fagent.updatereadingpath("C:\\TEST\\GRID\\TRANSMISSION\\DEMANDER_STEMP_V_" + df2.format(attackvalue) + "\\demander_G_" + g + "_R_" + df1.format(r) + ".txt");	
 				while(!fagent.readLineFromFile().equals("Total Average Energy:"));
 				demandervalues[g] = Double.valueOf(fagent.readLineFromFile());
 			}
 			String writeline = "";
 			for(double value : demandervalues){
-				writeline += value + " ";
+				writeline += value + ",";
 			}
 			fagent.writeLineToFile(writeline);
-
 		}
 		
 		//Supplier Analysis
 		for(double r = 0 ; r < 0.011 ; r += 0.001){
 			DecimalFormat df1 = new DecimalFormat("0.000");
-			fagent.updatewritingpath("C:\\TEST\\GRID\\result_supplier_GAD_V_" + df2.format(attackvaluesupply) + ".txt");
+			fagent.updatewritingpath("C:\\TEST\\GRID\\result_supplier_V_" + df2.format(attackvalue) + ".csv");
 			for(int g = 0 ; g < suppliernumber ; g++){
-				fagent.updatereadingpath("C:\\TEST\\GRID\\"+ location +"\\SUPPLIER_GAD_V_"+ df2.format(attackvaluedemand) +"\\supplier_G_" + g + "_R_" + df1.format(r) + ".txt");
-//				fagent.updatereadingpath("C:\\TEST\\GRID\\"+ location +"\\SUPPLIER_EWMA_V_" + df2.format(attackvaluesupply) + "\\supplier_G_" + g + "_R_" + df1.format(r) + ".txt");
+				fagent.updatereadingpath("C:\\TEST\\GRID\\TRANSMISSION\\SUPPLIER_V_" + df2.format(attackvalue) + "\\supplier_G_" + g + "_R_" + df1.format(r) + ".txt");
 				while(!fagent.readLineFromFile().equals("Total Average Energy:"));
 				suppliervalues[g] = Double.valueOf(fagent.readLineFromFile());
 			}
 			String writeline = "";
 			for(double value : suppliervalues){
-				writeline += value + " ";
+				writeline += value + ",";
 			}
 			fagent.writeLineToFile(writeline);
 		}

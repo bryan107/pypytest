@@ -1,8 +1,6 @@
 package smartgrid.simulator;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,10 +8,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 
-public class SimulatorWithGAD {
+public class SimulatorWithKernelExtra {
 
 	public static void main(String[] args) {
-		Log logger = LogFactory.getLog(SimulatorWithGAD.class);
+		Log logger = LogFactory.getLog(SimulatorWithKernelExtra.class);
 		final int totalround = 365;
 		double[] demands = { 396, 2671, 153, 122, 78, 337, 386, 701, 114, 392,
 				92, 568, 903, 43, 690, 245, 785, 1483, 664, 241, 622, 446 };
@@ -25,15 +23,15 @@ public class SimulatorWithGAD {
 		Map<Integer, GridSimulatorWithGAD> demandermap = new HashMap<Integer, GridSimulatorWithGAD>();
 		Map<Integer, GridSimulatorWithGAD> suppliermap = new HashMap<Integer, GridSimulatorWithGAD>();
 		double count = 0;
-		GridSimulatorWithGAD grid;
+		GridSimulatorWithKernel grid;
 		DecimalFormat df = new DecimalFormat("0.000");
 		
-		for (double ratio = 0.000; ratio < 0.011; ratio += 0.001) {
+		for (double ratio = 0.010; ratio < 0.011; ratio += 0.001) {
 //			DEMANDS
 			for (int i = 0; i < demands.length; i++) {
 				detaileddemands[i][0] = 20 + (180 * Math.random());
 				detaileddemands[i][1] = detaileddemands[i][0] + demands[i];
-				grid = new GridSimulatorWithGAD("C:\\TEST\\GRID\\OUTAGE\\DEMANDER_GAD_V_1.00\\demander_G_"
+				grid = new GridSimulatorWithKernel("C:\\TEST\\GRID\\TRANSMISSION\\DEMANDER_Kernel_V_0.15\\demander_G_"
 						+ i + "_R_"+ df.format(ratio) +".txt", (detaileddemands[i][0])/10,
 						(detaileddemands[i][1])/10);
 				// CONSUMER FAULT CHANCE
@@ -50,7 +48,7 @@ public class SimulatorWithGAD {
 			for (int i = 0; i < supplys.length; i++) {
 				detailedsupplys[i][1] = 20 + (180 * Math.random());
 				detailedsupplys[i][0] = detailedsupplys[i][1] + supplys[i];
-				grid = new GridSimulatorWithGAD("C:\\TEST\\GRID\\OUTAGE\\SUPPLIER_GAD_V_1.00\\supplier_G_"
+				grid = new GridSimulatorWithKernel("C:\\TEST\\GRID\\TRANSMISSION\\SUPPLIER_Kernel_V_0.15\\supplier_G_"
 						+ i + "_R_"+ df.format(ratio) + ".txt", (detailedsupplys[i][0])/10,
 						(detailedsupplys[i][1])/10);
 				// SUPPLIER FAULT CHANCE
@@ -63,10 +61,15 @@ public class SimulatorWithGAD {
 				logger.info(df.format(count * 100 / ((demands.length + supplys.length) *11)) + "% Complete");
 			}
 		}
-		Calendar cal = Calendar.getInstance();
-    	cal.getTime();
-    	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-    	System.out.println( sdf.format(cal.getTime()) );
+
+//		double dtemp = 0, stemp = 0;
+//		for (double value : demands) {
+//			dtemp += value;
+//		}
+//		for (double value : supplys) {
+//			stemp += value;
+//		}
+//		System.out.println("D: " + dtemp + " S: " + stemp);
 	}
 
 }

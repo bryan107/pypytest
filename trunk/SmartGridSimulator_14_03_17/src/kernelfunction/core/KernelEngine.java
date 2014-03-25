@@ -106,7 +106,7 @@ public class KernelEngine {
 		try {
 			double f = integrator.integrate(maxEval, k, 0, threshold_r);
 			
-			logger.info("INT:" + f + " R:" + threshold_r + " P:" + threshold_p);
+//			logger.info("INT:" + f + " R:" + threshold_r + " P:" + threshold_p);
 			if(f > threshold_p){
 				rc = GD;
 			}

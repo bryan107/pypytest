@@ -216,6 +216,7 @@ public class GridSimulatorWithKernel {
 				sfdetected += " [" + i + "]:" + round;
 				//
 				ks.resetNode(i);
+				logger.info("@ Round:" + round);
 				suppliercluster.get(i).updateFault(new FaultNull());
 			}
 			DecimalFormat df = new DecimalFormat("0.0000");

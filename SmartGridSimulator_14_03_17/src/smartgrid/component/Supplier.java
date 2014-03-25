@@ -1,5 +1,7 @@
 package smartgrid.component;
 
+import flanagan.analysis.Stat;
+
 public class Supplier {
 
 	private double averagegeneration;
@@ -62,10 +64,11 @@ public class Supplier {
 	
 	public double generation(long sections, long sectionnumber){	
 		double generatepower = averagegeneration + generationpattern.getValue(variation, attribute, sections, sectionnumber);
-		if(Math.random() > 0.5)
-			generatepower = generatepower * (1 + Math.random() * noise);
-		else
-			generatepower = generatepower * (1 - Math.random() * noise);
+		generatepower =  Stat.normalInverseCDF(generatepower, generatepower*noise, Math.random());
+//		if(Math.random() > 0.5)
+//			generatepower = generatepower * (1 + Math.random() * noise);
+//		else
+//			generatepower = generatepower * (1 - Math.random() * noise);
 		return generatepower;
 	}
 	

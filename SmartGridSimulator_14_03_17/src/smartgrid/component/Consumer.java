@@ -1,5 +1,7 @@
 package smartgrid.component;
 
+import flanagan.analysis.Stat;
+
 public class Consumer {
 
 	private double averageconsumption;
@@ -44,13 +46,15 @@ public class Consumer {
 	
 	public double getDemand(long sections, long sectionnumber){
 		double value = averageconsumption + consumepattern.getValue(variation, attribute, sections, sectionnumber);
-		if(Math.random() > 0.5)
-			value *=  (1 + Math.random() * noise);
-		else
-			value *=  (1 - Math.random() * noise);
+		value =  Stat.normalInverseCDF(value, value*noise, Math.random());
+//		if(Math.random() > 0.5)
+//			value *=  (1 + Math.random() * noise);
+//		else
+//			value *=  (1 - Math.random() * noise);
 		
 		return fault.getValue(value);
 	}
+	
 	
 	public boolean isNormal(){
 		return fault.isNull();

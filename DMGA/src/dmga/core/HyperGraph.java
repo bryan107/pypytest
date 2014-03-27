@@ -53,7 +53,7 @@ public class HyperGraph {
 		}
 	}
 
-	private Iterator<Integer> accumulateLinkWeight(int hypernodeid_1,
+	private void accumulateLinkWeight(int hypernodeid_1,
 			Map<Integer, Double> temp, double weight, int count,
 			int hypernodeid_2) {
 		Iterator<Integer> itsub1 = hypernodes.get(hypernodeid_1).iterator(); // Accumulate weights
@@ -75,8 +75,12 @@ public class HyperGraph {
 		}
 		// Add weight to hyperlink between hypernode 1 and hypernode 2.
 		// If weight < 0, not all original links are > than minlinkweight, than weight will < 0.
-		temp.put(hypernodeid_2, (weight/count));
-		return itsub1;
+		if(weight < 0){
+			temp.put(hypernodeid_2, weight);
+		} else{
+			temp.put(hypernodeid_2, (weight/count));
+		}
+		
 	}
 
 	public Map<Integer, LinkedList<Integer>> hyperNodes() {

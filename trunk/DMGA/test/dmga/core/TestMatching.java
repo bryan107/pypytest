@@ -49,7 +49,7 @@ public class TestMatching extends TestCase {
 				if(i == j){
 					continue;
 				}
-				tempmap.put(j, Math.random()/2 + 0.5);
+				tempmap.put(j, Math.random()/2 + 0.4);
 			}
 			hyperlinks.put(i, tempmap);
 		}

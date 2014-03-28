@@ -9,13 +9,15 @@ public class HyperGraph {
 	private Map<Integer, LinkedList<Integer>> hypernodes;
 	private Map<Integer, Map<Integer, Double>> hyperlinks;
 	private Map<Integer, Map<Integer, Double>> originallinks;
+	private LinkedList<Integer> residues;
 	private double minlinkweight;
 
 	public HyperGraph(Map<Integer, LinkedList<Integer>> hypernodes,
 			Map<Integer, Map<Integer, Double>> originallinks, double minlinkweight) {
 		hyperlinks = new HashMap<Integer, Map<Integer, Double>>();
+		residues = new LinkedList<Integer>();
 		updateOriginalLinks(originallinks);
-		udpateMinLinkeWeight(minlinkweight);
+		updateMinLinkeWeight(minlinkweight);
 		updateHyperNode(hypernodes);
 	}
 
@@ -29,10 +31,21 @@ public class HyperGraph {
 		updateHyperLinks();
 	}
 	
-	public void udpateMinLinkeWeight(double minlinkweight){
+	public void updateMinLinkeWeight(double minlinkweight){
 		this.minlinkweight = minlinkweight;
 	}
 
+	public void addResidues(int nodeid){
+		residues.add(nodeid);
+	}
+	
+	public LinkedList<Integer> residues(){
+		return residues;
+	}
+	
+	public Map<Integer, Map<Integer, Double>> originalLinks(){
+		return originallinks;
+	}	
 	private void updateHyperLinks(){
 		hyperlinks.clear();
 		Iterator<Integer> it = hypernodes.keySet().iterator();

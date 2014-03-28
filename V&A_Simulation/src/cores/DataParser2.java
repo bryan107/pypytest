@@ -3,7 +3,6 @@ package cores;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -18,91 +17,38 @@ import faultSymptom.StuckOfReadingFault;
 import fileAccessInterface.FileAccessAgent;
 import fileAccessInterface.PropertyAgent;
 
-public class DataParser {
+public class DataParser2 {
 
-	private int count = 0;
+	private double count = 0;
 	private final int datacount = 34945;
 	private FileAccessAgent agent;
 	private String readingpath, writingpath;
-	private static Log logger = LogFactory.getLog(DataParser.class);
+	private static Log logger = LogFactory.getLog(DataParser2.class);
 	private Map<String, Integer> labels;
 	private String[] temp, humidity;
 	private FaultSymptom fsymptom;
 	private double faultratio;
 	private double[] previous_t;
 	private double[] previous_h;
-	private int round;
-	DecimalFormat df = new DecimalFormat("0.0000");
-	Map<Integer, LinkedList<Integer>> fault_t = new HashMap<Integer, LinkedList<Integer>>();
-	Map<Integer, LinkedList<Integer>> fault_h = new HashMap<Integer, LinkedList<Integer>>();
-	public DataParser(String writingpath, String readingpath,
+	public DataParser2(String writingpath, String readingpath,
 			Map<String, Integer> labels, FaultSymptom fsymptom,
-			double faultratio, int round) {
+			double faultratio) {
 		this.labels = labels;
 		this.fsymptom = fsymptom;
 		this.faultratio = faultratio;
-		this.round = round;
 		previous_t = new double[labels.size()];
 		previous_h = new double[labels.size()];
-		
 		setupFileAccess(writingpath, readingpath);
 	}
 
 	public void run() {
-		generateFaultsT();
-		generateFaultsH();
+
 		processLine();
 		int[] templocation = processHeader(temp);
 		logger.info("Processed Temp Header");
 		int[] humilocation = processHeader(humidity);
 		logger.info("Processed Humi Header");
 		processData(templocation, humilocation);
-	}
-	
-	private void generateFaultsT(){
-		agent.updatewritingpath(writingpath + "V&A_temp_" + fsymptom.getKey() + "__fratio__" + df.format(faultratio) + ".csv");
-		agent.writeLineToFile("Start");
-		// -------------------------------------------------
-
-		// -------------Fault Node and Round ---------------
-		String outputstring = "";
-		for(int section = 0 ; section < round ; section++){
-			LinkedList<Integer> temp = new LinkedList<Integer>();
-			for(int nodeid = 0 ; nodeid < 8 ; nodeid++){
-				if(Math.random() <= faultratio && section >30){
-					temp.add(nodeid);
-					outputstring = outputstring + section + "::" + nodeid + ",";
-				}
-			}
-			fault_t.put(section, temp);
-		}
-		agent.writeLineToFile(outputstring);
-		// -------------------------------------------------
-
-		agent.writeLineToFile("Readings");
-	}
-	
-	private void generateFaultsH(){
-		agent.updatewritingpath(writingpath + "V&A_humi_" + fsymptom.getKey() + "__fratio__" + df.format(faultratio) + ".csv");
-		agent.writeLineToFile("Start");
-		// -------------------------------------------------
-
-		// -------------Fault Node and Round ---------------
-		String outputstring = "";
-		for(int section = 0 ; section < round ; section++){
-			LinkedList<Integer> temp = new LinkedList<Integer>();
-			for(int nodeid = 0 ; nodeid < 8 ; nodeid++){
-				if(Math.random() <= faultratio && section >30){
-					temp.add(nodeid);
-					outputstring = outputstring + section + "::" + nodeid + ",";
-				}
-			}
-			fault_h.put(section, temp);
-		}
-		agent.writeLineToFile(outputstring);
-		// -------------------------------------------------
-
-		agent.writeLineToFile("Readings");
 	}
 
 	private int[] processHeader(String[] readings) {
@@ -153,7 +99,7 @@ public class DataParser {
 			for (int i = 0, m = templocation.length; i < m; i++) {
 				try {
 					double t;
-					if(fault_t.get(count).contains(i)){
+					if(Math.random() > faultratio){
 						t = fsymptom.getValue(Double.valueOf(temp[templocation[i]]));
 					} else{
 						t = Double.valueOf(temp[templocation[i]]);
@@ -169,7 +115,7 @@ public class DataParser {
 			for (int i = 0, m = humilocation.length; i < m; i++) {
 				try {
 					double t;
-					if(fault_h.get(count).contains(i)){
+					if(Math.random() > faultratio){
 						t = fsymptom.getValue(Double.valueOf(humidity[humilocation[i]]));
 					} else{
 						t = Double.valueOf(humidity[humilocation[i]]);

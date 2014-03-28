@@ -1,5 +1,7 @@
 package faultSymptom;
 
+import flanagan.analysis.Stat;
+
 public class NoisyReadingFault implements FaultSymptom {
 	private double attribute;
 	
@@ -13,11 +15,7 @@ public class NoisyReadingFault implements FaultSymptom {
 	}
 	
 	public double getValue(double value) {
-		if(Math.random() < 0.5){
-			return value + value * Math.random() * attribute;
-		}else{
-			return value - value * Math.random() * attribute;
-		}
+		return Stat.gaussianInverseCDF(value, attribute, Math.random());
 	}
 	
 	public String getKey(){

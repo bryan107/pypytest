@@ -10,24 +10,41 @@ import junit.framework.TestCase;
 
 public class TestMatching extends TestCase {
 
+	private final double minlinkweight = 0.5;
+	
 	public void testDoMatching(){
-		Matching m = new Matching(0.5);
-		HyperGraph g = generateGraph(8, 1);
-		
+		Matching m = new Matching();
+		DMGA dmga = new DMGA(8, minlinkweight);
+		HyperGraph g = generateGraph(32, 1);
 		System.out.println("Before Matching");
 		printHyperGraph(g);
-		g = m.doMatching(g);
-		System.out.println();
-		System.out.println("1st Matching");
+		
+		dmga.grouping(g);
+		System.out.println("After Matching");
 		printHyperGraph(g);
-		g = m.doMatching(g);
-		System.out.println();
-		System.out.println("2st Matching");
-		printHyperGraph(g);
-		g = m.doMatching(g);
-		System.out.println();
-		System.out.println("3st Matching");
-		printHyperGraph(g);
+		
+//		System.out.println("Before Matching");
+//		printHyperGraph(g);
+//		
+//		System.out.println();
+//		System.out.println("1st Matching");
+//		g = m.doMatching(g);
+//		printHyperGraph(g);
+//		
+//		System.out.println();
+//		System.out.println("2st Matching");
+//		g = m.doMatching(g);
+//		printHyperGraph(g);
+//		
+//		System.out.println();
+//		System.out.println("3st Matching");
+//		g = m.doMatching(g);
+//		printHyperGraph(g);
+//	
+//		g.updateMinLinkeWeight(0);
+//		g = m.residueJoin(g);
+//		System.out.println("Residue Join:");
+//		printHyperGraph(g);
 	}
 	
 	private HyperGraph generateGraph(int groupnumber , int nodesize){
@@ -49,12 +66,12 @@ public class TestMatching extends TestCase {
 				if(i == j){
 					continue;
 				}
-				tempmap.put(j, Math.random()/2 + 0.4);
+				tempmap.put(j, Math.random()/2 + 0.48);
 			}
 			hyperlinks.put(i, tempmap);
 		}
 		// Return HyperGraph		
-		return new HyperGraph(hypernodes, hyperlinks, 0.5);
+		return new HyperGraph(hypernodes, hyperlinks, minlinkweight);
 	}
 	
 	private void printHyperGraph(HyperGraph g){
@@ -72,6 +89,13 @@ public class TestMatching extends TestCase {
 			}
 			System.out.print("} ");
 		}
+		System.out.print("[R]:");
+		it = g.residues().iterator();
+		while(it.hasNext()){
+			System.out.print("{" + it.next() + "}");
+		}
+		
+		
 		System.out.println();
 		System.out.println("HyperLinks:");
 		//Print HyperLinks

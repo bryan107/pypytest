@@ -9,14 +9,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Matching {
-	private double minlinkweight;
 	private static Log logger = LogFactory.getLog(Matching.class);
-	public Matching(double minlinkweight) {
-		updateMinLinkWeight(minlinkweight);
-	}
-	
-	public void updateMinLinkWeight(double minlinkweight){
-		this.minlinkweight = minlinkweight;
+	public Matching() {
+		
 	}
 
 	public HyperGraph doMatching(HyperGraph g) {
@@ -40,26 +35,87 @@ public class Matching {
 		}
 		// TODO collecetResidues at the very end of all
 		if(!g.hyperNodes().isEmpty()){ // Collect residues
-			collectResidues(g, matchednodes, matchednodesindex);
+			collectResidues(g);
 		}
 		g.updateHyperNode(matchednodes);
 		return g;
 	}
 
-	private void collectResidues(HyperGraph g,
-			Map<Integer, LinkedList<Integer>> matchednodes,
-			int matchednodesindex) {
+	public HyperGraph residueJoin(HyperGraph g){
+		if(g.hyperNodes().isEmpty()){
+			logger.warn("No Valid Hyper Node to Join");
+			return g;
+		}
+		
+		while(!g.residues().isEmpty()){
+			HyperLink bestlink = new HyperLink(0, 0, -1);
+			Iterator<Integer> it = g.residues().iterator();
+			while(it.hasNext()){ // Iterate through each residue
+				int residue = it.next();
+				Iterator<Integer> it2 = g.hyperNodes().keySet().iterator();
+				while(it2.hasNext()){ // Iterate through each hyper node
+					int hypernodeid = it2.next();
+					Iterator<Integer> it3 = g.hyperNodes().get(hypernodeid).iterator();
+					// Accumulate the total weight between the residue and the hyper node.
+					double weight = 0;
+					int count = 0;
+					while(it3.hasNext()){
+						int nodeid = it3.next();
+						weight += g.originalLinks().get(residue).get(nodeid);
+						count++;
+					}
+					if((weight/count) > bestlink.weight()){
+						bestlink.updateLink(residue, hypernodeid, (weight/count));
+					}
+				}
+			}
+			// Join the best pair.
+			g.hyperNodes().get(bestlink.node()[1]).add(bestlink.node()[0]);
+			// Remove paired residue
+			int index = 0;
+			it = g.residues().iterator();
+			while(it.hasNext()){
+				int residue = it.next();
+				if(residue == bestlink.node()[0]){
+					g.residues().remove(index);
+					break;
+				}
+				index++;
+			}
+			g.updateHyperNode(g.hyperNodes());
+		}
+		
+		return g;
+	}
+	
+	// VLDB version.
+	private void collectResidues(HyperGraph g) {
 		Iterator<Integer> it = g.hyperNodes().keySet().iterator();
 		while(it.hasNext()){
 			try {
 				int hypernodeid = it.next();
-				matchednodes.put(matchednodesindex, g.hyperNodes().get(hypernodeid));
-				matchednodesindex++;
+				g.residues().addAll(g.hyperNodes().get(hypernodeid));
 			} catch (Exception e) {
 				logger.error("GG" + e);
 			}
 		}
 	}
+	
+	// Old version. Residues forms group
+//	private void collectResidues(HyperGraph g,
+//			Map<Integer, LinkedList<Integer>> matchednodes,
+//			int matchednodesindex) {
+//		Iterator<Integer> it = g.hyperNodes().keySet().iterator();
+//		while(it.hasNext()){
+//			try {
+//				int hypernodeid = it.next();
+//				matchednodes.put(matchednodesindex, g.hyperNodes().get(hypernodeid));
+//				matchednodesindex++;
+//			} catch (Exception e) {
+//				logger.error("GG" + e);
+//			}
+//		}
+//	}
 
 	private int updateMatchedNodes(
 			Map<Integer, LinkedList<Integer>> hypernodes,

@@ -10,7 +10,7 @@ public class IMFs {
 	private int currentmax; 
 	private int noiselevel, frequencylevel; // noiselevel is the max IMF level that include and below that are white noises.
 											// frequencylevel is the max IMF level that include and below that are frequencies. 
-	private LinkedList<LinkedList<Double>> imfs = new LinkedList<LinkedList<Double>>();
+	private LinkedList<LinkedList<Data>> imfs = new LinkedList<LinkedList<Data>>();
 	
 	/*
 	 * Constructor
@@ -37,7 +37,7 @@ public class IMFs {
 	/*
 	 * IMF operations
 	 * */
-	public void addIMF(LinkedList<Double> imf){
+	public void addIMF(LinkedList<Data> imf){
 		imfs.add(imf);
 	}
 	
@@ -45,11 +45,11 @@ public class IMFs {
 		return currentmax;
 	}
 	
-	public LinkedList<LinkedList<Double>> getIMFs(){
+	public LinkedList<LinkedList<Data>> getIMFs(){
 		return imfs;
 	}
 	
-	public LinkedList<Double> getIMF(int level){
+	public LinkedList<Data> getIMF(int level){
 		try {
 			return imfs.get(level);
 		} catch (Exception e) {

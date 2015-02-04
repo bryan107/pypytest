@@ -3,26 +3,26 @@ package mdfr.math.emd;
 import java.util.LinkedList;
 
 public class Envelopes {
-	private LinkedList<Double> upperenvelope, lowerenvelope; 
+	private LinkedList<Data> upperenvelope, lowerenvelope; 
 	
-	public Envelopes(LinkedList<Double> upperenvelope, LinkedList<Double> lowerenvelope){
+	public Envelopes(LinkedList<Data> upperenvelope, LinkedList<Data> lowerenvelope){
 		updateUpperEnvelope(upperenvelope);
 		updateLowerEnvelope(lowerenvelope);
 	}
 	
-	public void updateUpperEnvelope(LinkedList<Double> upperenvelope){
+	public void updateUpperEnvelope(LinkedList<Data> upperenvelope){
 		this.upperenvelope = upperenvelope;
 	}
 	
-	public void updateLowerEnvelope(LinkedList<Double> lowerenvelope){
+	public void updateLowerEnvelope(LinkedList<Data> lowerenvelope){
 		this.lowerenvelope = lowerenvelope;
 	}
 	
-	public LinkedList<Double> upperEnvelope(){
+	public LinkedList<Data> upperEnvelope(){
 		return upperenvelope;
 	} 
 	
-	public LinkedList<Double> lowerEnvelope(){
+	public LinkedList<Data> lowerEnvelope(){
 		return lowerenvelope;
 	}
 }

@@ -21,15 +21,15 @@ public class Tools {
 	/*
 	 * Find local extremas
 	 * */
-	public LocalExtremas getLocalExtremas(LinkedList<Double> data){
+	public LocalExtremas getLocalExtremas(LinkedList<Data> data){
 		LocalExtremas le = new LocalExtremas();
 		for(int i = 1 ; i < (data.size() -1) ; i++){
 			// If a point is a local maximum
-			if((data.get(i) > data.get(i-1)) && (data.get(i) > data.get(i+1)))
-				le.localMaxima().add(i);
+			if((data.get(i).value() > data.get(i-1).value()) && (data.get(i).value() > data.get(i+1).value()))
+				le.localMaxima().add(data.get(i));
 			// If a point is a local minimum
-			else if((data.get(i) < data.get(i-1)) && (data.get(i) < data.get(i+1)))
-				le.localMinima().add(i);
+			else if((data.get(i).value() < data.get(i-1).value()) && (data.get(i).value() < data.get(i+1).value()))
+				le.localMinima().add(data.get(i));
 		}
 		return le;
 	}	
@@ -37,17 +37,26 @@ public class Tools {
 	/*
 	 * Get the mean values between envelopes with the same length.
 	 * */
-	public LinkedList<Double> getMean(LinkedList<Double> list1, LinkedList<Double> list2){
-		LinkedList<Double> mean = new LinkedList<Double>();
+	// TODO test the get mean function
+	public LinkedList<Data> getMean(LinkedList<Data> list1, LinkedList<Data> list2){
+		LinkedList<Data> mean = new LinkedList<Data>();
 		if(list1.size() != list2.size()){
 			logger.error("list size not match");
 			return null;
 		}
-		Iterator<Double> value1 = list1.iterator();
-		Iterator<Double> value2 = list2.iterator();
+		Iterator<Data> value1 = list1.iterator();
+		Iterator<Data> value2 = list2.iterator();
 		while(value1.hasNext() && value2.hasNext()){
-			// Here defines the mean operation.
-			mean.add((value1.next() + value2.next())/2);
+			Data data1 = value1.next();
+			Data data2 = value2.next();
+			// If two list are aligned, calculate and store mean.
+			if(data1.time() == data2.time()){
+				double time = data1.time();
+				double value = (data1.value() + data1.value())/2;
+				Data data = new Data(time,value);
+				mean.add(data);
+			}
+			logger.error("list is not aligned");
 		}
 		return mean;
 	}
@@ -55,17 +64,26 @@ public class Tools {
 	/*
 	 * Get differences
 	 * */
-	public LinkedList<Double> getDifference(LinkedList<Double> list1 , LinkedList<Double> list2){
-		LinkedList<Double> difference = new LinkedList<Double>();
+	// TODO Test and fix the duality with mean function.
+	public LinkedList<Data> getDifference(LinkedList<Data> list1 , LinkedList<Data> list2){
+		LinkedList<Data> difference = new LinkedList<Data>();
 		if(list1.size() != list2.size()){
 			logger.error("list size not match");
 			return null;
 		}
-		Iterator<Double> value1 = list1.iterator();
-		Iterator<Double> value2 = list2.iterator();
+		Iterator<Data> value1 = list1.iterator();
+		Iterator<Data> value2 = list2.iterator();
 		while(value1.hasNext() && value2.hasNext()){
-			// Here defines the differencing operation
-			difference.add(value1.next() - value2.next());
+			Data data1 = value1.next();
+			Data data2 = value2.next();
+			// If two list are aligned, calculate and store mean.
+			if(data1.time() == data2.time()){
+				double time = data1.time();
+				double value = data1.value() - data1.value();
+				Data data = new Data(time,value);
+				difference.add(data);
+			}
+			logger.error("list is not aligned");
 		}
 		return difference;
 	}

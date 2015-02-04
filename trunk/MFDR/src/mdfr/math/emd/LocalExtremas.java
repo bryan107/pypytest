@@ -4,18 +4,24 @@ import java.util.LinkedList;
 
 public class LocalExtremas {
 
-	private LinkedList<Integer> localminima;
-	private LinkedList<Integer> localmaxima;
+	private LinkedList<Data> localminima;
+	private LinkedList<Data> localmaxima;
 	
 	public LocalExtremas(){
-		localminima = new LinkedList<Integer>();
-		localmaxima = new LinkedList<Integer>();
+		localminima = new LinkedList<Data>();
+		localmaxima = new LinkedList<Data>();
 	}
 	
-	public LinkedList<Integer> localMinima(){
+	public LinkedList<Data> localMinima(){
 		return localminima;
 	}
-	public LinkedList<Integer> localMaxima(){
+	public LinkedList<Data> localMaxima(){
 		return localmaxima;
+	}
+	
+	public boolean isMonotonic(){
+		if ((localminima.size() < 2) || (localmaxima.size() < 2))
+			return true;
+		return false;
 	}
 }

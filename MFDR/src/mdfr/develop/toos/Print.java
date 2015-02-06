@@ -4,9 +4,12 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import mdfr.math.emd.Data;
+
 public class Print {
 
-	DecimalFormat df = new DecimalFormat("0.000");
+	DecimalFormat valuedf = new DecimalFormat("0.000");
+	DecimalFormat timedf = new DecimalFormat("0");
 	
 	private static Print self = new Print(); 
 	private Print(){
@@ -16,14 +19,19 @@ public class Print {
 		return self;
 	}
 	
-	public void setupFormat(String st){
-		df = new DecimalFormat(st);
+	public void setupValueFormat(String st){
+		this.valuedf = new DecimalFormat(st);
 	}
 	
-	public void printLinkedList(LinkedList list){
-		Iterator<Double> it = list.iterator();
+	public void setupTimeFormat(String st){
+		this.timedf = new DecimalFormat(st);
+	}
+	
+	public void printDataLinkedList(LinkedList<Data> list){
+		Iterator<Data> it = list.iterator();
 		while(it.hasNext()){
-			System.out.print(" "+ df.format(it.next()));
+			Data data = it.next();
+			System.out.print("["+ timedf.format(data.time()) +"]:"+ valuedf.format(data.value()) + " ");
 		}
 		System.out.println();
 	}

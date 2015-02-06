@@ -1,37 +1,21 @@
-package mdfr.math.emd;
+package mdfr.math.emd.datastructure;
 
 import java.util.LinkedList;
+
+import mdfr.math.emd.Data;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class IMFs {
 	private static Log logger = LogFactory.getLog(IMFs.class);
-	private int currentmax; 
-	private int noiselevel, frequencylevel; // noiselevel is the max IMF level that include and below that are white noises.
-											// frequencylevel is the max IMF level that include and below that are frequencies. 
 	private LinkedList<LinkedList<Data>> imfs = new LinkedList<LinkedList<Data>>();
 	
 	/*
 	 * Constructor
 	 * */
 	
-	public IMFs(int maxnumber){
-		currentmax = 0;
-		noiselevel = 0;
-		frequencylevel = 0;
-	}
-	
-	/*
-	 * Update IMF properties and parameters
-	 * */	
-
-	public void updateNoiseLevel(int noiselevel){
-		this.noiselevel = noiselevel;
-	}
-	
-	public void updateFrequencyLevel(int frequencylevel){
-		this.frequencylevel = frequencylevel;
+	public IMFs(){
 	}
 	
 	/*
@@ -39,10 +23,6 @@ public class IMFs {
 	 * */
 	public void addIMF(LinkedList<Data> imf){
 		imfs.add(imf);
-	}
-	
-	public int size(){
-		return currentmax;
 	}
 	
 	public LinkedList<LinkedList<Data>> getIMFs(){

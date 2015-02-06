@@ -1,58 +1,75 @@
 package mdfr.core.emd;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import mdfr.develop.toos.Print;
-import mdfr.math.emd.CalculateEnvelopes;
-import mdfr.math.emd.Envelopes;
-import mdfr.math.emd.LocalExtremas;
-import mdfr.math.emd.Tools;
+import mdfr.math.emd.Data;
+import mdfr.math.emd.EMD;
+import mdfr.math.emd.datastructure.IMFs;
 import junit.framework.TestCase;
 
 public class TestCalculateEnvelopes extends TestCase {
-/*
+
+	final long datasize = 100;
+	
+	public void testEMD(){
+		final int round = 5;
+		LinkedList<Data> residual = new LinkedList<Data>();
+		generateResidual(residual, datasize);
+		System.out.println("Original Data");
+		Print.getInstance().printDataLinkedList(residual);
+		EMD emd = new EMD(residual);
+		IMFs imf = emd.operates(round);
+		Iterator<LinkedList<Data>> it = imf.getIMFs().iterator();
+		for(int i = 0 ; it.hasNext();i++){
+			System.out.println("Level[" + i + "]");
+			Print.getInstance().printDataLinkedList(it.next());
+		}
+	}
+	
 	public void testGetEnvelopes(){
-		LinkedList<Double> residual = new LinkedList<Double>();
+		/*
+		LinkedList<Data> residual = new LinkedList<Data>();
 		LocalExtremas le = new LocalExtremas();
-		generateResidual(residual, 20);
+		generateResidual(residual, datasize);
+		Print.getInstance().printDataLinkedList(residual);
+
+		//
 		le = Tools.getInstance().getLocalExtremas(residual);
-		
+
 		//
-		Print.getInstance().setupFormat("0.00");
-		Print.getInstance().printLinkedList(residual);
-		
-		//
-		Print.getInstance().setupFormat("0");
 		System.out.println("Local Max");
-		Print.getInstance().printLinkedList(le.localMaxima());
+		Print.getInstance().printDataLinkedList(le.localMaxima());
 		System.out.println("Local Min");
-		Print.getInstance().printLinkedList(le.localMinima());
+		Print.getInstance().printDataLinkedList(le.localMinima());
 		
 		//
-		Print.getInstance().setupFormat("0.00");
 		Envelopes envelope = CalculateEnvelopes.getInstance().getEnvelopes(residual, le);
 		System.out.println("Upper Envelope");
-		Print.getInstance().printLinkedList(envelope.upperEnvelope());
+		Print.getInstance().printDataLinkedList(envelope.upperEnvelope());
 		System.out.println("Lower Envelope");
-		Print.getInstance().printLinkedList(envelope.lowerEnvelope());
+		Print.getInstance().printDataLinkedList(envelope.lowerEnvelope());
 		
-		//
+		
 		System.out.println("Mean");
-		LinkedList<Double> mean = Tools.getInstance().getMean(envelope.upperEnvelope(), envelope.lowerEnvelope());
-		Print.getInstance().printLinkedList(mean);
+		LinkedList<Data> mean = Tools.getInstance().getMean(envelope.upperEnvelope(), envelope.lowerEnvelope());
+		Print.getInstance().printDataLinkedList(mean);
+		
 		System.out.println("Difference:");
-		LinkedList<Double> difference = Tools.getInstance().getDifference(residual, mean);
-		Print.getInstance().printLinkedList(difference);
+		LinkedList<Data> difference = Tools.getInstance().getDifference(residual, mean);
+		Print.getInstance().printDataLinkedList(difference);
+		
+		System.out.println("Sum:");
+		LinkedList<Data> sum = Tools.getInstance().getSum(difference, mean);
+		Print.getInstance().printDataLinkedList(sum);
+		*/
 	}
-	*/
-	private void generateResidual(LinkedList<Double> residual, int size){
-		for(int i = 0 ; i < size ; i++){
-			double value;
-			if(i % 5 == 0)
-				value = 4.5 + 1*Math.random();
-			else
-				value = 1.5 + 1*Math.random();
-			residual.add(value);	
+	
+	private void generateResidual(LinkedList<Data> residual, long size){
+		for(double i = 0 ; i < size ; i++){
+			double value = 9.5 * Math.sin(i/3) + Math.random();
+			residual.add(new Data(i,value));	
 		}
 	}
 	

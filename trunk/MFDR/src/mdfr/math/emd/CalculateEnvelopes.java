@@ -1,15 +1,27 @@
 package mdfr.math.emd;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
+import mdfr.math.emd.datastructure.Envelopes;
+import mdfr.math.emd.datastructure.LocalExtremas;
 import flanagan.interpolation.CubicSpline;
 
 public class CalculateEnvelopes {
 
-	private static CalculateEnvelopes self = new CalculateEnvelopes();
+	private final short TIME = 0;
+	private final short VALUE = 1;
+	private int location;
 
-	private CalculateEnvelopes() {
+	// Default resolution and location. setup before use.
+	private static CalculateEnvelopes self = new CalculateEnvelopes(1);
 
+	private CalculateEnvelopes(int location) {
+		this.location = location;
+	}
+
+	public void setupLocation(int location) {
+		this.location = location;
 	}
 
 	public static CalculateEnvelopes getInstance() {
@@ -19,38 +31,33 @@ public class CalculateEnvelopes {
 	public Envelopes getEnvelopes(LinkedList<Data> residual, LocalExtremas le) {
 		Envelopes envelopes = new Envelopes(new LinkedList<Data>(),
 				new LinkedList<Data>());
-		int location = 1;
-		// TODO Test extraplotation
 		// 0. Use symmetric extremes to complete Extrapolation.
 		symFrontEnvelope(residual, le, location);
 		symRearEnvelope(residual, le, location);
-		// TODO the following codes are needed to be updated.
 
 		// 1. Convert Data from linked list to array
-		double[] values = LinkedListToArray(residual);
-		double[] upperextremas = LinkedListToArray(le.localMaxima());
-		double[] lowerextremas = LinkedListToArray(le.localMinima());
+
+		double[] upperextremas = LinkedListToArray(le.localMaxima(), TIME);
+		double[] lowerextremas = LinkedListToArray(le.localMinima(), TIME);
 
 		// 2. Prepare value array for interpolation.
-		double[] uppervalues = extractValues(values, upperextremas);
-		double[] lowervalues = extractValues(values, lowerextremas);
+		double[] uppervalues = LinkedListToArray(le.localMaxima(), VALUE);
+		double[] lowervalues = LinkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
-
+		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);
 		CubicSpline lowerCS = new CubicSpline(lowerextremas, lowervalues);
 		// Calculate upperenvelope
-		calculateEnvelop(envelopes.upperEnvelope(), values, upperextremas,
-				uppervalues);
+		calculateEnvelope(envelopes.upperEnvelope(), upperCS, residual);
 		// Calculate lowerenvelope
-		calculateEnvelop(envelopes.lowerEnvelope(), values, lowerextremas,
-				lowervalues);
+		calculateEnvelope(envelopes.lowerEnvelope(), lowerCS, residual);
 		return envelopes;
 	}
 
 	/*
 	 * Symmetric Front Envelopes
-	 * */
-	
+	 */
+
 	private void symFrontEnvelope(LinkedList<Data> residual, LocalExtremas le,
 			int location) {
 		/*
@@ -61,8 +68,8 @@ public class CalculateEnvelopes {
 			if (residual.peek().value() > le.localMinima().peek().value()) {
 				// Symmetric section is too small
 				if ((2 * le.localMaxima().peek().time())
-						- le.localMinima().peek().time() > residual
-						.peek().time()) {
+						- le.localMinima().peek().time() > residual.peek()
+						.time()) {
 					symFrontMaximaAlongOrigin(residual, le, location);
 					symFrontMinimaAlongOrigin(residual, le, location);
 				}
@@ -86,8 +93,8 @@ public class CalculateEnvelopes {
 			if (residual.peek().value() < le.localMaxima().peek().value()) {
 				// Symmetric section is too small
 				if ((2 * le.localMinima().peek().time())
-						- le.localMaxima().peek().time() > residual
-						.peek().time()) {
+						- le.localMaxima().peek().time() > residual.peek()
+						.time()) {
 					symFrontMaximaAlongOrigin(residual, le, location);
 					symFrontMinimaAlongOrigin(residual, le, location);
 				}
@@ -144,7 +151,7 @@ public class CalculateEnvelopes {
 
 	private void symFrontMinimaAlongMinima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
-		for (int i = 0; i < location ; i++) {
+		for (int i = 0; i < location; i++) {
 			// Here to ensure not to include the first minima.
 			double minimatime = 2 * le.localMinima().peek().time()
 					- le.localMinima().get(i + 1).time();
@@ -196,19 +203,22 @@ public class CalculateEnvelopes {
 
 	/*
 	 * Symmetric Rear Envelopes
-	 * */
-	
+	 */
+
 	private void symRearEnvelope(LinkedList<Data> residual, LocalExtremas le,
 			int location) {
 		/*
 		 * Last extrema is a maxima.
 		 */
-		if (le.localMaxima().peekLast().time() > le.localMinima().peekLast().time()) {
+		if (le.localMaxima().peekLast().time() > le.localMinima().peekLast()
+				.time()) {
 			// residual[n] is not a minima.
-			if (residual.peekLast().value() > le.localMinima().peekLast().value()) {
+			if (residual.peekLast().value() > le.localMinima().peekLast()
+					.value()) {
 				// Symmetric section is too small
 				if ((2 * le.localMaxima().peekLast().time())
-						- le.localMinima().peekLast().time() < residual.peekLast().time()) {
+						- le.localMinima().peekLast().time() < residual
+						.peekLast().time()) {
 					symRearMaximaAlongEnd(residual, le, location);
 					symRearMinimaAlongEnd(residual, le, location);
 				}
@@ -229,10 +239,12 @@ public class CalculateEnvelopes {
 		 */
 		else {
 			// residual[n] is not a maxima.
-			if (residual.peekLast().value() < le.localMaxima().peekLast().value()) {
+			if (residual.peekLast().value() < le.localMaxima().peekLast()
+					.value()) {
 				// Symmetric section is too small
 				if ((2 * le.localMinima().peekLast().time())
-						- le.localMaxima().peekLast().time() > residual.peek().time()) {
+						- le.localMaxima().peekLast().time() > residual.peek()
+						.time()) {
 					symRearMaximaAlongEnd(residual, le, location);
 					symRearMinimaAlongEnd(residual, le, location);
 				}
@@ -257,32 +269,37 @@ public class CalculateEnvelopes {
 		le.localMaxima().addLast(new Data(time, value));
 		for (int i = 0; i < location; i++) { // Ensure the copy is one less then
 												// other situation.
-			time = 2 * residual.peekLast().time() - le.localMaxima().get(le.localMaxima().size()-i).time();
-			value = le.localMaxima().get(le.localMaxima().size()-i).value();
+			time = 2 * residual.peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
+			value = le.localMaxima().get(le.localMaxima().size() -1 - i).value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
-	
+
 	private void symRearMinimaEndNewMinima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		double time = residual.peekLast().time();
 		double value = residual.peekLast().value();
 		le.localMinima().addLast(new Data(time, value));
-		for (int i = 0; i < location - 1; i++) { // Ensure the copy is one less then other situation.
+		for (int i = 0; i < location - 1; i++) { // Ensure the copy is one less
+													// then other situation.
 			time = 2 * residual.peekLast().time()
-					- le.localMinima().get(le.localMinima().size()-i).time();
-			value = le.localMinima().get(le.localMinima().size()-i).value();
+					- le.localMinima().get(le.localMinima().size() -1 - i).time();
+			value = le.localMinima().get(le.localMinima().size() -1 - i).value();
 			le.localMinima().addFirst(new Data(time, value));
 		}
 	}
-	
+
 	private void symRearMaximaAlongMaxima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
 			// Here to ensure not to include the first maxima.
-			double time = 2 * le.localMaxima().peekLast().time()
-					- le.localMaxima().get(le.localMaxima().size()-i-1).time();
-			double value = le.localMaxima().get(le.localMaxima().size()-i-1).value();
+			double time = 2
+					* le.localMaxima().peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() - i - 2)
+							.time();
+			double value = le.localMaxima()
+					.get(le.localMaxima().size() - i - 2).value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
@@ -291,83 +308,89 @@ public class CalculateEnvelopes {
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location + 1; i++) {
 			double time = 2 * le.localMaxima().peekLast().time()
-					- le.localMinima().get(le.localMinima().size()-i).time();
-			double value = le.localMinima().get(le.localMinima().size()-i).value();
+					- le.localMinima().get(le.localMinima().size() -1 - i).time();
+			double value = le.localMinima().get(le.localMinima().size() -1 - i).value();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}
-	
+
 	private void symRearMaximaAlongMinima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
-		for (int i = 0; i < location ; i++) {
+		for (int i = 0; i < location; i++) {
 			double time = 2 * le.localMinima().peekLast().time()
-					- le.localMaxima().get(le.localMaxima().size()-i).time();
-			double value = le.localMaxima().get(le.localMaxima().size()-i).value();
+					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
+			double value = le.localMaxima().get(le.localMaxima().size() -1 - i)
+					.value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
 
 	private void symRearMinimaAlongMinima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
-		for (int i = 0; i < location ; i++) {
+		for (int i = 0; i < location; i++) {
 			// Here to ensure not to include the first minima.
-			double time = 2 * le.localMinima().peekLast().time()
-					- le.localMinima().get(le.localMinima().size()-i-1).time();
-			double value = le.localMinima().get(le.localMinima().size()-i-1).value();
+			double time = 2
+					* le.localMinima().peekLast().time()
+					- le.localMinima().get(le.localMinima().size() - i - 2)
+							.time();
+			double value = le.localMinima()
+					.get(le.localMinima().size() - i - 2).value();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}
-	
+
 	private void symRearMinimaAlongEnd(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
-			double time = 2 * residual.peekLast().time() - le.localMinima().get(le.localMinima().size() -i).time();
-			double value = le.localMinima().get(le.localMinima().size() -i).time();
+			double time = 2 * residual.peekLast().time()
+					- le.localMinima().get(le.localMinima().size() -1 - i).time();
+			double value = le.localMinima().get(le.localMinima().size() -1 - i)
+					.time();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}
-	
+
 	private void symRearMaximaAlongEnd(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
-			double time = 2 * residual.peekLast().time() - le.localMaxima().get(le.localMaxima().size() -i).time();
+			double time = 2 * residual.peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
 			double value = le.localMaxima().get(i).value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
-	
-	// TODO complete calculateEnvelop
-	private void calculateEnvelop(LinkedList<Data> envelopes, double[] values,
-			double[] upperextremas, double[] uppervalues) {
-		CubicSpline CS = new CubicSpline(upperextremas, uppervalues);
-		for (int i = 0; i < values.length; i++) {
-			// envelopes.add(CS.interpolate(i));
-		}
-	}
 
 	/*
-	 * Extract values from values array according to the index array.
-	 */
-	private double[] extractValues(double[] values, double[] index) {
-		double[] extractions = new double[index.length];
-		for (int i = 0; i < extractions.length; i++) {
-			extractions[i] = values[(int) index[i]];
+	 * Use interpolation and extremes to retrieve envelope. 
+	 * */	
+	
+	private void calculateEnvelope(LinkedList<Data> envelope, CubicSpline CS, LinkedList<Data> residual) {
+		Iterator<Data> it = residual.iterator();
+		while(it.hasNext()){
+			double time = it.next().time();
+			double value = CS.interpolate(time);
+			envelope.add(new Data(time,value));
 		}
-		return extractions;
 	}
 
 	/*
 	 * Convert LinkedList to Array
 	 */
-	private double[] LinkedListToArray(LinkedList linkedlist) { // LinkedList
-																// may be
-																// different
-																// types
+	
+	private double[] LinkedListToArray(LinkedList<Data> linkedlist, short option) {
 		double[] array = new double[linkedlist.size()];
-		for (int i = 0; i < array.length; i++) {
-			array[i] = Double.valueOf(linkedlist.get(i).toString());
+		switch (option) {
+		case TIME:
+			for (int i = 0; i < array.length; i++)
+				array[i] = Double.valueOf(linkedlist.get(i).time());
+			break;
+		case VALUE:
+			for (int i = 0; i < array.length; i++)
+				array[i] = Double.valueOf(linkedlist.get(i).value());
+			break;
+		default:
+			break;
 		}
 		return array;
 	}
-
 }

@@ -2,8 +2,6 @@ package mdfr.math.emd.datastructure;
 
 import java.util.LinkedList;
 
-import mdfr.math.emd.Data;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,6 +21,10 @@ public class IMFs {
 	 * */
 	public void addIMF(LinkedList<Data> imf){
 		imfs.add(imf);
+	}
+	
+	public int size(){
+		return imfs.size();
 	}
 	
 	public LinkedList<LinkedList<Data>> getIMFs(){

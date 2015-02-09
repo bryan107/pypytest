@@ -4,8 +4,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import mdfr.develop.toos.Print;
-import mdfr.math.emd.Data;
 import mdfr.math.emd.EMD;
+import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.IMFs;
 import junit.framework.TestCase;
 

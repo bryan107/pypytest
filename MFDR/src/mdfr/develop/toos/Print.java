@@ -4,12 +4,12 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.Data;
+import mdfr.math.emd.datastructure.Data;
 
 public class Print {
 
-	DecimalFormat valuedf = new DecimalFormat("0.000");
-	DecimalFormat timedf = new DecimalFormat("0");
+	DecimalFormat valuedf = new DecimalFormat("0.0000");
+	DecimalFormat timedf = new DecimalFormat("0.00");
 	
 	private static Print self = new Print(); 
 	private Print(){

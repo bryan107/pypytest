@@ -3,6 +3,7 @@ package mdfr.math.emd;
 import java.util.LinkedList;
 
 import mdfr.math.emd.Tools;
+import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.IMFs;
 import mdfr.math.emd.datastructure.LocalExtremas;

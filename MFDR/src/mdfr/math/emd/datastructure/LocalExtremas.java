@@ -2,8 +2,6 @@ package mdfr.math.emd.datastructure;
 
 import java.util.LinkedList;
 
-import mdfr.math.emd.Data;
-
 public class LocalExtremas {
 
 	private LinkedList<Data> localminima;

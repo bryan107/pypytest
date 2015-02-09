@@ -3,6 +3,7 @@ package mdfr.math.emd;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import flanagan.interpolation.CubicSpline;
@@ -37,12 +38,12 @@ public class CalculateEnvelopes {
 
 		// 1. Convert Data from linked list to array
 
-		double[] upperextremas = LinkedListToArray(le.localMaxima(), TIME);
-		double[] lowerextremas = LinkedListToArray(le.localMinima(), TIME);
+		double[] upperextremas = Tools.getInstance().LinkedListToArray(le.localMaxima(), TIME);
+		double[] lowerextremas = Tools.getInstance().LinkedListToArray(le.localMinima(), TIME);
 
 		// 2. Prepare value array for interpolation.
-		double[] uppervalues = LinkedListToArray(le.localMaxima(), VALUE);
-		double[] lowervalues = LinkedListToArray(le.localMinima(), VALUE);
+		double[] uppervalues = Tools.getInstance().LinkedListToArray(le.localMaxima(), VALUE);
+		double[] lowervalues = Tools.getInstance().LinkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
 		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);
@@ -371,26 +372,5 @@ public class CalculateEnvelopes {
 			double value = CS.interpolate(time);
 			envelope.add(new Data(time,value));
 		}
-	}
-
-	/*
-	 * Convert LinkedList to Array
-	 */
-	
-	private double[] LinkedListToArray(LinkedList<Data> linkedlist, short option) {
-		double[] array = new double[linkedlist.size()];
-		switch (option) {
-		case TIME:
-			for (int i = 0; i < array.length; i++)
-				array[i] = Double.valueOf(linkedlist.get(i).time());
-			break;
-		case VALUE:
-			for (int i = 0; i < array.length; i++)
-				array[i] = Double.valueOf(linkedlist.get(i).value());
-			break;
-		default:
-			break;
-		}
-		return array;
 	}
 }

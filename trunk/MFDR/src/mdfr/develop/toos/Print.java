@@ -29,7 +29,11 @@ public class Print {
 	
 	public void printDataLinkedList(LinkedList<Data> list){
 		Iterator<Data> it = list.iterator();
+		int count = 0;
 		while(it.hasNext()){
+			if(count > 50)
+				break;
+			count++;
 			Data data = it.next();
 			System.out.print("["+ timedf.format(data.time()) +"]:"+ valuedf.format(data.value()) + " ");
 		}

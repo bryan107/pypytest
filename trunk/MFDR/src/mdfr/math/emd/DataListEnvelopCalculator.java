@@ -8,16 +8,16 @@ import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import flanagan.interpolation.CubicSpline;
 
-public class CalculateEnvelopes {
+public class DataListEnvelopCalculator {
 
 	private final short TIME = 0;
 	private final short VALUE = 1;
 	private int location;
 
 	// Default resolution and location. setup before use.
-	private static CalculateEnvelopes self = new CalculateEnvelopes(1);
+	private static DataListEnvelopCalculator self = new DataListEnvelopCalculator(1);
 
-	private CalculateEnvelopes(int location) {
+	private DataListEnvelopCalculator(int location) {
 		this.location = location;
 	}
 
@@ -25,7 +25,7 @@ public class CalculateEnvelopes {
 		this.location = location;
 	}
 
-	public static CalculateEnvelopes getInstance() {
+	public static DataListEnvelopCalculator getInstance() {
 		return self;
 	}
 
@@ -38,12 +38,12 @@ public class CalculateEnvelopes {
 
 		// 1. Convert Data from linked list to array
 
-		double[] upperextremas = Tools.getInstance().LinkedListToArray(le.localMaxima(), TIME);
-		double[] lowerextremas = Tools.getInstance().LinkedListToArray(le.localMinima(), TIME);
+		double[] upperextremas = DataListOperator.getInstance().LinkedListToArray(le.localMaxima(), TIME);
+		double[] lowerextremas = DataListOperator.getInstance().LinkedListToArray(le.localMinima(), TIME);
 
 		// 2. Prepare value array for interpolation.
-		double[] uppervalues = Tools.getInstance().LinkedListToArray(le.localMaxima(), VALUE);
-		double[] lowervalues = Tools.getInstance().LinkedListToArray(le.localMinima(), VALUE);
+		double[] uppervalues = DataListOperator.getInstance().LinkedListToArray(le.localMaxima(), VALUE);
+		double[] lowervalues = DataListOperator.getInstance().LinkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
 		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);

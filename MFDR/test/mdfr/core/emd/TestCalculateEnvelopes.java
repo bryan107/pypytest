@@ -19,8 +19,8 @@ public class TestCalculateEnvelopes extends TestCase {
 		generateResidual(residual, datasize);
 		System.out.println("Original Data");
 		Print.getInstance().printDataLinkedList(residual);
-		EMD emd = new EMD(residual);
-		IMFs imf = emd.operates(round);
+		EMD emd = new EMD(residual, 0.0001, 4,2,1);
+		IMFs imf = emd.getIMFs(round);
 		Iterator<LinkedList<Data>> it = imf.getIMFs().iterator();
 		for(int i = 0 ; it.hasNext();i++){
 			System.out.println("Level[" + i + "]");

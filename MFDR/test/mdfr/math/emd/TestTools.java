@@ -4,9 +4,9 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.develop.toos.Print;
 import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.utility.Print;
 import flanagan.interpolation.CubicSpline;
 import junit.framework.TestCase;
 
@@ -38,7 +38,7 @@ public class TestTools extends TestCase {
 		CubicSpline CS = new CubicSpline(datapoints, datavalues);
 		LinkedList<Data> extremas = DataListPropertyExtractor.getInstance().getSortedLocalExtremas(
 				data);
-		Print.getInstance().printDataLinkedList(extremas);
+		Print.getInstance().printDataLinkedList(extremas, 100);
 		System.out.println("Extrema{" + extremas.get(1).time() + ","
 				+ extremas.get(2).time() + "}" + "Value{"
 				+ extremas.get(1).value() + "," + extremas.get(2).time() + "}");
@@ -56,9 +56,9 @@ public class TestTools extends TestCase {
 		
 		// Print
 		System.out.print("Upper Extremas: ");
-		Print.getInstance().printDataLinkedList(le.localMaxima());
+		Print.getInstance().printDataLinkedList(le.localMaxima(), 100);
 		System.out.print("Lower Extremas: ");
-		Print.getInstance().printDataLinkedList(le.localMinima());
+		Print.getInstance().printDataLinkedList(le.localMinima(), 100);
 		System.out.print("Zero Crossings: ");
 //		Print.getInstance().printDataLinkedList(zerocrossings);
 	}
@@ -72,10 +72,10 @@ public class TestTools extends TestCase {
 		System.out.println();
 		double e1 = calcL2Error(instf, realfre);
 		System.out.println("Instant Frequency[N]: Error:" + e1 + "%");
-		Print.getInstance().printDataLinkedList(instf2);
+		Print.getInstance().printDataLinkedList(instf2, 100);
 		double e2 = calcL2Error(instf2, realfre);
 		System.out.println("Instant Frequency[W]:" + e2 + "%" );
-		Print.getInstance().printDataLinkedList(instf);
+		Print.getInstance().printDataLinkedList(instf, 100);
 	}
 
 	private double generateResidual(LinkedList<Data> residual, long size) {

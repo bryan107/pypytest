@@ -1,8 +1,10 @@
 package mdfr.math.emd;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import mdfr.math.emd.datastructure.Data;
+import mdfr.utility.StatTool;
 
 public class DataListOperator {
 	
@@ -88,4 +90,38 @@ public class DataListOperator {
 		}
 		return newlist;
 	}
+	
+	public LinkedList<Data> normalize(LinkedList<Data> dataset){
+		LinkedList<Data> norm_dataset = new LinkedList<Data>();
+		// Find the Max value of data list
+		double max = StatTool.getInstance().maxDataListAbsValue(dataset);
+		// Calculate normalized dataset
+		Iterator<Data> it = dataset.iterator();
+		while (it.hasNext()) {
+			Data data = (Data) it.next();
+			norm_dataset.add(new Data(data.time(),(data.value()/max)));
+		}
+		return norm_dataset;
+	}
+
+	public LinkedList<Double> getTimeList(LinkedList<Data> linkedlist){
+		LinkedList<Double> timeref = new LinkedList<Double>();
+		Iterator<Data> it = linkedlist.iterator();
+		while (it.hasNext()) {
+			Data data = (Data) it.next();
+			timeref.add(data.time());
+		}
+		return timeref;
+	}
+	
+	public LinkedList<Double> getValueList(LinkedList<Data> linkedlist){
+		LinkedList<Double> timeref = new LinkedList<Double>();
+		Iterator<Data> it = linkedlist.iterator();
+		while (it.hasNext()) {
+			Data data = (Data) it.next();
+			timeref.add(data.value());
+		}
+		return timeref;
+	}
+	
 }

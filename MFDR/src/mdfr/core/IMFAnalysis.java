@@ -2,72 +2,78 @@ package mdfr.core;
 
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFs;
+import mdfr.math.statistic.StatisticalBounds;
+import mdfr.math.statistic.StatisticalBoundsWhiteNoise;
+import mdfr.math.statistic.StatisticalProperty;
 
 public class IMFAnalysis {
+	
+	private static Log logger = LogFactory.getLog(IMFAnalysis.class);
 	IMFs imfs = new IMFs();
-	double whitenoise, FTratio;
+	double whitenoiselevel, FTratio, t_threshold;
 	
 	/*
 	 * Constructor
 	 * */
-	public IMFAnalysis(IMFs imfs, double whitenoise, double FTratio){
-		setIMFS(imfs);
-		setWhiteNoiseLevel(whitenoise);
+	public IMFAnalysis(double whitenoiselevel, double FTratio, double t_threshold){
+		setWhiteNoiseLevel(whitenoiselevel);
 		setFTRatio(FTratio);
+		setTThreshold(t_threshold);
 	}
 	
-	public void setIMFS(IMFs imfs){
-		if(imfs.size() == 0){throw new NullPointerException("IMFs is empty.");}
-		this.imfs = imfs;
+	
+	/*
+	 * Private parameters
+	 */
+	public void setWhiteNoiseLevel(double whitenoiselevel){
+		this.whitenoiselevel = whitenoiselevel;
+	}
+	
+	public void setFTRatio(double FTratio){
+		this.FTratio = FTratio;
+	}
+	
+	public void setTThreshold(double t_threshold){
+		this.t_threshold = t_threshold;
 	}
 	
 	/*
 	 * White noises discrimination functions
 	 * */
 	
-	public void setWhiteNoiseLevel(double whitenoise){
-		this.whitenoise = whitenoise;
-	}
-	
-	public double getNoise(int level){
-		double noise = 0;
-		if(imfs.getIMF(level) == null){throw new NullPointerException("IMFs is empty.");}
-		// TODO calculate noise;
-		return noise;
-	}	
-	
-	public LinkedList<Double> getAllNoise(){
-		LinkedList<Double> noise = new LinkedList<Double>();
-		for(int i = 0 ; i < imfs.size(); i++){
-			noise.add(getNoise(i));
-		}
-		return noise;
-	}
-	
-	public boolean isWhiteNoise(double noise){
-		if(noise <= whitenoise)
+
+	public boolean isSignal(IMF imf){
+		double averagewavelength = imf.averageWavelength();
+		System.out.println("Length: " + averagewavelength);
+//		double energydensity = imf.normalizedEnergyDensity();
+		double energydensity = imf.energyDensity();
+		logger.info("Engergy Density: " + energydensity);
+		StatisticalBounds sb = new StatisticalBoundsWhiteNoise(whitenoiselevel, imf.size());
+		if(averagewavelength >= imf.size()){
+			logger.info("No Instant Frequency exist for this IMF");
 			return true;
-		else
+		}else if(StatisticalProperty.getInstance().isStatisticalSignificance(sb, averagewavelength, energydensity, t_threshold)){
+			return true;
+		}else{
 			return false;
-	}
-	
-	public boolean isWhiteNoise(int level){
-		return isWhiteNoise(getNoise(level));
+		}
 	}
 
-	public boolean isSignal(int level){
-		return !isWhiteNoise(getNoise(level));
+	public boolean isWhiteNoise(IMF imf){
+		return !isSignal(imf);
 	}
+
 	
 	/*
 	 * Frequency/Trend discrimination functions
 	 * */
 
-	public void setFTRatio(double FTratio){
-		this.FTratio = FTratio;
-	}
-	
+
 	public double getFTRatio(int level){
 		double FTratio = 0;
 		// TODO implement auto-correlation-based FT detect scheme.

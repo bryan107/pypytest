@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class IMFs {
 	private static Log logger = LogFactory.getLog(IMFs.class);
-	private LinkedList<LinkedList<Data>> imfs = new LinkedList<LinkedList<Data>>();
+	private LinkedList<IMF> imfs = new LinkedList<IMF>();
 	
 	/*
 	 * Constructor
@@ -19,7 +19,7 @@ public class IMFs {
 	/*
 	 * IMF operations
 	 * */
-	public void addIMF(LinkedList<Data> imf){
+	public void addIMF(IMF imf){
 		imfs.add(imf);
 	}
 	
@@ -27,11 +27,11 @@ public class IMFs {
 		return imfs.size();
 	}
 	
-	public LinkedList<LinkedList<Data>> getIMFs(){
+	public LinkedList<IMF> getIMFs(){
 		return imfs;
 	}
 	
-	public LinkedList<Data> getIMF(int level){
+	public IMF getIMF(int level){
 		try {
 			return imfs.get(level);
 		} catch (Exception e) {
@@ -40,4 +40,5 @@ public class IMFs {
 		}
 		return null;
 	}
+	
 }

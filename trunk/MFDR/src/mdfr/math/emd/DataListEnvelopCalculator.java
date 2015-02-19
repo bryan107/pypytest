@@ -3,13 +3,18 @@ package mdfr.math.emd;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.utility.Print;
 import flanagan.interpolation.CubicSpline;
 
 public class DataListEnvelopCalculator {
 
+	private static Log logger = LogFactory.getLog(DataListEnvelopCalculator.class);
 	private final short TIME = 0;
 	private final short VALUE = 1;
 	private int location;
@@ -35,7 +40,7 @@ public class DataListEnvelopCalculator {
 		// 0. Use symmetric extremes to complete Extrapolation.
 		symFrontEnvelope(residual, le, location);
 		symRearEnvelope(residual, le, location);
-
+		
 		// 1. Convert Data from linked list to array
 
 		double[] upperextremas = DataListOperator.getInstance().LinkedListToArray(le.localMaxima(), TIME);
@@ -346,7 +351,7 @@ public class DataListEnvelopCalculator {
 			double time = 2 * residual.peekLast().time()
 					- le.localMinima().get(le.localMinima().size() -1 - i).time();
 			double value = le.localMinima().get(le.localMinima().size() -1 - i)
-					.time();
+					.value();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}

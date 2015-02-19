@@ -4,9 +4,9 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.develop.toos.Print;
 import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.utility.Print;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,7 +46,8 @@ public class DataListPropertyExtractor {
 				frequency);
 		if (instantfrequency.isEmpty()) {
 			logger.warn("This IMF does not has enough points to calculate Instant Frequency");
-			Print.getInstance().printDataLinkedList(imf);
+			System.out.print("IMF:");
+			Print.getInstance().printDataLinkedList(imf, 100);
 		}
 		return instantfrequency;
 	}

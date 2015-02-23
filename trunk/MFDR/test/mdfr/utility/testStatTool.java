@@ -3,8 +3,8 @@ package mdfr.utility;
 import java.util.LinkedList;
 
 import flanagan.analysis.Stat;
+import mdfr.datastructure.Data;
 import mdfr.math.emd.DataListOperator;
-import mdfr.math.emd.datastructure.Data;
 import junit.framework.TestCase;
 
 public class testStatTool extends TestCase {

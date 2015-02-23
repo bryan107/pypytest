@@ -2,11 +2,14 @@ package mdfr.math.emd;
 
 import java.util.LinkedList;
 
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListPropertyExtractor;
-import mdfr.math.emd.datastructure.Data;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.IMF;
-import mdfr.math.emd.datastructure.IMFs;
+import mdfr.math.emd.datastructure.IMFS;
+import mdfr.math.emd.datastructure.IMF_BAK;
+import mdfr.math.emd.datastructure.IMFs_BAK;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.Print;
 
@@ -15,17 +18,17 @@ import org.apache.commons.logging.LogFactory;
 
 public class EMD {
 	private static Log logger = LogFactory.getLog(EMD.class);
-	private LinkedList<Data> residual = new LinkedList<Data>();
+	private TimeSeries residual = new TimeSeries();
 	private InstantFrequency IF;
 	private double zerocrossingaccuracy;
 	
-	public EMD(LinkedList<Data> residual, double zerocrossingaccuracy, double W4, double W2, double W1){
+	public EMD(TimeSeries residual, double zerocrossingaccuracy, double W4, double W2, double W1){
 		updateRedisual(residual);
 		updateZeroCorssingAccuracy(zerocrossingaccuracy);
 		updateInstantFrequency(W4, W2, W1);
 	}
 	
-	public void updateRedisual(LinkedList<Data> residual){
+	public void updateRedisual(TimeSeries residual){
 		this.residual = residual;
 	}
 	
@@ -37,9 +40,9 @@ public class EMD {
 		this.zerocrossingaccuracy = zerocorssingaccuracy;
 	}
 	
-	public IMFs getIMFs(int maxnumber){
+	public IMFS getIMFs(int maxnumber){
 		// Great a new IMFs object which contains IMFs.
-		IMFs imfs = new IMFs();
+		IMFS imfs = new IMFS();
 		for(int iteration = 0 ; iteration < maxnumber ; iteration++){
 			/*
 			 * This is one iteration.
@@ -50,21 +53,20 @@ public class EMD {
 			// 2. Get the upper and lower envelope with the same resolution of the original signal (residual).
 			// 2-1. If residual is monotonic, where no upper and lower envelopes can be extracted, break.
 			if(le.isMonotonic()){
-				imfs.addIMF(new IMF(residual, zerocrossingaccuracy, IF));
-				logger.info("EMD terminates at level [" + imfs.getIMFs().size() + "].  No further level can be extracted.");
+				imfs.add(new IMF(residual, zerocrossingaccuracy, IF));
+				logger.info("EMD terminates at level [" + imfs.size() + "].  No further level can be extracted.");
 				break;
 			}
 			Envelopes envelope = DataListEnvelopCalculator.getInstance().getEnvelopes(residual, le);
 			
 			// 3. Get the mean (remaining residual) of the two envelope
-			LinkedList<Data> mean = DataListCalculator.getInstance().getMean(envelope.upperEnvelope(), envelope.lowerEnvelope()); 
+			TimeSeries mean = DataListCalculator.getInstance().getMean(envelope.upperEnvelope(), envelope.lowerEnvelope()); 
 			
 			// 4. Extract a IMF using the current mean.
-			LinkedList<Data> difference = DataListCalculator.getInstance().getDifference(residual, mean);
+			TimeSeries difference = DataListCalculator.getInstance().getDifference(residual, mean);
 			IMF imf = new IMF(difference, zerocrossingaccuracy, IF);
-			
 		    // 5. Save the extracted IMF and make the mean become the new residual.
-			imfs.addIMF(imf);
+			imfs.add(imf);
 			this.residual = mean;
 		}
 		// Return IMFs

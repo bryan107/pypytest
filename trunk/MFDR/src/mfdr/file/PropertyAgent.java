@@ -1,4 +1,4 @@
-package mdr.file;
+package mfdr.file;
 
 import java.io.File;
 import java.io.FileInputStream;

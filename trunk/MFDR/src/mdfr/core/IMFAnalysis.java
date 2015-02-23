@@ -6,7 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.math.emd.datastructure.IMF;
-import mdfr.math.emd.datastructure.IMFs;
+import mdfr.math.emd.datastructure.IMF_BAK;
+import mdfr.math.emd.datastructure.IMFs_BAK;
 import mdfr.math.statistic.StatisticalBounds;
 import mdfr.math.statistic.StatisticalBoundsWhiteNoise;
 import mdfr.math.statistic.StatisticalProperty;
@@ -14,7 +15,7 @@ import mdfr.math.statistic.StatisticalProperty;
 public class IMFAnalysis {
 	
 	private static Log logger = LogFactory.getLog(IMFAnalysis.class);
-	IMFs imfs = new IMFs();
+	IMFs_BAK imfs = new IMFs_BAK();
 	double whitenoiselevel, FTratio, t_threshold;
 	
 	/*
@@ -98,4 +99,5 @@ public class IMFAnalysis {
 	public boolean isFreqLevel(int level){
 		return isFreqLevel(getFTRatio(level));
 	}
+	
 }

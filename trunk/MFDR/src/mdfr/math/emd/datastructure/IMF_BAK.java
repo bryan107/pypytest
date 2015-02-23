@@ -3,32 +3,29 @@ package mdfr.math.emd.datastructure;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListOperator;
 import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.InstantFrequency;
+import mdfr.utility.Print;
 
-public class IMF extends TimeSeries {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1467628417547634012L;
-	private static Log logger = LogFactory.getLog(IMF.class);
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class IMF_BAK {
+	private static Log logger = LogFactory.getLog(IMF_BAK.class);
+	private TimeSeries datapoints;
 	private LinkedList<Data> freq;
 
-	public IMF(TimeSeries datapoints, double zerocrossingaccuracy,InstantFrequency IF) {
+	public IMF_BAK(TimeSeries datapoints, double zerocrossingaccuracy,
+			InstantFrequency IF) {
 		updateIMF(datapoints, zerocrossingaccuracy, IF);
 	}
 
-	public void updateIMF(TimeSeries datapoints, double zerocrossingaccuracy, InstantFrequency IF) {
-		Iterator<Data> it = datapoints.iterator();
-		while (it.hasNext()) {
-			this.add((Data) it.next());
-		}
+	public void updateIMF(TimeSeries datapoints,
+			double zerocrossingaccuracy, InstantFrequency IF) {
+		this.datapoints = datapoints;
 		calcInstantFrequency(zerocrossingaccuracy, IF);
 	}
 
@@ -36,9 +33,16 @@ public class IMF extends TimeSeries {
 	 * Retrieve Data from IMF
 	 */
 	
+	public LinkedList<Data> getDataList() {
+		return datapoints;
+	}
+
+	public Data getDataPoint(int index) {
+		return datapoints.get(index);
+	}
 
 	public Data getDataPoint(double time) {
-		Iterator<Data> it = iterator();
+		Iterator<Data> it = datapoints.iterator();
 		while (it.hasNext()) {
 			Data data = (Data) it.next();
 			if (data.time() == time) {
@@ -53,9 +57,12 @@ public class IMF extends TimeSeries {
 	 * Retrieve IMF properties
 	 */
 	
+	public double size() {
+		return datapoints.size();
+	}
 
 	public double timeLength() {
-		return peekLast().time() - peekFirst().time();
+		return datapoints.peekLast().time() - datapoints.peekFirst().time();
 	}
 
 	
@@ -68,7 +75,8 @@ public class IMF extends TimeSeries {
 	private void calcInstantFrequency(double zerocrossingaccuracy,
 			InstantFrequency IF) {
 		try {
-			freq = DataListPropertyExtractor.getInstance().getInstantFrequency(this, zerocrossingaccuracy, IF);
+			freq = DataListPropertyExtractor.getInstance().getInstantFrequency(
+					datapoints, zerocrossingaccuracy, IF);
 		} catch (Exception e) {
 			logger.error("EMD parameters are not properly setted" + e);
 		}
@@ -190,4 +198,37 @@ public class IMF extends TimeSeries {
 	public double averageWavelength() throws ArithmeticException{
 		return 1 / averageFrequency();
 	}
+
+	/*
+	 * IMF property retrieving functions
+	 */
+
+//	// TODO REFACTOR WITH TimeSeries
+//	// Get the energy Density of Average Density
+//	public double energyDensity() {
+//		double energy = 0;
+//		Iterator<Data> it = datapoints.iterator();
+//		while (it.hasNext()) {
+//			Data data = (Data) it.next();
+//			energy += Math.pow(data.value(), 2);
+//		}
+//		logger.info("Energy:" + energy + "  Data Size:" + datapoints.size());
+//		return energy / datapoints.size();
+//	}
+//	
+//	// TODO REFACTOR WITH TimeSeries
+//	public double normalizedEnergyDensity(){
+//		// Normalize IMF to acquire normalized energy density 
+//		LinkedList<Data> norm_datapoints = DataListOperator.getInstance().normalize(datapoints);
+//		logger.info("NORMALISED:" );
+//		Print.getInstance().printDataLinkedList(norm_datapoints, 100);
+//		double energy = 0;
+//		Iterator<Data> it = norm_datapoints.iterator();
+//		while (it.hasNext()) {
+//			Data data = (Data) it.next();
+//			energy += Math.pow(data.value(), 2);
+//		}
+//		logger.info("Energy:" + energy + "  Data Size:" + datapoints.size());
+//		return energy / datapoints.size();
+//	}
 }

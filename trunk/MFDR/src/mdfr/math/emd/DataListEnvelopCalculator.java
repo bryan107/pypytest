@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.math.emd.datastructure.Data;
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.Print;
@@ -35,8 +36,7 @@ public class DataListEnvelopCalculator {
 	}
 
 	public Envelopes getEnvelopes(LinkedList<Data> residual, LocalExtremas le) {
-		Envelopes envelopes = new Envelopes(new LinkedList<Data>(),
-				new LinkedList<Data>());
+		Envelopes envelopes = new Envelopes(new TimeSeries(),	new TimeSeries());
 		// 0. Use symmetric extremes to complete Extrapolation.
 		symFrontEnvelope(residual, le, location);
 		symRearEnvelope(residual, le, location);

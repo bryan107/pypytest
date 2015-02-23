@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.math.emd.datastructure.Data;
-import mdfr.math.emd.datastructure.IMF;
+import mdfr.datastructure.Data;
+import mdfr.math.emd.datastructure.IMF_BAK;
 
 public class Print {
 	private static Log logger = LogFactory.getLog(Print.class);

@@ -1,4 +1,4 @@
-package mdfr.math.emd.datastructure;
+package mdfr.datastructure;
 
 public class Data {
 	private double time;

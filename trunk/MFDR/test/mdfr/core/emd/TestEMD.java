@@ -3,20 +3,21 @@ package mdfr.core.emd;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.logging.Logger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.core.IMFAnalysis;
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListOperator;
 import mdfr.math.emd.EMD;
-import mdfr.math.emd.datastructure.Data;
-import mdfr.math.emd.datastructure.IMFs;
+import mdfr.math.emd.datastructure.IMFS;
+import mdfr.math.emd.datastructure.IMFs_BAK;
 import mdfr.utility.File;
 import mdfr.utility.Print;
 import mdfr.utility.StatTool;
-import mdr.file.FileAccessAgent;
+import mfdr.file.FileAccessAgent;
 import junit.framework.TestCase;
 
 public class TestEMD extends TestCase {
@@ -32,9 +33,9 @@ public class TestEMD extends TestCase {
 	DecimalFormat df = new DecimalFormat("0.0");
 	
 	public void testGetIMFs(){
-		LinkedList<Data> residual = new LinkedList<Data>();
+		TimeSeries residual = new TimeSeries();
 		double realfre = generateResidual(residual, datasize);
-		residual = DataListOperator.getInstance().normalize(residual);
+		residual = (TimeSeries) DataListOperator.getInstance().normalize(residual);
 //		residual = normalise(residual);
 		logger.info("RESIDUAL:");
 		Print.getInstance().printDataLinkedList(residual, 100);
@@ -49,7 +50,7 @@ public class TestEMD extends TestCase {
 		// Create IMF analysis object
 		IMFAnalysis analysis = new IMFAnalysis(percentilesvalue, FTRatio, t_threshold);
 		// Calculate IMF with EMD
-		IMFs imfs = emd.getIMFs(MAXLEVEL);
+		IMFS imfs = emd.getIMFs(MAXLEVEL);
 		
 		/*
 		 *  Store Results
@@ -84,8 +85,8 @@ public class TestEMD extends TestCase {
 		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
 		try {
 			for(int i = 0 ; i < imfs.size() ; i++){
-				System.out.print("IF[" + StatTool.getInstance().autoCorrCoeff(imfs.getIMF(i).instFreqFullResol(residual)) + "]: ");
-				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.getIMF(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
+				System.out.print("IF[" + StatTool.getInstance().autoCorrCoeff(imfs.get(i).instFreqFullResol(residual)) + "]: ");
+				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.get(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

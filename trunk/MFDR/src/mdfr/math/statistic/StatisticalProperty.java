@@ -3,11 +3,11 @@ package mdfr.math.statistic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.math.emd.datastructure.IMF;
+import mdfr.math.emd.datastructure.IMF_BAK;
 
 public class StatisticalProperty {
 
-	private static Log logger = LogFactory.getLog(IMF.class);
+	private static Log logger = LogFactory.getLog(IMF_BAK.class);
 	private static StatisticalProperty self = new StatisticalProperty();
 
 	private StatisticalProperty() {

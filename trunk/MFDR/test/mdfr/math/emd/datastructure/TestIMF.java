@@ -6,6 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.core.emd.TestEMD;
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.InstantFrequencyWeighted;
 import mdfr.utility.Print;
 import junit.framework.TestCase;
@@ -17,7 +19,7 @@ public class TestIMF extends TestCase {
 	private double[] IFparamaters = {4,2,1}; 
 	
 	public void testFrequency(){
-		LinkedList<Data> residual = new LinkedList<Data>();
+		TimeSeries residual = new TimeSeries();
 		double frequency = generateResidual(residual, 1000);
 		Print.getInstance().printDataLinkedList(residual,100);
 		logger.info("Residual frequency: " + frequency);

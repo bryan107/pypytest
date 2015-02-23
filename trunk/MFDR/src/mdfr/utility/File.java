@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.datastructure.Data;
-import mdr.file.FileAccessAgent;
+import mdfr.datastructure.Data;
+import mfdr.file.FileAccessAgent;
 
 public class File {
 	

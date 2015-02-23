@@ -1,28 +1,28 @@
 package mdfr.math.emd.datastructure;
 
-import java.util.LinkedList;
+import mdfr.datastructure.TimeSeries;
 
 public class Envelopes {
-	private LinkedList<Data> upperenvelope, lowerenvelope; 
+	private TimeSeries upperenvelope, lowerenvelope; 
 	
-	public Envelopes(LinkedList<Data> upperenvelope, LinkedList<Data> lowerenvelope){
+	public Envelopes(TimeSeries upperenvelope, TimeSeries lowerenvelope){
 		updateUpperEnvelope(upperenvelope);
 		updateLowerEnvelope(lowerenvelope);
 	}
 	
-	public void updateUpperEnvelope(LinkedList<Data> upperenvelope){
+	public void updateUpperEnvelope(TimeSeries upperenvelope){
 		this.upperenvelope = upperenvelope;
 	}
 	
-	public void updateLowerEnvelope(LinkedList<Data> lowerenvelope){
+	public void updateLowerEnvelope(TimeSeries lowerenvelope){
 		this.lowerenvelope = lowerenvelope;
 	}
 	
-	public LinkedList<Data> upperEnvelope(){
+	public TimeSeries upperEnvelope(){
 		return upperenvelope;
 	} 
 	
-	public LinkedList<Data> lowerEnvelope(){
+	public TimeSeries lowerEnvelope(){
 		return lowerenvelope;
 	}
 }

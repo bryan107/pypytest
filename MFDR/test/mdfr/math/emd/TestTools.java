@@ -4,7 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.datastructure.Data;
+import mdfr.datastructure.Data;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.Print;
 import flanagan.interpolation.CubicSpline;

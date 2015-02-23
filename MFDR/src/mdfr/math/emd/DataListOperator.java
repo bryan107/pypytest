@@ -3,7 +3,8 @@ package mdfr.math.emd;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.datastructure.Data;
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.utility.StatTool;
 
 public class DataListOperator {
@@ -68,7 +69,7 @@ public class DataListOperator {
 	 * */
 	public LinkedList<Data> mergeLinkedLists(LinkedList<Data> a,
 			LinkedList<Data> b) {
-		LinkedList<Data> newlist = new LinkedList<Data>();
+		TimeSeries newlist = new TimeSeries();
 		int index_a = 0;
 		int index_b = 0;
 		// When both lists have contents.
@@ -92,7 +93,7 @@ public class DataListOperator {
 	}
 	
 	public LinkedList<Data> normalize(LinkedList<Data> dataset){
-		LinkedList<Data> norm_dataset = new LinkedList<Data>();
+		LinkedList<Data> norm_dataset = new TimeSeries();
 		// Find the Max value of data list
 		double max = StatTool.getInstance().maxDataListAbsValue(dataset);
 		// Calculate normalized dataset

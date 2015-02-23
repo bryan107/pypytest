@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import flanagan.analysis.Stat;
+import mdfr.datastructure.Data;
 import mdfr.math.emd.DataListOperator;
-import mdfr.math.emd.datastructure.Data;
 
 public class StatTool {
 	private final short VALUE = 1;

@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.math.emd.datastructure.Data;
+import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 
 public class DataListCalculator {
 
@@ -28,9 +29,9 @@ public class DataListCalculator {
 	/*
 	 * Get the mean values between envelopes with the same length.
 	 */
-	public LinkedList<Data> getMean(LinkedList<Data> list1,
-			LinkedList<Data> list2) {
-		LinkedList<Data> mean = new LinkedList<Data>();
+	public TimeSeries getMean(TimeSeries list1,
+			TimeSeries list2) {
+		TimeSeries mean = new TimeSeries();
 		if (list1.size() != list2.size()) {
 			logger.error("list size not match");
 			return null;
@@ -57,9 +58,9 @@ public class DataListCalculator {
 	/*
 	 * Get differences
 	 */
-	public LinkedList<Data> getDifference(LinkedList<Data> list1,
-			LinkedList<Data> list2) {
-		LinkedList<Data> difference = new LinkedList<Data>();
+	public TimeSeries getDifference(TimeSeries list1,
+			TimeSeries list2) {
+		TimeSeries difference = new TimeSeries();
 		if (list1.size() != list2.size()) {
 			logger.error("list size not match");
 			return null;
@@ -85,9 +86,9 @@ public class DataListCalculator {
 	/*
 	 * Get sums
 	 */
-	public LinkedList<Data> getSum(LinkedList<Data> list1,
-			LinkedList<Data> list2) {
-		LinkedList<Data> sum = new LinkedList<Data>();
+	public TimeSeries getSum(TimeSeries list1,
+			TimeSeries list2) {
+		TimeSeries sum = new TimeSeries();
 		if (list1.size() != list2.size()) {
 			logger.error("list size not match");
 			return null;

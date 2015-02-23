@@ -3,7 +3,7 @@ package mdfr.utility;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.datastructure.Data;
+import mdfr.datastructure.Data;
 
 public class SignalProcessing {
 

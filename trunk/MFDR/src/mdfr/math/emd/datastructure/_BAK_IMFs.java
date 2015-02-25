@@ -5,15 +5,15 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class IMFs_BAK {
-	private static Log logger = LogFactory.getLog(IMFs_BAK.class);
+public class _BAK_IMFs {
+	private static Log logger = LogFactory.getLog(_BAK_IMFs.class);
 	private LinkedList<IMF> imfs = new LinkedList<IMF>();
 	
 	/*
 	 * Constructor
 	 * */
 	
-	public IMFs_BAK(){
+	public _BAK_IMFs(){
 	}
 	
 	/*

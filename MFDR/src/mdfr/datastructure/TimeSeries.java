@@ -29,12 +29,7 @@ public class TimeSeries extends LinkedList<Data> {
 		return energy;
 	}
 	
-	// Calculate the energy density of the time series
-	public double energyDensity() {
-		return energy() / size();
-	}
-	
-	public double normalizedEnergyDensity(){
+	public double normalizedEnergy(){
 		// Normalize IMF to acquire normalized energy density 
 		LinkedList<Data> norm_datapoints = DataListOperator.getInstance().normalize(this);
 		logger.info("NORMALISED:" );
@@ -46,6 +41,19 @@ public class TimeSeries extends LinkedList<Data> {
 			energy += Math.pow(data.value(), 2);
 		}
 		logger.info("Energy:" + energy + "  Data Size:" + size());
-		return energy / size();
+		return energy;
+	}
+	
+	// Calculate the energy density of the time series
+	public double energyDensity() {
+		return energy() / size();
+	}
+	
+	public double normalizedEnergyDensity(){
+		return normalizedEnergy() / size();
+	}
+	
+	public TimeSeries normalisedValues(){
+		return DataListOperator.getInstance().normalize(this);
 	}
 }

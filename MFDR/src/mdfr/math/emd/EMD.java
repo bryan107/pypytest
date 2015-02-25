@@ -8,8 +8,8 @@ import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
-import mdfr.math.emd.datastructure.IMF_BAK;
-import mdfr.math.emd.datastructure.IMFs_BAK;
+import mdfr.math.emd.datastructure._BAK_IMF;
+import mdfr.math.emd.datastructure._BAK_IMFs;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.Print;
 

@@ -13,12 +13,12 @@ import mdfr.utility.Print;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class IMF_BAK {
-	private static Log logger = LogFactory.getLog(IMF_BAK.class);
+public class _BAK_IMF {
+	private static Log logger = LogFactory.getLog(_BAK_IMF.class);
 	private TimeSeries datapoints;
 	private LinkedList<Data> freq;
 
-	public IMF_BAK(TimeSeries datapoints, double zerocrossingaccuracy,
+	public _BAK_IMF(TimeSeries datapoints, double zerocrossingaccuracy,
 			InstantFrequency IF) {
 		updateIMF(datapoints, zerocrossingaccuracy, IF);
 	}

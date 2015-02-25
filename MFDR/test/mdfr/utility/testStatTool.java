@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import flanagan.analysis.Stat;
 import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListOperator;
 import junit.framework.TestCase;
 
@@ -11,7 +12,7 @@ public class testStatTool extends TestCase {
 	private long datasize = 100;  
 	
 	public void testAutoCorr(){
-		LinkedList<Data> residual = new LinkedList<Data>();
+		TimeSeries residual = new TimeSeries();
 		generateResidual(residual, datasize);
 		residual = DataListOperator.getInstance().normalize(residual);
 		double[] ac = StatTool.getInstance().autoCorr(residual);

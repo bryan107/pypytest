@@ -13,7 +13,7 @@ import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListOperator;
 import mdfr.math.emd.EMD;
 import mdfr.math.emd.datastructure.IMFS;
-import mdfr.math.emd.datastructure.IMFs_BAK;
+import mdfr.math.emd.datastructure._BAK_IMFs;
 import mdfr.utility.File;
 import mdfr.utility.Print;
 import mdfr.utility.StatTool;
@@ -27,10 +27,18 @@ public class TestEMD extends TestCase {
 	private long datasize = 100;  
 	private double[] IFparamaters = {4,2,1}; 
 	private final int MAXLEVEL = 10;
-	private double percentilesvalue = 5; // p-value 0.01
-	private double FTRatio = 0.50; 
-	private double t_threshold = 6.2;
 	DecimalFormat df = new DecimalFormat("0.0");
+	
+	
+	// Parameters for Noise/Signal Analysis
+	final double noise_whitenoiselevel = 5; // p-value 0.01
+	final double noise_threshold = 6.2;
+
+	// Parameters for Frequency/Trend Analysis
+
+	final int motif_k = 2; 
+	final double motif_threshold = 0.1;
+	final double FTratio = 0.5;
 	
 	public void testGetIMFs(){
 		TimeSeries residual = new TimeSeries();
@@ -48,7 +56,7 @@ public class TestEMD extends TestCase {
 		// Create EMD service object
 		EMD emd = new EMD(residual, zerocrossingaccuracy, IFparamaters[0], IFparamaters[1], IFparamaters[2]);
 		// Create IMF analysis object
-		IMFAnalysis analysis = new IMFAnalysis(percentilesvalue, FTRatio, t_threshold);
+		IMFAnalysis analysis = new IMFAnalysis(noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
 		// Calculate IMF with EMD
 		IMFS imfs = emd.getIMFs(MAXLEVEL);
 		
@@ -82,15 +90,15 @@ public class TestEMD extends TestCase {
 //		}
 		
 		// Save instant
-		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
-		try {
-			for(int i = 0 ; i < imfs.size() ; i++){
-				System.out.print("IF[" + StatTool.getInstance().autoCorrCoeff(imfs.get(i).instFreqFullResol(residual)) + "]: ");
-				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.get(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
-			}
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+//		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
+//		try {
+//			for(int i = 0 ; i < imfs.size() ; i++){
+//				System.out.print("IF[" + StatTool.getInstance().autoCorrCoeff(imfs.get(i).instFreqFullResol(residual)) + "]: ");
+//				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.get(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
+//			}
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
 	
 		
 //		for (int i = 0; i < imfs.size(); i++) {
@@ -108,34 +116,49 @@ public class TestEMD extends TestCase {
 		
 		
 		/*
-		 *  Print Results
+		 *  Print Results of each IMF
 		 */
-//		for(int i = 0 ; i < imfs.size() ; i++){
+		
+		for(int i = 0 ; i < imfs.size() ; i++){
+			System.out.println();
+			
+			// Print IMF[i] values
+			try {
+				double average = average(imfs.get(i));
+				System.out.println("IMF[" + i + "]  SIZE" + imfs.get(i).size() + " AVERAGE: " + average);
+				Print.getInstance().printDataLinkedList(imfs.get(i), 100);
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+			
+			// Print IMF[i] frequency condition
 //			System.out.println();
-//			System.out.println("IMF[" + i + "]: DataSize-" + imfs.getIMF(i).size() + " FrequencySIZE-" + imfs.getIMF(i).instantFrequency().size());
-//			if(analysis.isWhiteNoise(imfs.getIMF(i))){
-//				System.out.println("WHITENOISE");
-//			}else{
-//				System.out.println("SIGNAL");
-//			}
-////		    Print IMF[i]
-//			try {
-//				double average = average(imfs.getIMF(i).getDataList());
-//				System.out.println("IMF[" + i + "]:" + average);
-//				Print.getInstance().printDataLinkedList(imfs.getIMF(i).getDataList(), 100);
-//			} catch (Exception e) {
-//				System.out.println(e);
-//			}
+//			System.out.println("FrequencySIZE-" + imfs.get(i).instantFrequency().size());
 //			try {
 //				System.out.println("Current Signal Frequency:" + realfre);
-//				System.out.println("IMF Average Frequency:" + imfs.getIMF(i).averageFrequency());
-//				System.out.println("Instant Frequency[" + i + "]" + "Error:" + calcL2Error(imfs.getIMF(i).instantFrequency(), realfre/(i+1)));
-////				Print.getInstance().printDataLinkedList(IFs.get(i).getFrequency());
+//				System.out.println("IMF Average Frequency:" + imfs.get(i).averageFrequency());
+//				System.out.println("Instant Frequency[" + i + "]" + "Error:" + calcL2Error(imfs.get(i).instantFrequency(), realfre/(i+1)));
+//				Print.getInstance().printDataLinkedList(imfs.get(i).instantFrequency(), 100);
 //			} catch (Exception e) {
 //				System.out.println(e);
 //			}
-//
-//		}
+			
+			System.out.println();
+			// Print IMF[i] Noise condition
+			if(analysis.isWhiteNoise(imfs.get(i))){
+				System.out.println("WHITENOISE");
+			}else{
+				System.out.println("SIGNAL");
+			}
+			
+			
+			//  Print IMF[i] Frequency/Trend condition
+			if(analysis.isFreq(imfs.get(i))){
+				System.out.println("FREQUENCY");
+			}else{
+				System.out.println("Trend");
+			}
+		}
 	}
 	
 	public void testGetInstantFrequency(){
@@ -148,7 +171,11 @@ public class TestEMD extends TestCase {
 			double noise = 0; 
 			noise = r.nextGaussian() * Math.sqrt(5);
 //			double value = noise;
-			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + 10*Math.pow(i, 0.5);
+			double trend = 10*Math.pow(i, 0.5);
+			if(i > size/2){
+				trend = -trend;
+			}
+			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + trend;
 			
 			residual.add(new Data(i, value));
 		}

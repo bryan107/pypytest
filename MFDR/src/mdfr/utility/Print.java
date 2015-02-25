@@ -9,7 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.datastructure.Data;
-import mdfr.math.emd.datastructure.IMF_BAK;
+import mdfr.math.emd.datastructure._BAK_IMF;
 
 public class Print {
 	private static Log logger = LogFactory.getLog(Print.class);

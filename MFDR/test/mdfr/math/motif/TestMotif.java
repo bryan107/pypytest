@@ -8,19 +8,20 @@ import mdfr.utility.File;
 import mdfr.utility.Print;
 import mdfr.utility.StatTool;
 import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import junit.framework.TestCase;
 
 public class TestMotif extends TestCase {
 
 	public void testGetKMotif(){
-		LinkedList<Data> ts = new LinkedList<Data>();
+		TimeSeries ts = new TimeSeries();
 		generateResidual(ts, 120);
 		System.out.println("Time Series");
 		Print.getInstance().printDataLinkedList(ts, 120);
 		
 		
 		Motif motif = new Motif(ts, 12);
-		LinkedList<LinkedList<Integer>> kmotif = motif.getKMotif(2, 0.2);
+		LinkedList<LinkedList<Integer>> kmotif = motif.getKMotifs(2, 0.2);
 		
 		//Print results
 		int i = 0;

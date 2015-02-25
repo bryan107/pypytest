@@ -3,8 +3,12 @@ package mdfr.math.emd;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
+import mdfr.math.emd.datastructure.IMF;
 import mdfr.utility.StatTool;
 
 public class DataListOperator {
@@ -12,7 +16,7 @@ public class DataListOperator {
 	/*
 	 * This Class provides basic <Data> LinkedList merge and information extraction methods. 
 	 */
-	
+	private static Log logger = LogFactory.getLog(DataListOperator.class);
 	private static DataListOperator self = new DataListOperator();
 	// TODO Remove the use of these two final variables
 	private final short TIME = 0;
@@ -92,10 +96,11 @@ public class DataListOperator {
 		return newlist;
 	}
 	
-	public LinkedList<Data> normalize(LinkedList<Data> dataset){
-		LinkedList<Data> norm_dataset = new TimeSeries();
+	public TimeSeries normalize(TimeSeries dataset){
+		TimeSeries norm_dataset = new TimeSeries();
 		// Find the Max value of data list
 		double max = StatTool.getInstance().maxDataListAbsValue(dataset);
+		logger.info("MAX: " + max);
 		// Calculate normalized dataset
 		Iterator<Data> it = dataset.iterator();
 		while (it.hasNext()) {
@@ -104,7 +109,7 @@ public class DataListOperator {
 		}
 		return norm_dataset;
 	}
-
+	
 	public LinkedList<Double> getTimeList(LinkedList<Data> linkedlist){
 		LinkedList<Double> timeref = new LinkedList<Double>();
 		Iterator<Data> it = linkedlist.iterator();

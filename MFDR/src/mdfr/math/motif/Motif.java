@@ -7,29 +7,30 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
 import mdfr.distance.Distance;
 import mdfr.distance.EuclideanDistance;
 import mdfr.math.emd.DataListOperator;
 
 public class Motif {
 	private static Log logger = LogFactory.getLog(Motif.class);
-	LinkedList<LinkedList<Data>> motif = new LinkedList<LinkedList<Data>>();
+	LinkedList<TimeSeries> motif = new LinkedList<TimeSeries>();
 	double windowsize;
 	private final short VALUE = 1;
 	
-	public Motif(LinkedList<Data> ts, double windowsize){
+	public Motif(TimeSeries ts, double windowsize){
 		updateWindowSize(windowsize);
 		updateTS(ts);
 	}
 	
-	public void updateTS(LinkedList<Data> ts){
+	public void updateTS(TimeSeries ts){
 		double indexsize = windowsize/getTimeInterval(ts);
 		if(windowsize%getTimeInterval(ts) != 0){
 			logger.info("Window size does not match time interval");
 		}
 		Iterator<Data> it = ts.iterator();
 		while (it.hasNext()) {
-			LinkedList<Data> temp = new LinkedList<Data>();
+			TimeSeries temp = new TimeSeries();
 			for(int i = 0 ; i < indexsize ; i++){
 				if(!it.hasNext()){
 					logger.info("The length of input time series does not perfectly match the window size");
@@ -62,37 +63,47 @@ public class Motif {
 	/*
 	 * This is a brute-force solution of standard K-Motif algorithm
 	 */
-	public LinkedList<LinkedList<Integer>> getKMotif(int k, double threshold){
+	public LinkedList<LinkedList<Integer>> getKMotifs(int k, double threshold){
 		LinkedList<LinkedList<Integer>> kmotif = new LinkedList<LinkedList<Integer>>();
 		LinkedList<LinkedList<Integer>> matchpool = new LinkedList<LinkedList<Integer>>();
 		Distance d = new EuclideanDistance();
 		
 		// Initiate pool instances.
-		for(int i = 0 ; i < motif.size() ; i++){
+		// Ensure that the last motif (which may not contain enough data) is not included.
+		for(int i = 0 ; i < motif.size() - 1 ; i++){
 			matchpool.add(new LinkedList<Integer>());
 		}
 		
 		// Generate match pool
-		for(int i = 0 ; i < motif.size() ; i++){
-			for(int j = i + 1 ; j < motif.size() ; j++){
+		// Ensure that the last motif (which may not contain enough data) is not included.
+		for(int i = 0 ; i < motif.size() - 1 ; i++){
+			for(int j = i + 1 ; j < motif.size() - 1 ; j++){
 				double[] xx = DataListOperator.getInstance().LinkedListToArray(motif.get(i), VALUE);
 				double[] yy = DataListOperator.getInstance().LinkedListToArray(motif.get(j), VALUE);
 				// If two motif is a non trivial match:
-				double distance = d.calDistance(xx, yy);
+				// TODO test here distance is normalised by motif length
+				double distance = d.calDistance(xx, yy)/xx.length;
 				if(distance <= threshold){
 					matchpool.get(i).add(j);
 					matchpool.get(j).add(i);
 				}
 			}
 		}
-		
 		// Extract K-Motif
-		for(int i = 0 ; i < k ; i++){
+		boolean flag = false;
+		for(int i = 0 ; i < k && i < motif.size() - 1; i++){
 			Integer current_best_location = 0;
 			Integer current_best_num = 0;
 			// Get current level 1-Motif
 			current_best_location = findBestMatchMotif(matchpool,
 					current_best_location, current_best_num);
+			// If not motif can be extracted.
+			if(current_best_location == 0){
+				if(flag){
+					break;
+				}
+				flag = true;
+			}
 			// Save the 1-Motif matchs in the map
 			matchpool = saveBestMatchMotif(kmotif, matchpool, current_best_location);
 		}
@@ -118,18 +129,29 @@ public class Motif {
 		motifs.add(current_best_location);
 		Iterator<Integer> it = matchpool.get(current_best_location).iterator();
 		while (it.hasNext()) {
-			Integer integer = (Integer) it.next();
+			Integer index = (Integer) it.next();
 			// Add match to motifs
-			motifs.add(integer);
-			// Remove object current_best_location from others
-			matchpool.get(integer).remove(current_best_location);
+			motifs.add(index);
+			
+			/*
+			 * K-Motif selection, can only use one of them
+			 */
+			
+			// 1.Naive K-Motif
+			//   Remove object current_best_location from others
+//			matchpool.get(index).remove(current_best_location);
+			
+			// 2.Standard K-Motif proposed in KDD 02'
+			//   Remove object that has been included in cluster of current_best_location.
+			//   This ensures that there is no overlap between clusters.
+			matchpool.get(index).clear();
 		}
 		matchpool.get(current_best_location).clear();
 		kmotif.add(motifs);
 		return matchpool;
 	}
 	
-	public LinkedList<Data> getMotif(int index){
+	public TimeSeries getMotif(int index){
 		return motif.get(index);
 	}
 	

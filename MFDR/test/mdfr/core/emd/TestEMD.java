@@ -12,6 +12,7 @@ import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListOperator;
 import mdfr.math.emd.EMD;
+import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
 import mdfr.math.emd.datastructure._BAK_IMFs;
 import mdfr.utility.File;
@@ -24,7 +25,7 @@ public class TestEMD extends TestCase {
 	
 	private static Log logger = LogFactory.getLog(TestEMD.class);
 	private double zerocrossingaccuracy = 0.0001;
-	private long datasize = 100;  
+	private long datasize = 2000;  
 	private double[] IFparamaters = {4,2,1}; 
 	private final int MAXLEVEL = 10;
 	DecimalFormat df = new DecimalFormat("0.0");
@@ -43,10 +44,11 @@ public class TestEMD extends TestCase {
 	public void testGetIMFs(){
 		TimeSeries residual = new TimeSeries();
 		double realfre = generateResidual(residual, datasize);
-		residual = (TimeSeries) DataListOperator.getInstance().normalize(residual);
+//		residual = (TimeSeries) DataListOperator.getInstance().normalize(residual);
 //		residual = normalise(residual);
 		logger.info("RESIDUAL:");
 		Print.getInstance().printDataLinkedList(residual, 100);
+		logger.info("Energy: " + residual.energy());
 //		IMFAnalysis residualanalysis = new IMFAnalysis(percentilesvalue, FTRatio, t_threshold);
 //		residualanalysis.isSignal(residual);
 		
@@ -55,10 +57,28 @@ public class TestEMD extends TestCase {
 		 */
 		// Create EMD service object
 		EMD emd = new EMD(residual, zerocrossingaccuracy, IFparamaters[0], IFparamaters[1], IFparamaters[2]);
-		// Create IMF analysis object
-		IMFAnalysis analysis = new IMFAnalysis(noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
 		// Calculate IMF with EMD
 		IMFS imfs = emd.getIMFs(MAXLEVEL);
+		// Create IMF analysis object
+		IMFAnalysis analysis = new IMFAnalysis(residual, imfs, noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
+		
+		double oimfd = 0;
+		Iterator<IMF> it = imfs.iterator();
+		while (it.hasNext()) {
+			IMF imf = (IMF) it.next();
+			oimfd += imf.normalizedEnergyDensity(residual.energyNormalizedFactor());
+		}
+		
+		logger.info("ORIGINAL IMFS ENERGY DENSITY: " + oimfd);
+		
+		double imfd = 0;
+		it = imfs.iterator();
+		while (it.hasNext()) {
+			IMF imf = (IMF) it.next();
+			imfd += imf.energyDensity()/imfs.totalEnergyDensity();
+		}
+		
+		logger.info("NEW IMFS ENERGY DENSITY: " + imfd);
 		
 		/*
 		 *  Store Results
@@ -86,7 +106,6 @@ public class TestEMD extends TestCase {
 //				File.getInstance().saveLinkedListToFile(imfs.getIMF(i).instFreqFullResol(residual), "C:\\TEST\\MDFR\\IMFTest_Norm_Freq.csv");
 //			}
 //		} catch (Exception e) {
-//			// TODO: handle exception
 //		}
 		
 		// Save instant
@@ -97,7 +116,6 @@ public class TestEMD extends TestCase {
 //				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.get(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
 //			}
 //		} catch (Exception e) {
-//			// TODO: handle exception
 //		}
 	
 		
@@ -109,7 +127,6 @@ public class TestEMD extends TestCase {
 //				System.out.print("Full resolution IF[" + imfs.getIMF(i).instFreqFullResol(residual).size() + "]: ");
 //				Print.getInstance().printDataLinkedList(imfs.getIMF(i).instFreqFullResol(residual), 100);
 //			} catch (Exception e) {
-//				// TODO: handle exception
 //			}
 //
 //		}
@@ -166,7 +183,7 @@ public class TestEMD extends TestCase {
 	}
 	
 	private double generateResidual(LinkedList<Data> residual, long size) {
-		for (double i = 0; i < size; i+=0.2) {
+		for (double i = 0; i < size; i+=1) {
 			java.util.Random r = new java.util.Random();
 			double noise = 0; 
 			noise = r.nextGaussian() * Math.sqrt(5);
@@ -175,8 +192,9 @@ public class TestEMD extends TestCase {
 			if(i > size/2){
 				trend = -trend;
 			}
-			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + trend;
-			
+//			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + trend;
+			double value = noise;
+//			double value = 9.5 * Math.sin(i*Math.PI / 16) + 9.5 * Math.sin(i*Math.PI / 8);
 			residual.add(new Data(i, value));
 		}
 		return (double)1/6;

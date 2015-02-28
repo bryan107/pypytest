@@ -14,7 +14,7 @@ public class testStatTool extends TestCase {
 	public void testAutoCorr(){
 		TimeSeries residual = new TimeSeries();
 		generateResidual(residual, datasize);
-		residual = DataListOperator.getInstance().normalize(residual);
+		residual = DataListOperator.getInstance().normalize(residual, 2);
 		double[] ac = StatTool.getInstance().autoCorr(residual);
 		double acc = StatTool.getInstance().autoCorrCoeff(residual);
 		System.out.println("ACC: " + acc);

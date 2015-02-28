@@ -14,84 +14,97 @@ import mdfr.math.emd.DataListOperator;
 
 public class Motif {
 	private static Log logger = LogFactory.getLog(Motif.class);
-	LinkedList<TimeSeries> motif = new LinkedList<TimeSeries>();
-	double windowsize;
+	private LinkedList<TimeSeries> subsignals = new LinkedList<TimeSeries>();
+	private double windowsize;
+	private TimeSeries ts;
+	private boolean lastsubsigavailable = true;
 	private final short VALUE = 1;
 	
+	// Constructor
 	public Motif(TimeSeries ts, double windowsize){
-		updateWindowSize(windowsize);
-		updateTS(ts);
+		this.ts = ts;
+		this.windowsize = windowsize;
+		updateSubSignals();
 	}
 	
-	public void updateTS(TimeSeries ts){
-		double indexsize = windowsize/getTimeInterval(ts);
-		if(windowsize%getTimeInterval(ts) != 0){
+	/** Initial function
+	 * Here the input time series (can be an IMF) is separated into several signals at a given window size
+	 * and stored as a Linkedlist of TimeSeries objects.
+	 */ 
+	// update Time Series
+	public void updateTimeSeries(TimeSeries ts){
+		this.ts = ts;
+		updateSubSignals();
+	}
+	
+	// update Window Size
+	public void updateWindowSize(double windowsize){
+		this.windowsize = windowsize;
+		updateSubSignals();
+	}
+	
+	// update subsignals
+	private void updateSubSignals(){
+		double subsignallength = windowsize / ts.timeInterval();
+		// Check if the last sub-signal has enough length as its comparable counterparts.
+		if(windowsize % ts.timeInterval() != 0){
 			logger.info("Window size does not match time interval");
+			lastsubsigavailable = false;
 		}
+		// Move values in Time Series ts into subsignals 
 		Iterator<Data> it = ts.iterator();
 		while (it.hasNext()) {
 			TimeSeries temp = new TimeSeries();
-			for(int i = 0 ; i < indexsize ; i++){
+			for(int i = 0 ; i < subsignallength ; i++){
+				// Check if the last sub-signal has enough length as its comparable counterparts.
 				if(!it.hasNext()){
 					logger.info("The length of input time series does not perfectly match the window size");
 					break;
 				}
 				temp.add((Data) it.next());
 			}
-			motif.add(temp);
+			subsignals.add(temp);
 		}
 	}
 	
-	// TODO this is only for temporary use fix with new Time Series Object.
-	private double getTimeInterval(LinkedList<Data> ts){
-		Iterator<Data> it = ts.iterator();
-		double t1 = 0, t2 = 0;
-		try {
-			t1 = it.next().time();
-			t2 = it.next().time();
-		} catch (Exception e) {
-			logger.error("The input TS does not have enough length to get interval" + e);
-			return 0;
-		}
-		return t2-t1;
-	}
-	
-	public void updateWindowSize(double windowsize){
-		this.windowsize = windowsize;
-	}
-	
-	/*
-	 * This is a brute-force solution of standard K-Motif algorithm
+	/**
+	 * Supported public functions
 	 */
+	public TimeSeries getSubSignal(int index){
+		return subsignals.get(index);
+	}
+	
+	public int getSubSignalNum(){
+		return subsignals.size();
+	}
+	
+	/**
+	 * This is a brute-force solution of standard K-Motifs algorithm
+	 **/
 	public LinkedList<LinkedList<Integer>> getKMotifs(int k, double threshold){
 		LinkedList<LinkedList<Integer>> kmotif = new LinkedList<LinkedList<Integer>>();
 		LinkedList<LinkedList<Integer>> matchpool = new LinkedList<LinkedList<Integer>>();
 		Distance d = new EuclideanDistance();
-		
-		// Initiate pool instances.
-		// Ensure that the last motif (which may not contain enough data) is not included.
-		for(int i = 0 ; i < motif.size() - 1 ; i++){
-			matchpool.add(new LinkedList<Integer>());
-		}
-		
-		// Generate match pool
-		// Ensure that the last motif (which may not contain enough data) is not included.
-		for(int i = 0 ; i < motif.size() - 1 ; i++){
-			for(int j = i + 1 ; j < motif.size() - 1 ; j++){
-				double[] xx = DataListOperator.getInstance().LinkedListToArray(motif.get(i), VALUE);
-				double[] yy = DataListOperator.getInstance().LinkedListToArray(motif.get(j), VALUE);
-				// If two motif is a non trivial match:
-				// TODO test here distance is normalised by motif length
-				double distance = d.calDistance(xx, yy)/xx.length;
-				if(distance <= threshold){
-					matchpool.get(i).add(j);
-					matchpool.get(j).add(i);
-				}
-			}
-		}
-		// Extract K-Motif
+		// 1. Initiate pool instances.
+		initMatchPool(matchpool);
+		// 2. Generate match pool
+		establishMatchPool(threshold, matchpool, d);
+		// 3. Extract K-Motif
+		extractKMotif(k, kmotif, matchpool);
+		return kmotif;
+	}
+
+	
+	/* 
+	 * These are implementations that serve getKMotifs()
+	 */
+	private void extractKMotif(int k, LinkedList<LinkedList<Integer>> kmotif,
+			LinkedList<LinkedList<Integer>> matchpool) {
 		boolean flag = false;
-		for(int i = 0 ; i < k && i < motif.size() - 1; i++){
+		int compensation = 1;
+		if(lastsubsigavailable)
+			compensation = 0;
+		for(int i = 0 ; i < k && i < subsignals.size() - compensation; i++){
 			Integer current_best_location = 0;
 			Integer current_best_num = 0;
 			// Get current level 1-Motif
@@ -107,9 +120,37 @@ public class Motif {
 			// Save the 1-Motif matchs in the map
 			matchpool = saveBestMatchMotif(kmotif, matchpool, current_best_location);
 		}
-		return kmotif;
 	}
 
+	private void establishMatchPool(double threshold,
+			LinkedList<LinkedList<Integer>> matchpool, Distance d) {
+		int compensation = 1;
+		if(lastsubsigavailable)
+			compensation = 0;
+		for(int i = 0 ; i < subsignals.size() - compensation ; i++){
+			for(int j = i + 1 ; j < subsignals.size() - 1 ; j++){
+				double[] xx = DataListOperator.getInstance().LinkedListToArray(subsignals.get(i), VALUE);
+				double[] yy = DataListOperator.getInstance().LinkedListToArray(subsignals.get(j), VALUE);
+				// Here distance is normalised by motif length
+				double distance = d.calDistance(xx, yy)/xx.length;
+				if(distance <= threshold){
+					matchpool.get(i).add(j);
+					matchpool.get(j).add(i);
+				}
+			}
+		}
+	}
+
+	private void initMatchPool(LinkedList<LinkedList<Integer>> matchpool) {
+		// Ensure that the last motif (which may not contain enough data) is not included.
+		for(int i = 0 ; i < subsignals.size() - 1 ; i++){
+			matchpool.add(new LinkedList<Integer>());
+		}
+	}
+
+	/*
+	 * These are implementations that serve extractKMotif()
+	 */
 	private Integer findBestMatchMotif(
 			LinkedList<LinkedList<Integer>> matchpool,
 			Integer current_best_location, Integer current_best_num) {
@@ -151,12 +192,7 @@ public class Motif {
 		return matchpool;
 	}
 	
-	public TimeSeries getMotif(int index){
-		return motif.get(index);
-	}
 	
-	public int getMotifNum(){
-		return motif.size();
-	}
+
 	
 }

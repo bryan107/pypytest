@@ -96,16 +96,13 @@ public class DataListOperator {
 		return newlist;
 	}
 	
-	public TimeSeries normalize(TimeSeries dataset){
+	public TimeSeries normalize(TimeSeries dataset, double base){
 		TimeSeries norm_dataset = new TimeSeries();
-		// Find the Max value of data list
-		double max = StatTool.getInstance().maxDataListAbsValue(dataset);
-		logger.info("MAX: " + max);
 		// Calculate normalized dataset
 		Iterator<Data> it = dataset.iterator();
 		while (it.hasNext()) {
 			Data data = (Data) it.next();
-			norm_dataset.add(new Data(data.time(),(data.value()/max)));
+			norm_dataset.add(new Data(data.time(),(data.value()/base)));
 		}
 		return norm_dataset;
 	}

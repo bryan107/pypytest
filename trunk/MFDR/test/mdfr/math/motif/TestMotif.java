@@ -32,7 +32,7 @@ public class TestMotif extends TestCase {
 			Iterator<Integer> it2 = k.iterator();
 			while (it2.hasNext()) {
 				Integer index = (Integer) it2.next();
-				Print.getInstance().printDataLinkedList(motif.getMotif(index), 30);
+				Print.getInstance().printDataLinkedList(motif.getSubSignal(index), 30);
 			}
 		}
 		
@@ -43,7 +43,6 @@ public class TestMotif extends TestCase {
 //				File.getInstance().saveArrayToFile(StatTool.getInstance().autoCorr(imfs.getIMF(i).instFreqFullResol(residual)), "C:\\TEST\\MDFR\\IMFTest_Norm_AutoCorr.csv");
 //			}
 //		} catch (Exception e) {
-//			// TODO: handle exception
 //		}
 
 	}

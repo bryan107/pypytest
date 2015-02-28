@@ -11,7 +11,7 @@ public class TestTimeSeries extends TestCase {
 		generateResidual(ts, 100);
 		System.out.println("Energy:" + ts.energy());
 		System.out.println("Energy Density" + ts.energyDensity());
-		System.out.println("Normalised Energy Density" + ts.normalizedEnergyDensity());
+//		System.out.println("Normalised Energy Density" + ts.normalizedEnergyDensity());
 	}
 	
 	

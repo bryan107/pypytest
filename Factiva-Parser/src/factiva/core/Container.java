@@ -23,7 +23,14 @@ public class Container {
 	}
 	
 	public void attachContent(String content){
-		this.content += content;
+		int i = 0;
+		for(; i < content.length() ; i++){
+			char test = content.charAt(i);
+			if(test!= ' '){
+				break;
+			}
+		}
+		this.content += content.substring(i);;
 	}
 	
 	public boolean hasTag(){

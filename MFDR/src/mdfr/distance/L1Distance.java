@@ -1,6 +1,6 @@
 package mdfr.distance;
 
-public class L1Distance implements Distance {
+public class L1Distance extends Distance {
 
 	@Override
 	public double calDistance(double[] xx, double[] yy) {

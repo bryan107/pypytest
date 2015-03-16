@@ -10,11 +10,11 @@ public class Data {
 	}
 	
 	public double time(){
-		return time;
+		return this.time;
 	}
 	
 	public double value(){
-		return value;
+		return this.value;
 	}
 	
 	

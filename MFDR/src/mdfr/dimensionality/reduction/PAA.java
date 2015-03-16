@@ -1,4 +1,4 @@
-package mdfr.dimentionality.reduction;
+package mdfr.dimensionality.reduction;
 
 import java.util.Iterator;
 
@@ -18,6 +18,7 @@ public class PAA implements DimentionalityReduction {
 		this.windowsize = windowsize;
 	}
 
+	// TODO reconstruct this with getDR
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries paafull = new TimeSeries();
@@ -99,7 +100,8 @@ public class PAA implements DimentionalityReduction {
 			}
 			try {
 				// Add PAA result to dr
-				paa.add(new Data(init_time, sum/count));		
+				double value = sum/count;
+				paa.add(new Data(init_time, value));		
 			} catch (Exception e) {
 				logger.info("Zero count when calculate PAA" + e);
 			}
@@ -114,9 +116,8 @@ public class PAA implements DimentionalityReduction {
 	}
 
 	@Override
-	public TimeSeries getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		// TODO return distance
-		return null;
+	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
+		return distance.calDistance(getFullResolutionDR(ts1), getFullResolutionDR(ts2), ts1);
 	}
 
 }

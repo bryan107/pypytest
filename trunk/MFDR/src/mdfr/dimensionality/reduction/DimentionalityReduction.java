@@ -1,4 +1,4 @@
-package mdfr.dimentionality.reduction;
+package mdfr.dimensionality.reduction;
 
 import mdfr.datastructure.TimeSeries;
 import mdfr.distance.Distance;
@@ -19,5 +19,5 @@ public interface DimentionalityReduction {
 	public Object getDR(TimeSeries ts, double windowsize);
 	
 	// Returns the distance between ts1 and ts2 with the given DR.
-	public TimeSeries getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance);
+	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance);
 }

@@ -1,31 +1,30 @@
 package mdfr.dimensionality.reduction;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
+import mdfr.dimensionality.datastructure.PAAData;
 import mdfr.distance.Distance;
 
-public class PAA implements DimentionalityReduction {
+public class PAA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PAA.class);
-	private double windowsize;
 	
-	@Override
-	public void setWindowSize(double windowsize) {
-		this.windowsize = windowsize;
+	public PAA(double windowsize){
+		setWindowSize(windowsize);
 	}
-
-	// TODO reconstruct this with getDR
+	
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries paafull = new TimeSeries();
-		TimeSeries paa = (TimeSeries) getDR(ts);
+		LinkedList<PAAData> paa = getDR(ts);
 		// set it_paa
-		Data data_paa_front, data_paa_rare;
-		Iterator<Data> it_paa = paa.iterator();
+		PAAData data_paa_front, data_paa_rare;
+		Iterator<PAAData> it_paa = paa.iterator();
 		if(paa.size() >1){
 			data_paa_front = it_paa.next();
 			data_paa_rare = it_paa.next();
@@ -42,15 +41,15 @@ public class PAA implements DimentionalityReduction {
 			Data data_ts = (Data) it.next();
 			// If at the last window of PAA
 			if(data_paa_rare == null){
-				paafull.add(new Data(data_ts.time(), data_paa_front.value()));
+				paafull.add(new Data(data_ts.time(), data_paa_front.average()));
 			}
 			// If at the middle of PAA
 			else if((data_ts.time() >= data_paa_front.time()) && data_ts.time() < data_paa_rare.time()){
-				paafull.add(new Data(data_ts.time(), data_paa_front.value()));
+				paafull.add(new Data(data_ts.time(), data_paa_front.average()));
 			}
 			// If iterate to the next window of PAA
 			else if(data_ts.time() >= data_paa_rare.time()){
-				paafull.add(new Data(data_ts.time(), data_paa_rare.value()));
+				paafull.add(new Data(data_ts.time(), data_paa_rare.average()));
 				data_paa_front = data_paa_rare;
 				// Exam whether or not achieve the last window.
 				if(it_paa.hasNext()){
@@ -66,14 +65,8 @@ public class PAA implements DimentionalityReduction {
 	}
 
 	@Override
-	public TimeSeries getFullResolutionDR(TimeSeries ts, double windowsize) {
-		setWindowSize(windowsize);
-		return getFullResolutionDR(ts);
-	}
-
-	@Override
-	public Object getDR(TimeSeries ts) {
-		TimeSeries paa = new TimeSeries();
+	public LinkedList<PAAData> getDR(TimeSeries ts) {
+		LinkedList<PAAData> paa = new LinkedList<PAAData>();
 		boolean isfirstround = true;
 		Data data = new Data(0, 0);
 		Iterator<Data> it = ts.iterator();
@@ -100,8 +93,8 @@ public class PAA implements DimentionalityReduction {
 			}
 			try {
 				// Add PAA result to dr
-				double value = sum/count;
-				paa.add(new Data(init_time, value));		
+				double average = sum/count;
+				paa.add(new PAAData(init_time, average));		
 			} catch (Exception e) {
 				logger.info("Zero count when calculate PAA" + e);
 			}
@@ -110,14 +103,10 @@ public class PAA implements DimentionalityReduction {
 	}
 
 	@Override
-	public Object getDR(TimeSeries ts, double windowsize) {
-		setWindowSize(windowsize);
-		return getDR(ts);
-	}
-
-	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		return distance.calDistance(getFullResolutionDR(ts1), getFullResolutionDR(ts2), ts1);
+		TimeSeries dr1 = getFullResolutionDR(ts1);
+		TimeSeries dr2 = getFullResolutionDR(ts2);
+		return distance.calDistance(dr1, dr2, ts1);
 	}
 
 }

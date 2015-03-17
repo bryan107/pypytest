@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -15,37 +14,62 @@ import mdfr.datastructure.TimeSeries;
 import mdfr.dimensionality.datastructure.PLAData;
 import mdfr.distance.Distance;
 
-public class PLA implements DimentionalityReduction {
+public class PLA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PLA.class);
-	private double windowsize;
 	
 	public PLA(double windowsize){
 		setWindowSize(windowsize);
 	}
 	
-	public double windowSize(){
-		return this.windowsize;
-	}
-	
-	@Override
-	public void setWindowSize(double windowsize) {
-		this.windowsize = windowsize;
-	}
-
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
-		// TODO Auto-generated method stub
-		return null;
+		TimeSeries plafull = new TimeSeries();
+		LinkedList<PLAData> pla = getDR(ts);
+		calFullResolutionDR(ts, plafull, pla);
+		return plafull;
+	}
+	
+	public TimeSeries getFullResolutionDR(LinkedList<PLAData> pla, TimeSeries ref){
+		TimeSeries plafull = new TimeSeries();
+		calFullResolutionDR(ref, plafull, pla);
+		return plafull;
+	}
+
+	private void calFullResolutionDR(TimeSeries ts, TimeSeries plafull,
+			LinkedList<PLAData> pla) {
+		double init_time = -1;
+		double end_time = -1;
+		try {
+			end_time = pla.get(0).time();
+		} catch (Exception e) {
+			logger.info("Empty PLA retuls" + e);
+			return;
+		}
+		Iterator<Data> it = ts.iterator();
+		Data data = (Data) it.next();
+		// When pla has end point windows.
+		for(int index = 1 ; index < pla.size() ; index++){
+			init_time = end_time;
+			end_time = pla.get(index).time();
+			while(data.time() >= init_time && data.time() < end_time){
+				double value = pla.get(index-1).getValue(data.time());
+				plafull.add(new Data(data.time(), value));
+				if(it.hasNext()){
+					data = it.next();
+				}
+			}
+		}
+		double value = pla.get(pla.size()-1).getValue(data.time());
+		plafull.add(new Data(data.time(), value));
+		while(it.hasNext()){
+			data = it.next();
+			value = pla.get(pla.size()-1).getValue(data.time());
+			plafull.add(new Data(data.time(), value));
+		}
 	}
 
 	@Override
-	public TimeSeries getFullResolutionDR(TimeSeries ts, double windowsize) {
-		setWindowSize(windowsize);
-		return getFullResolutionDR(ts);
-	}
-
-	@Override
-	public Object getDR(TimeSeries ts) {
+	public LinkedList<PLAData> getDR(TimeSeries ts) {
 		LinkedList<PLAData> pla = new LinkedList<PLAData>();
 		boolean isfirstround = true;
 		Data data = new Data(0, 0);
@@ -54,7 +78,7 @@ public class PLA implements DimentionalityReduction {
 			Map<Double, Double> temp = new HashMap<Double, Double>();
 			// If first round, initiate data.
 			if(isfirstround){
-				 data = (Data) it.next();
+				data = (Data) it.next();
 				isfirstround = false;
 			}
 			double init_time = data.time();
@@ -74,7 +98,7 @@ public class PLA implements DimentionalityReduction {
 				double[] x = new double[temp.size()];
 				double[] y = new double[temp.size()];
 				// TODO This can be extracted to Utility
-				convertMapToArray(temp, x);
+				convertMapToArray(temp, x, y);
 				Regression reg = new Regression(x, y);
 				reg.linear();
 				double[] coeff = reg.getBestEstimates();
@@ -86,27 +110,27 @@ public class PLA implements DimentionalityReduction {
 		return pla;
 	}
 
-	private void convertMapToArray(Map<Double, Double> temp, double[] x) {
+	private void convertMapToArray(Map<Double, Double> temp, double[] x, double[] y) {
 		int index = 0;
 		Iterator<Double> it2 = temp.keySet().iterator(); 
 		while (it2.hasNext()) {
 			Double time = (Double) it2.next();
 			x[index] = time;
-			x[index] = temp.get(time);
+			y[index] = temp.get(time);
 			index++;
 		}
 	}
 
 	@Override
-	public Object getDR(TimeSeries ts, double windowsize) {
-		setWindowSize(windowsize);
-		return getDR(ts);
-	}
-
-	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		// TODO Auto-generated method stub
-		return 0;
+		TimeSeries dr1full = getFullResolutionDR(ts1);
+		TimeSeries dr2full = getFullResolutionDR(ts2);
+		return distance.calDistance(dr1full, dr2full, dr1full);
 	}
-
+	
+	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, TimeSeries ref, Distance distance) {
+		TimeSeries dr1full = getFullResolutionDR(dr1, ref);
+		TimeSeries dr2full = getFullResolutionDR(dr2, ref);
+		return distance.calDistance(dr1full, dr2full, dr1full);
+	}
 }

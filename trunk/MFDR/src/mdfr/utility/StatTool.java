@@ -1,12 +1,10 @@
 package mdfr.utility;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import flanagan.analysis.Stat;
 import mdfr.datastructure.Data;
-import mdfr.math.emd.DataListOperator;
 
 public class StatTool {
 	private final short VALUE = 1;
@@ -53,7 +51,7 @@ public class StatTool {
     * The implementation for LinkedList<Data>
     */
    public double[] autoCorr(LinkedList<Data> dataset){
-	   double[] xx = DataListOperator.getInstance().LinkedListToArray(dataset, VALUE);
+	   double[] xx = DataListOperator.getInstance().linkedListToArray(dataset, VALUE);
        return autoCorr(xx);
    }
    

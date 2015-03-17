@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import flanagan.analysis.Stat;
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
-import mdfr.math.emd.DataListOperator;
 import junit.framework.TestCase;
 
 public class testStatTool extends TestCase {
@@ -20,7 +19,7 @@ public class testStatTool extends TestCase {
 		System.out.println("ACC: " + acc);
 		System.out.print("AC:");
 		Print.getInstance().printArray(ac, 100);
-		double[] array = DataListOperator.getInstance().LinkedListToArray(residual, (short) 1);
+		double[] array = DataListOperator.getInstance().linkedListToArray(residual, (short) 1);
 		double corr = Stat.corrCoeff(array, array);
 		System.out.println("Corr: " + corr);
 	}

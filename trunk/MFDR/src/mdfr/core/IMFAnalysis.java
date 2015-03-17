@@ -7,15 +7,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import mdfr.datastructure.TimeSeries;
-import mdfr.math.emd.DataListOperator;
 import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
 import mdfr.math.motif.Motif;
 import mdfr.math.statistic.StatisticalBounds;
 import mdfr.math.statistic.StatisticalBoundsWhiteNoise;
 import mdfr.math.statistic.StatisticalProperty;
-import mdfr.utility.Print;
-import mdfr.utility.StatTool;
 
 public class IMFAnalysis {
 	// Logger

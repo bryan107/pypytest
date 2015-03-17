@@ -10,7 +10,7 @@ import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
-import mdfr.utility.Print;
+import mdfr.utility.DataListOperator;
 import flanagan.interpolation.CubicSpline;
 
 public class DataListEnvelopCalculator {
@@ -43,12 +43,12 @@ public class DataListEnvelopCalculator {
 		
 		// 1. Convert Data from linked list to array
 
-		double[] upperextremas = DataListOperator.getInstance().LinkedListToArray(le.localMaxima(), TIME);
-		double[] lowerextremas = DataListOperator.getInstance().LinkedListToArray(le.localMinima(), TIME);
+		double[] upperextremas = DataListOperator.getInstance().linkedListToArray(le.localMaxima(), TIME);
+		double[] lowerextremas = DataListOperator.getInstance().linkedListToArray(le.localMinima(), TIME);
 
 		// 2. Prepare value array for interpolation.
-		double[] uppervalues = DataListOperator.getInstance().LinkedListToArray(le.localMaxima(), VALUE);
-		double[] lowervalues = DataListOperator.getInstance().LinkedListToArray(le.localMinima(), VALUE);
+		double[] uppervalues = DataListOperator.getInstance().linkedListToArray(le.localMaxima(), VALUE);
+		double[] lowervalues = DataListOperator.getInstance().linkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
 		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);

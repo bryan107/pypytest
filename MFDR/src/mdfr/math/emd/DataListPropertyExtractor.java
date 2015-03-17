@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import mdfr.datastructure.Data;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.utility.DataListOperator;
 import mdfr.utility.Print;
 
 import org.apache.commons.logging.Log;

@@ -1,5 +1,11 @@
 package mdfr.dimensionality.reduction;
 
+import math.jwave.Transform;
+import math.jwave.transforms.FastWaveletTransform;
+import math.jwave.transforms.wavelets.haar.Haar1;
+import mdfr.distance.Distance;
+import mdfr.distance.EuclideanDistance;
+import mdfr.utility.Print;
 import flanagan.analysis.Regression;
 import junit.framework.TestCase;
 
@@ -18,5 +24,29 @@ public class TestTools extends TestCase {
 		double[] e = reg.getBestEstimates();
 		System.out.println(e.length);
 	}
+	
+	public void testDWT(){
+		Transform t = new Transform( new FastWaveletTransform( new Haar1( ) ) );
+		Distance dist = new EuclideanDistance();
+		
+		double[ ] arrTime = { 1, 2, 3, 4, 0, 0, 0, 0};
+		double[ ] arrTime2 = { 2, 2, 4, 4, 0, 0, 0, 0};
+		
+		double[ ] arrTimexx = { 1, 2, 3, 4};
+		double[ ] arrTimexx2 = { 2, 2, 4, 4};
+		
+		double[ ] arrHilb = t.forward( arrTime ); // 1-D FWT Haar forward
+		double[ ] arrHilb2 = t.forward( arrTime2 ); // 1-D FWT Haar forward
+		System.out.println("Hilb1");
+		Print.getInstance().printArray(arrHilb, 8);
+		System.out.println("Hilb2");
+		Print.getInstance().printArray(arrHilb2, 8);
+		
+		System.out.println("Dist Original: " + dist.calDistance(arrTime, arrTime2));
+//		System.out.println("Dist Original Trimmed: " + dist.calDistance(arrTimexx, arrTimexx2));
+		System.out.println("Dist DWT: " + dist.calDistance(arrHilb, arrHilb2));
+//		System.out.println("TEST: " + 5.6%1);
+	}
+	
 	
 }

@@ -10,7 +10,7 @@ import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.distance.Distance;
 import mdfr.distance.EuclideanDistance;
-import mdfr.math.emd.DataListOperator;
+import mdfr.utility.DataListOperator;
 
 public class Motif {
 	private static Log logger = LogFactory.getLog(Motif.class);
@@ -129,8 +129,8 @@ public class Motif {
 			compensation = 0;
 		for(int i = 0 ; i < subsignals.size() - compensation ; i++){
 			for(int j = i + 1 ; j < subsignals.size() - 1 ; j++){
-				double[] xx = DataListOperator.getInstance().LinkedListToArray(subsignals.get(i), VALUE);
-				double[] yy = DataListOperator.getInstance().LinkedListToArray(subsignals.get(j), VALUE);
+				double[] xx = DataListOperator.getInstance().linkedListToArray(subsignals.get(i), VALUE);
+				double[] yy = DataListOperator.getInstance().linkedListToArray(subsignals.get(j), VALUE);
 				// Here distance is normalised by motif length
 				double distance = d.calDistance(xx, yy)/xx.length;
 				if(distance <= threshold){

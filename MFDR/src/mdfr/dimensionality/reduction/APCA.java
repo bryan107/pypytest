@@ -3,13 +3,7 @@ package mdfr.dimensionality.reduction;
 import mdfr.datastructure.TimeSeries;
 import mdfr.distance.Distance;
 
-public class APCA implements DimentionalityReduction {
-
-	@Override
-	public void setWindowSize(double windowsize) {
-		// TODO Auto-generated method stub
-
-	}
+public class APCA extends DimensionalityReduction {
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
@@ -18,19 +12,7 @@ public class APCA implements DimentionalityReduction {
 	}
 
 	@Override
-	public TimeSeries getFullResolutionDR(TimeSeries ts, double windowsize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Object getDR(TimeSeries ts) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object getDR(TimeSeries ts, double windowsize) {
 		// TODO Auto-generated method stub
 		return null;
 	}

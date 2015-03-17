@@ -1,17 +1,11 @@
 package mdfr.math.emd;
 
-import java.util.LinkedList;
-
-import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
-import mdfr.math.emd.datastructure._BAK_IMF;
-import mdfr.math.emd.datastructure._BAK_IMFs;
 import mdfr.math.emd.datastructure.LocalExtremas;
-import mdfr.utility.Print;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -3,8 +3,7 @@ package mdfr.datastructure;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import mdfr.math.emd.DataListOperator;
-import mdfr.utility.Print;
+import mdfr.utility.DataListOperator;
 import mdfr.utility.StatTool;
 
 import org.apache.commons.logging.Log;

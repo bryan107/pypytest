@@ -1,7 +1,6 @@
 package mdfr.math.emd;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

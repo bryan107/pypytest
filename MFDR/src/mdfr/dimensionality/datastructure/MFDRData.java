@@ -1,11 +1,11 @@
 package mdfr.dimensionality.datastructure;
 
-public class MDFRData {
+public class MFDRData {
 	private final double time;
 	private final PLAData pla;
 	private final DWTData dwt;
 	
-	public MDFRData(double time, PLAData pla, DWTData dwt){
+	public MFDRData(double time, PLAData pla, DWTData dwt){
 		this.time = time;
 		this.pla = pla;
 		this.dwt = dwt;

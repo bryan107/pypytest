@@ -63,10 +63,10 @@ public class TestPAA extends TestCase {
 		System.out.println("Distance PLA: " + paa.getDistance(ts1, ts2, dist));
 		
 		File.getInstance().saveTimeToFile(ts1, "C:\\TEST\\MDFR\\PAA.csv");
-		File.getInstance().saveLinkedListToFile(ts1, "C:\\TEST\\MDFR\\PAA.csv");
-		File.getInstance().saveLinkedListToFile(ts2, "C:\\TEST\\MDFR\\PAA.csv");
-		File.getInstance().saveLinkedListToFile(dr1full, "C:\\TEST\\MDFR\\PAA.csv");
-		File.getInstance().saveLinkedListToFile(dr2full, "C:\\TEST\\MDFR\\PAA.csv");
+//		File.getInstance().saveLinkedListToFile(ts1, "C:\\TEST\\MDFR\\PAA.csv");
+//		File.getInstance().saveLinkedListToFile(ts2, "C:\\TEST\\MDFR\\PAA.csv");
+//		File.getInstance().saveLinkedListToFile(dr1full, "C:\\TEST\\MDFR\\PAA.csv");
+//		File.getInstance().saveLinkedListToFile(dr2full, "C:\\TEST\\MDFR\\PAA.csv");
 	}
 	
 	private double generateResidual(LinkedList<Data> residual, double trendvariation, double noisevariation , long size) {

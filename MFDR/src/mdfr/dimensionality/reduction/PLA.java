@@ -121,6 +121,7 @@ public class PLA extends DimensionalityReduction {
 		}
 	}
 
+
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		TimeSeries dr1full = getFullResolutionDR(ts1);
@@ -132,5 +133,12 @@ public class PLA extends DimensionalityReduction {
 		TimeSeries dr1full = getFullResolutionDR(dr1, ref);
 		TimeSeries dr2full = getFullResolutionDR(dr2, ref);
 		return distance.calDistance(dr1full, dr2full, dr1full);
+	}
+	// TODO These are only temperate distance functions, need to implement a real one
+	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, Distance distance) {
+//		TimeSeries dr1full = getFullResolutionDR(dr1, ref);
+//		TimeSeries dr2full = getFullResolutionDR(dr2, ref);
+//		return distance.calDistance(dr1full, dr2full, dr1full);
+		return 0;
 	}
 }

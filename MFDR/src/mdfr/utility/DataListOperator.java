@@ -37,8 +37,8 @@ public class DataListOperator {
 	 * @param windowsize
 	 * @return LinkedList<LinkedList<Data>>
 	 */
-	public LinkedList<Data> linkedListCombinition(LinkedList<TimeSeries> inputlist){
-		LinkedList<Data> output = new LinkedList<Data>();
+	public TimeSeries linkedListCombinition(LinkedList<TimeSeries> inputlist){
+		TimeSeries output = new TimeSeries();
 		for(int i = 0 ; i < inputlist.size() ; i++){
 			LinkedList<Data> temp = inputlist.get(i);
 			for(int j = 0 ; j < temp.size() ; j++){
@@ -70,18 +70,20 @@ public class DataListOperator {
 		int i = 0;
 		while (i < linkedlist.size()) {
 			TimeSeries temp = new TimeSeries();
-			if ((linkedlist.get(i).time() - inittime) < windowsize) {
+			inittime = linkedlist.get(i).time();
+			while (i < linkedlist.size() && (linkedlist.get(i).time() - inittime) < windowsize) {
 				temp.add(linkedlist.get(i));
-				i++;
-				if (i >= linkedlist.size()) {
+				if(i < linkedlist.size()){
+					i++;
+				}else{
 					logger.info("The input length (" + linkedlist.size()
 							+ ") does not perfectly match the window size("
 							+ windowsize + ")");
 					outputlist.add(temp);
+					break;
 				}
 			}
 			outputlist.add(temp);
-			inittime = linkedlist.get(i).time();
 		}
 		return outputlist;
 	}
@@ -97,8 +99,8 @@ public class DataListOperator {
 	 * @param linkedlist_2
 	 * @return output
 	 */
-	public LinkedList<Data> linkedListSum(LinkedList<Data> linkedlist_1 , LinkedList<Data> linkedlist_2){
-		LinkedList<Data> outputlist = new LinkedList<Data>();
+	public TimeSeries linkedListSum(LinkedList<Data> linkedlist_1 , LinkedList<Data> linkedlist_2){
+		TimeSeries outputlist = new TimeSeries();
 		// Check if the lengths of the two linked list are the same.
 		if (linkedlist_1.size() != linkedlist_2.size()) {
 			logger.info("The lengths of two input linkedlist<Data> are not comparable. List[1]:"
@@ -136,9 +138,9 @@ public class DataListOperator {
 	 * @param linkedlist_2
 	 * @return output
 	 */
-	public LinkedList<Data> linkedtListSubtraction(
+	public TimeSeries linkedtListSubtraction(
 			LinkedList<Data> linkedlist_1, LinkedList<Data> linkedlist_2) {
-		LinkedList<Data> outputlist = new LinkedList<Data>();
+		TimeSeries outputlist = new TimeSeries();
 		// Check if the lengths of the two linked list are the same.
 		if (linkedlist_1.size() != linkedlist_2.size()) {
 			logger.info("The lengths of two input linkedlist<Data> are not comparable. List[1]:"

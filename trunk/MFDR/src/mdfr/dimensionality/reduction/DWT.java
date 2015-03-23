@@ -90,7 +90,7 @@ public class DWT extends DimensionalityReduction {
 		output = new DWTData(hilb);
 		return output;
 	}
-	
+	// TODO These are only temperate distance functions, need to implement a real one
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		double[] dr1 = getDR(ts1).hilb();
@@ -98,6 +98,17 @@ public class DWT extends DimensionalityReduction {
 		return distance.calDistance(dr1, dr2);
 	}
 	
+	public double getDistance(DWTData dwt1, DWTData dwt2, Distance distance){
+		return distance.calDistance(dwt1.hilb(), dwt2.hilb());
+	}
+
+	/**
+	 * This is a redundant function that calculate distances after restore DWT into full resolution
+	 * @param ts1
+	 * @param ts2
+	 * @param distance
+	 * @return
+	 */
 	public double getDistanceTest(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		TimeSeries dr1full = getFullResolutionDR(ts1);
 		TimeSeries dr2full = getFullResolutionDR(ts2);

@@ -5,16 +5,16 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.datastructure.MFDRDistanceDetails;
 import mdfr.datastructure.TimeSeries;
 import mdfr.dimensionality.datastructure.DWTData;
 import mdfr.dimensionality.datastructure.MFDRData;
 import mdfr.dimensionality.datastructure.PLAData;
+import mdfr.dimensionality.datastructure.ReversedMDFRData;
 import mdfr.distance.Distance;
 import mdfr.utility.DataListOperator;
 
-public class MFDR extends DimensionalityReduction {
-	private static Log logger = LogFactory.getLog(MFDR.class);
+public class ReversedMFDR extends DimensionalityReduction {
+	private static Log logger = LogFactory.getLog(ReversedMFDR.class);
 	private double windowsize_trend, windowsize_freq;
 	private double weight_trend, weight_freq;
 	private PLA pla;
@@ -46,24 +46,24 @@ public class MFDR extends DimensionalityReduction {
 	 * @param weight_trend
 	 * @param weight_freq
 	 */
-	public MFDR(double windowsize_trend, double windowsize_freq,
+	public ReversedMFDR(double windowsize_trend, double windowsize_freq,
 			double weight_trend, double weight_freq) {
 		updateTrendWindowsize(windowsize_trend);
 		updateFrequencyWindowsize(windowsize_freq);
 		updateTrendWeight(weight_trend);
 		updateFrequencyWeight(weight_freq);
-		this.pla = new PLA(this.windowsize_trend);
-		this.dwt = new DWT(this.windowsize_freq);
+		this.pla = new PLA(this.windowsize_freq);
+		this.dwt = new DWT(this.windowsize_trend);
 	}
 
 	public void updateTrendWindowsize(double windowsize_trend) {
 		this.windowsize_trend = windowsize_trend;
-		this.pla = new PLA(this.windowsize_trend);
+		this.dwt = new DWT(this.windowsize_trend);
 	}
 
 	public void updateFrequencyWindowsize(double windowsize_freq) {
 		this.windowsize_freq = windowsize_freq;
-		this.dwt = new DWT(this.windowsize_freq);
+		this.pla = new PLA(this.windowsize_freq);
 	}
 
 	public void updateTrendWeight(double weight_trend) {
@@ -94,15 +94,11 @@ public class MFDR extends DimensionalityReduction {
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries output = new TimeSeries();
-		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
-		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
-		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
-		for (int i = 0; i < mdfrlist.size(); i++) {
-			plalist.add(mdfrlist.get(i).pla());
-			dwtlist.add(mdfrlist.get(i).dwt());
-		}
+		ReversedMDFRData rmfdr= getDR(ts);
+		LinkedList<PLAData> plalist = rmfdr.pla();
+		DWTData dwtdata = rmfdr.dwt();
 		TimeSeries plafull = this.pla.getFullResolutionDR(plalist, ts);
-		TimeSeries dwtfull = reconstructFullResolutionDWT(ts, dwtlist);
+		TimeSeries dwtfull = this.dwt.getFullResolutionDR(dwtdata, ts);
 		output = DataListOperator.getInstance().linkedListSum(plafull, dwtfull);
 		return output;
 	}
@@ -144,33 +140,20 @@ public class MFDR extends DimensionalityReduction {
 		return getFullResolutionDR(ts);
 	}
 
-	// TODO TEST THIS!!!
+	/**
+	 * This function provides a reversed solution of MFDR.
+	 * It uses DWT to describe low frequent signals while 
+	 * using PLA to pick up details in the high frequency band.
+	 */
 	@Override
-	public LinkedList<MFDRData> getDR(TimeSeries ts) {
-		LinkedList<MFDRData> mdfrlist = new LinkedList<MFDRData>();
-
-		// Prepare PLAs
-		LinkedList<PLAData> trend = this.pla.getDR(ts);
+	public ReversedMDFRData getDR(TimeSeries ts) {
 		// Prepare DWTs
-		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
+		DWTData trend = this.dwt.getDR(ts);
+		// Prepare PLA = TS - DWT
+		TimeSeries trendfull = this.dwt.getFullResolutionDR(ts);
 		TimeSeries freqfull = DataListOperator.getInstance().linkedtListSubtraction(ts, trendfull);
-		LinkedList<TimeSeries> sub_freq = DataListOperator.getInstance()
-				.linkedListDivision(freqfull, this.windowsize_trend);
-		LinkedList<DWTData> freq = new LinkedList<DWTData>();
-		for (int i = 0; i < sub_freq.size(); i++) {
-			freq.add(this.dwt.getDR(sub_freq.get(i)));
-		}
-		// Check the correctness of PLA and DWT
-		if (trend.size() != freq.size()) {
-			logger.info("The length of trend and freq objects does not match");
-			return null;
-		}
-		// Save results to MDFRDatas
-		for (int i = 0; i < trend.size(); i++) {
-			mdfrlist.add(new MFDRData(trend.get(i).time(), trend.get(i), freq
-					.get(i)));
-		}
-		return mdfrlist;
+		LinkedList<PLAData> freq= this.pla.getDR(freqfull);
+		return new ReversedMDFRData(trend, freq);
 	}
 
 	/**
@@ -198,45 +181,8 @@ public class MFDR extends DimensionalityReduction {
 
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		LinkedList<MFDRData> mfdr1 = getDR(ts1);
-		LinkedList<MFDRData> mfdr2 = getDR(ts2);
-		return getDistance(mfdr1, mfdr2, distance);
-	}
-	
-	public MFDRDistanceDetails getDistanceDetails(LinkedList<MFDRData> mfdr1, LinkedList<MFDRData> mfdr2, Distance distance){
-		if(mfdr1.size() != mfdr2.size()){
-			logger.info("Input MFDR lists must have the same length");
-			return null;
-		}
-		// Prepare PLA and DWT data structure
-		LinkedList<PLAData> pla1 = new LinkedList<PLAData>();
-		LinkedList<PLAData> pla2 = new LinkedList<PLAData>();
-		LinkedList<DWTData> dwt1 = new LinkedList<DWTData>();
-		LinkedList<DWTData> dwt2 = new LinkedList<DWTData>();
-		for(int i = 0 ; i < mfdr1.size() ; i++){
-			pla1.add(mfdr1.get(i).pla());
-			pla2.add(mfdr2.get(i).pla());
-			dwt1.add(mfdr1.get(i).dwt());
-			dwt2.add(mfdr2.get(i).dwt());
-		}
-		// Calculate distances of low frequency pla and high frequency dwt
-		double dist_pla = pla.getDistance(pla1, pla2,  distance);
-		double dist_dwt = 0;
-		for(int i = 0 ; i < dwt1.size() ; i++){
-			dist_dwt += dwt.getDistance(dwt1.get(i), dwt2.get(i), distance);
-		}
-		return new MFDRDistanceDetails(dist_pla, dist_dwt);
-	}
-	
-	public double getDistance(LinkedList<MFDRData> mfdr1, LinkedList<MFDRData> mfdr2, Distance distance){
-		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, distance);
-		try {
-			double dist = this.weight_trend * details.pla() + this.weight_freq * details.dwt();
-			return dist;
-		} catch (Exception e) {
-			logger.info("Distance cannot be calculated, Please the formats and lengths of the input datas." + e);
-			return 0;
-		}
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

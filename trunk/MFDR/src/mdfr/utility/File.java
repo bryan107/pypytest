@@ -4,11 +4,16 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import mdfr.datastructure.Data;
+import mdfr.datastructure.TimeSeries;
+import mdfr.dimensionality.reduction.MFDR;
 import mfdr.file.FileAccessAgent;
 
 public class File {
-	
+	private static Log logger = LogFactory.getLog(File.class);
 	private static File self = new File();
 	DecimalFormat valuedf = new DecimalFormat("0.0000");
 	DecimalFormat timedf = new DecimalFormat("0.00");
@@ -22,14 +27,50 @@ public class File {
 		return self;
 	}
 	
-	public void saveLinkedListToFile(LinkedList<Data> data, String fileaddress){
-		String value = new String();
+	public LinkedList<Data> readTimeSeriesFromFile(String fileaddress){
+		TimeSeries ts = new TimeSeries();
+		String times = this.agent.readLineFromFile(fileaddress);
+		String values = this.agent.readLineFromFile();
+		String[] timearray = times.split(",");
+		String[] valuearray = values.split(",");
+		if(timearray.length != valuearray.length){
+			logger.info("Input data length does not match");
+			return null;
+		}
+		// Read start from 1 as the first column is reserved for tags. 
+		for(int i = 1 ; i < timearray.length ; i++){
+			ts.add(new Data(Double.valueOf(timearray[i]), Double.valueOf(valuearray[i])));
+		}
+		return ts;
+	}
+	
+	public LinkedList<Data> readTimeSeriesFromFile(String fileaddress, String tag){
+		TimeSeries ts = new TimeSeries();
+		String times = this.agent.readLineFromFile(fileaddress);
+		String values = this.agent.readLineFromFile();
+		while(!values.split(",")[0].equals(tag)){
+			values = this.agent.readLineFromFile();
+		}
+		String[] timearray = times.split(",");
+		String[] valuearray = values.split(",");
+		if(timearray.length != valuearray.length){
+			logger.info("Input data length does not match");
+			return null;
+		}
+		// Read start from 1 as the first column is reserved for tags. 
+		for(int i = 1 ; i < timearray.length ; i++){
+			ts.add(new Data(Double.valueOf(timearray[i]), Double.valueOf(valuearray[i])));
+		}
+		return ts;
+	}
+	
+	public void saveLinkedListToFile(String outputstring, LinkedList<Data> data, String fileaddress){
 		Iterator<Data> it = data.iterator();
 		while (it.hasNext()) {
 			Data data2 = (Data) it.next();
-			value = value + "," + valuedf.format(data2.value());
+			outputstring = outputstring + "," + valuedf.format(data2.value());
 		}
-		agent.writeLineToFile(value, fileaddress);
+		agent.writeLineToFile(outputstring, fileaddress);
 	}
 	
 	public void saveTimeToFile(LinkedList<Data> data, String fileaddress){

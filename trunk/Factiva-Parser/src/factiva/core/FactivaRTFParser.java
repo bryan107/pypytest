@@ -63,7 +63,7 @@ public class FactivaRTFParser {
 		Container c = new Container();
 		int round = 0;
 		// Process Each Line
-		while (round < 1500) {
+		while (true) {
 			System.out.println();
 			System.out.println("Round: " + round);
 			String temp = agent.readLineFromFile();
@@ -72,9 +72,9 @@ public class FactivaRTFParser {
 				break;
 			}
 			// ************* Debug code ***********
-			 if(isContentTag(c.tag())){
-				 System.out.println("500");
-			 }
+//			 if(isContentTag(c.tag())){
+//				 System.out.println("500");
+//			 }
 			// ************************************
 
 			// Extract meaningful tags and contents.

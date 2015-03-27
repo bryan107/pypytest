@@ -6,32 +6,31 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import math.jwave.Transform;
-import math.jwave.transforms.FastWaveletTransform;
-import math.jwave.transforms.wavelets.haar.*;
+import math.jwave.transforms.DiscreteFourierTransform;
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
-import mdfr.dimensionality.datastructure.DWTData;
+import mdfr.dimensionality.datastructure.DFTData;
 import mdfr.distance.Distance;
 import mdfr.utility.DataListOperator;
 
-public class DWT extends DimensionalityReduction {
-	private static Log logger = LogFactory.getLog(DWT.class);
+public class DFT extends DimensionalityReduction {
+	private static Log logger = LogFactory.getLog(DFT.class);
 	
-	public DWT(double windowsize) {
+	public DFT(double windowsize) {
 		setWindowSize(windowsize);
 	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
-		DWTData dwt = getDR(ts);
+		DFTData dwt = getDR(ts);
 		return getFullResolutionDR(dwt, ts);
 	}
 
-	public TimeSeries getFullResolutionDR( DWTData dwt, TimeSeries ref) {
+	public TimeSeries getFullResolutionDR( DFTData dwt, TimeSeries ref) {
 		TimeSeries drfull = new TimeSeries();
 		double[] tsHilb = dwt.hilb();
 		tsHilb = recoverNullHighFrequency(tsHilb, ref.size());
-		Transform t = new Transform(new FastWaveletTransform(new Haar1()));
+		Transform t = new Transform(new DiscreteFourierTransform());
 		double[] value = t.reverse(tsHilb);
 		for(int i = 0 ; i < ref.size() ; i++){
 			drfull.add(new Data(ref.get(i).time(), value[i]));
@@ -53,12 +52,12 @@ public class DWT extends DimensionalityReduction {
 
 
 	/**
-	 * Here we use double array as the ouput data structure to store the DWT results in the Hilbert Space.
+	 * Here we use double array as the ouput data structure to store the DFT results in the Hilbert Space.
 	 * @param ts
 	 * @return a double array containing the DWT result in Hilbert Space.
 	 */
 	@Override
-	public DWTData getDR(TimeSeries ts) {
+	public DFTData getDR(TimeSeries ts) {
 		double tslength = Math.log(ts.size())/Math.log(2);
 		// TODO reconstruct this to have a more flexible solution.
 		if(tslength % 1 != 0){
@@ -70,9 +69,9 @@ public class DWT extends DimensionalityReduction {
 		return getDR(valuearray);
 	}
 	
-	public DWTData getDR(double[] valuearray){
-		Transform t = new Transform(new FastWaveletTransform(new Haar1()));
-		DWTData tsHilb = new DWTData(t.forward(valuearray));
+	public DFTData getDR(double[] valuearray){
+		Transform t = new Transform(new DiscreteFourierTransform());
+		DFTData tsHilb = new DFTData(t.forward(valuearray));
 		// This calculates log_2(x).
 		double resolution = Math.log(windowsize)/Math.log(2);
 		for(int i = 0 ; i < resolution ; i++){
@@ -81,55 +80,55 @@ public class DWT extends DimensionalityReduction {
 		return tsHilb;
 	}
 
-	private DWTData removeHighestFrequency(DWTData input){
-		DWTData output;
+	private DFTData removeHighestFrequency(DFTData input){
+		DFTData output;
 		double[] hilb = new double[input.size()/2];
 		for(int i = 0 ; i < hilb.length; i++){
 			hilb[i] = input.value(i);
 		}
-		output = new DWTData(hilb);
+		output = new DFTData(hilb);
 		return output;
 	}
-	// TODO These are only temperate distance functions, need to implement a real one
+	
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		double[] dr1 = getDR(ts1).hilb();
-		double[] dr2 = getDR(ts2).hilb();
+		double[] dr1 = getDR(ts1).hilb(true, ts1.size());
+		double[] dr2 = getDR(ts2).hilb(true, ts1.size());
 		return distance.calDistance(dr1, dr2);
 	}
 	
-	public double getDistance(DWTData dwt1, DWTData dwt2, Distance distance){
-		return distance.calDistance(dwt1.hilb(), dwt2.hilb());
+	public double getDistance(DFTData dft1, DFTData dft2, Distance distance, int signallength){
+		return distance.calDistance(dft1.hilb(true, signallength), dft2.hilb(true, signallength));
 	}
 	
 	/**
 	 * This function calculate the distance between two dwt lists.
 	 * 
-	 * @param dwt_list1
-	 * @param dwt_list2
+	 * @param dft_list1
+	 * @param dft_list2
 	 * @param distance
 	 * @return
 	 */
-	public double getDistance(LinkedList<DWTData> dwt_list1 , LinkedList<DWTData> dwt_list2 , Distance distance){
-		double[] hilb1 = new double[dwt_list1.peek().hilb().length * dwt_list1.size()];
-		double[] hilb2 = new double[dwt_list2.peek().hilb().length * dwt_list2.size()];
+	public double getDistance(LinkedList<DFTData> dft_list1 , LinkedList<DFTData> dft_list2 , Distance distance){
+		double[] hilb1 = new double[dft_list1.peek().hilb().length * dft_list1.size()];
+		double[] hilb2 = new double[dft_list2.peek().hilb().length * dft_list2.size()];
 		if(hilb1.length != hilb2.length){
 			logger.info("The length of input dwt LinkedList is not equal.");
 			return 0;
 		}
-		int datalength = dwt_list1.size();
-		int datasize = dwt_list1.peek().hilb().length;
+		int datalength = dft_list1.size();
+		int datasize = dft_list1.peek().hilb().length;
 		for(int i = 0 ; i < datalength ; i++){
 			for(int j = 0 ; j < datasize ; j++){
-				hilb1[i*datasize+j] = dwt_list1.get(i).hilb()[j]; 
-				hilb2[i*datasize+j] = dwt_list2.get(i).hilb()[j]; 
+				hilb1[i*datasize+j] = dft_list1.get(i).hilb()[j]; 
+				hilb2[i*datasize+j] = dft_list2.get(i).hilb()[j]; 
 			}
 		}
 		return distance.calDistance(hilb1, hilb2);
 	}
 
 	/**
-	 * This is a redundant function that calculate distances after restore DWT into full resolution
+	 * This is a redundant function that calculate distances after restore DFT into full resolution
 	 * @param ts1
 	 * @param ts2
 	 * @param distance

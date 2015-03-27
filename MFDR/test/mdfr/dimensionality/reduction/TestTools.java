@@ -2,7 +2,7 @@ package mdfr.dimensionality.reduction;
 
 import math.jwave.Transform;
 import math.jwave.transforms.FastWaveletTransform;
-import math.jwave.transforms.wavelets.haar.Haar1;
+import math.jwave.transforms.wavelets.haar.*;
 import mdfr.distance.Distance;
 import mdfr.distance.EuclideanDistance;
 import mdfr.utility.Print;

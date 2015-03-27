@@ -12,11 +12,12 @@ import mdfr.dimensionality.datastructure.MFDRData;
 import mdfr.dimensionality.datastructure.PLAData;
 import mdfr.distance.Distance;
 import mdfr.utility.DataListOperator;
+import mdfr.utility.Print;
 
 public class MFDR extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(MFDR.class);
 	private double windowsize_trend, windowsize_freq;
-	private double weight_trend, weight_freq;
+	private double angle;
 	private PLA pla;
 	private DWT dwt;
 
@@ -46,12 +47,10 @@ public class MFDR extends DimensionalityReduction {
 	 * @param weight_trend
 	 * @param weight_freq
 	 */
-	public MFDR(double windowsize_trend, double windowsize_freq,
-			double weight_trend, double weight_freq) {
+	public MFDR(double windowsize_trend, double windowsize_freq, double angle) {
 		updateTrendWindowsize(windowsize_trend);
 		updateFrequencyWindowsize(windowsize_freq);
-		updateTrendWeight(weight_trend);
-		updateFrequencyWeight(weight_freq);
+		updateAngle(angle);
 		this.pla = new PLA(this.windowsize_trend);
 		this.dwt = new DWT(this.windowsize_freq);
 	}
@@ -66,12 +65,8 @@ public class MFDR extends DimensionalityReduction {
 		this.dwt = new DWT(this.windowsize_freq);
 	}
 
-	public void updateTrendWeight(double weight_trend) {
-		this.weight_trend = weight_trend;
-	}
-
-	public void updateFrequencyWeight(double weight_freq) {
-		this.weight_freq = weight_freq;
+	public void updateAngle(double angle) {
+		this.angle = angle;
 	}
 
 	public double windowSizeTrend() {
@@ -82,12 +77,8 @@ public class MFDR extends DimensionalityReduction {
 		return this.windowsize_freq;
 	}
 
-	public double weightTrend() {
-		return this.weight_trend;
-	}
-
-	public double weightFreq() {
-		return this.weight_freq;
+	public double angle() {
+		return this.angle;
 	}
 
 	// TODO TEST THIS!!!
@@ -106,6 +97,24 @@ public class MFDR extends DimensionalityReduction {
 		output = DataListOperator.getInstance().linkedListSum(plafull, dwtfull);
 		return output;
 	}
+	
+	public TimeSeries getFullResolutionPLA(TimeSeries ts){
+		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
+		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
+		for (int i = 0; i < mdfrlist.size(); i++) {
+			plalist.add(mdfrlist.get(i).pla());
+		}
+		return this.pla.getFullResolutionDR(plalist, ts);
+	}
+	
+	public TimeSeries getFullResolutionDWT(TimeSeries ts){
+		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
+		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
+		for (int i = 0; i < mdfrlist.size(); i++) {
+			dwtlist.add(mdfrlist.get(i).dwt());
+		}
+		return reconstructFullResolutionDWT(ts, dwtlist);
+	}
 
 	public TimeSeries reconstructFullResolutionDWT(TimeSeries ts,
 			LinkedList<DWTData> dwtlist) {
@@ -118,7 +127,8 @@ public class MFDR extends DimensionalityReduction {
 			dwttemp.add(this.dwt.getFullResolutionDR(dwtlist.get(i),
 					sub_ref.get(i)));
 		}
-		return (TimeSeries) DataListOperator.getInstance().linkedListCombinition(dwttemp);
+		return (TimeSeries) DataListOperator.getInstance()
+				.linkedListCombinition(dwttemp);
 	}
 
 	/**
@@ -153,7 +163,8 @@ public class MFDR extends DimensionalityReduction {
 		LinkedList<PLAData> trend = this.pla.getDR(ts);
 		// Prepare DWTs
 		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
-		TimeSeries freqfull = DataListOperator.getInstance().linkedtListSubtraction(ts, trendfull);
+		TimeSeries freqfull = DataListOperator.getInstance()
+				.linkedtListSubtraction(ts, trendfull);
 		LinkedList<TimeSeries> sub_freq = DataListOperator.getInstance()
 				.linkedListDivision(freqfull, this.windowsize_trend);
 		LinkedList<DWTData> freq = new LinkedList<DWTData>();
@@ -172,7 +183,18 @@ public class MFDR extends DimensionalityReduction {
 		}
 		return mdfrlist;
 	}
-
+	// ************** TEST ZONE ***********************
+	
+	public TimeSeries getRes(TimeSeries ts) {
+		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
+		return DataListOperator.getInstance().linkedtListSubtraction(ts, trendfull);
+	}
+	
+	public TimeSeries getPLA(TimeSeries ts) {
+		return this.pla.getFullResolutionDR(ts);
+	}
+	
+	//**************************************************
 	/**
 	 * MFDR is NOT comparable to this function, please use another one provided.
 	 */
@@ -200,11 +222,19 @@ public class MFDR extends DimensionalityReduction {
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		LinkedList<MFDRData> mfdr1 = getDR(ts1);
 		LinkedList<MFDRData> mfdr2 = getDR(ts2);
-		return getDistance(mfdr1, mfdr2, distance);
+		// ts1 is used as the sampling reference
+		return getDistance(mfdr1, mfdr2, ts1, distance);
+	}
+
+	public MFDRDistanceDetails getDistanceDetails(TimeSeries ts1, TimeSeries ts2, Distance distance) {
+		LinkedList<MFDRData> mfdr1 = getDR(ts1);
+		LinkedList<MFDRData> mfdr2 = getDR(ts2);
+		return getDistanceDetails(mfdr1, mfdr2, ts1, distance);
 	}
 	
-	public MFDRDistanceDetails getDistanceDetails(LinkedList<MFDRData> mfdr1, LinkedList<MFDRData> mfdr2, Distance distance){
-		if(mfdr1.size() != mfdr2.size()){
+	public MFDRDistanceDetails getDistanceDetails(LinkedList<MFDRData> mfdr1,
+			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance) {
+		if (mfdr1.size() != mfdr2.size()) {
 			logger.info("Input MFDR lists must have the same length");
 			return null;
 		}
@@ -213,30 +243,39 @@ public class MFDR extends DimensionalityReduction {
 		LinkedList<PLAData> pla2 = new LinkedList<PLAData>();
 		LinkedList<DWTData> dwt1 = new LinkedList<DWTData>();
 		LinkedList<DWTData> dwt2 = new LinkedList<DWTData>();
-		for(int i = 0 ; i < mfdr1.size() ; i++){
+		for (int i = 0; i < mfdr1.size(); i++) {
 			pla1.add(mfdr1.get(i).pla());
 			pla2.add(mfdr2.get(i).pla());
 			dwt1.add(mfdr1.get(i).dwt());
 			dwt2.add(mfdr2.get(i).dwt());
 		}
 		// Calculate distances of low frequency pla and high frequency dwt
-		double dist_pla = pla.getDistance(pla1, pla2,  distance);
-		double dist_dwt = 0;
-		for(int i = 0 ; i < dwt1.size() ; i++){
-			dist_dwt += dwt.getDistance(dwt1.get(i), dwt2.get(i), distance);
-		}
+		double dist_pla = pla.getDistance(pla1, pla2, ref, distance);
+		double dist_dwt = dwt.getDistance(dwt1, dwt2, distance);
 		return new MFDRDistanceDetails(dist_pla, dist_dwt);
 	}
-	
-	public double getDistance(LinkedList<MFDRData> mfdr1, LinkedList<MFDRData> mfdr2, Distance distance){
-		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, distance);
+
+	public double getDistance(LinkedList<MFDRData> mfdr1,
+			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance) {
+		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
+				distance);
 		try {
-			double dist = this.weight_trend * details.pla() + this.weight_freq * details.dwt();
-			return dist;
+			// Law of cosines: c^2 = a^2 + b^2 - 2ab*cos(angle)
+			double dist_square = Math.pow(details.pla(), 2)
+					+ Math.pow(details.dwt(), 2) - 2 * details.pla()
+					* details.dwt() * Math.cos(angle);
+			return Math.pow(dist_square, 0.5);
 		} catch (Exception e) {
-			logger.info("Distance cannot be calculated, Please the formats and lengths of the input datas." + e);
+			logger.info("Distance cannot be calculated, Please the formats and lengths of the input datas."
+					+ e);
 			return 0;
 		}
+	}
+
+	public double getDistance(LinkedList<MFDRData> mfdr1,
+			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance, double angle) {
+		updateAngle(angle);
+		return getDistance(mfdr1, mfdr2, ref, distance);
 	}
 
 }

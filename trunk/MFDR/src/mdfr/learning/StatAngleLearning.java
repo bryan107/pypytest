@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import flanagan.analysis.Stat;
 import mdfr.learning.datastructure.TrainingSet;
 
-public class StatisticLearning extends Learning {
+public class StatAngleLearning extends AngleLearning {
 
 	private double angle;
 	

@@ -8,9 +8,13 @@ import org.apache.commons.logging.LogFactory;
 import flanagan.analysis.Regression;
 import mdfr.learning.datastructure.TrainingSet;
 
-public class LinearRegressionLearning extends Learning {
-	private static Log logger = LogFactory.getLog(LinearRegressionLearning.class);
+public class LRAngleLearning extends AngleLearning {
+	private static Log logger = LogFactory.getLog(LRAngleLearning.class);
 	double[] coeff;
+	
+	public LRAngleLearning(LinkedList<TrainingSet> ts) {
+		trainingParameters(ts);
+	}
 	
 	/*
 	 * This class does not provide null input function.
@@ -25,7 +29,7 @@ public class LinearRegressionLearning extends Learning {
 	
 	@Override
 	public double getAngle(double trendlength, double freqlength){
-		return coeff[0] * trendlength + coeff[1] * freqlength;
+		return coeff[0] + coeff[1] * trendlength + coeff[2] * freqlength;
 	}
 	
 	@Override

@@ -4,7 +4,8 @@ import java.util.LinkedList;
 
 import mdfr.learning.datastructure.TrainingSet;
 
-public abstract class Learning {
+//TODO create a validation class to choose learning model: Either constant or LR
+public abstract class AngleLearning {
 
 	/**
 	 * Get angle

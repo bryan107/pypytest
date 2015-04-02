@@ -54,6 +54,13 @@ public class MFDR extends DimensionalityReduction {
 		this.pla = new PLA(this.windowsize_trend);
 		this.dwt = new DWT(this.windowsize_freq);
 	}
+	
+	public MFDR(double windowsize_trend, double windowsize_freq) {
+		updateTrendWindowsize(windowsize_trend);
+		updateFrequencyWindowsize(windowsize_freq);
+		this.pla = new PLA(this.windowsize_trend);
+		this.dwt = new DWT(this.windowsize_freq);
+	}
 
 	public void updateTrendWindowsize(double windowsize_trend) {
 		this.windowsize_trend = windowsize_trend;
@@ -154,7 +161,6 @@ public class MFDR extends DimensionalityReduction {
 		return getFullResolutionDR(ts);
 	}
 
-	// TODO TEST THIS!!!
 	@Override
 	public LinkedList<MFDRData> getDR(TimeSeries ts) {
 		LinkedList<MFDRData> mdfrlist = new LinkedList<MFDRData>();

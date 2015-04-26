@@ -1,4 +1,4 @@
-package mdfr.math.emd;
+package mdfr.math.emd.utility;
 
 import java.util.Iterator;
 

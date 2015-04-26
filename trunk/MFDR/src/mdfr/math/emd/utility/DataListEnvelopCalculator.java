@@ -1,4 +1,4 @@
-package mdfr.math.emd;
+package mdfr.math.emd.utility;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,6 +12,7 @@ import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.DataListOperator;
 import flanagan.interpolation.CubicSpline;
+import flanagan.interpolation.CubicSplineFast;
 
 public class DataListEnvelopCalculator {
 
@@ -51,8 +52,8 @@ public class DataListEnvelopCalculator {
 		double[] lowervalues = DataListOperator.getInstance().linkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
-		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);
-		CubicSpline lowerCS = new CubicSpline(lowerextremas, lowervalues);
+		CubicSplineFast upperCS = new CubicSplineFast(upperextremas, uppervalues);
+		CubicSplineFast lowerCS = new CubicSplineFast(lowerextremas, lowervalues);
 		// Calculate upperenvelope
 		calculateEnvelope(envelopes.upperEnvelope(), upperCS, residual);
 		// Calculate lowerenvelope
@@ -370,7 +371,7 @@ public class DataListEnvelopCalculator {
 	 * Use interpolation and extremes to retrieve envelope. 
 	 * */	
 	
-	private void calculateEnvelope(LinkedList<Data> envelope, CubicSpline CS, LinkedList<Data> residual) {
+	private void calculateEnvelope(LinkedList<Data> envelope, CubicSplineFast CS, LinkedList<Data> residual) {
 		Iterator<Data> it = residual.iterator();
 		while(it.hasNext()){
 			double time = it.next().time();

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import mdfr.datastructure.Data;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.math.emd.utility.DataListPropertyExtractor;
 import mdfr.utility.Print;
 import flanagan.interpolation.CubicSpline;
 import junit.framework.TestCase;

@@ -5,8 +5,8 @@ import java.util.LinkedList;
 
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
-import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.InstantFrequency;
+import mdfr.math.emd.utility.DataListPropertyExtractor;
 import mdfr.utility.DataListOperator;
 
 import org.apache.commons.logging.Log;

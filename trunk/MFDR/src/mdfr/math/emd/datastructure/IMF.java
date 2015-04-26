@@ -8,8 +8,8 @@ import org.apache.commons.logging.LogFactory;
 
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
-import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.InstantFrequency;
+import mdfr.math.emd.utility.DataListPropertyExtractor;
 import mdfr.utility.DataListOperator;
 
 public class IMF extends TimeSeries {

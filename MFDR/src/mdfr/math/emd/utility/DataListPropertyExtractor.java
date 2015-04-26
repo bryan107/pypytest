@@ -1,10 +1,11 @@
-package mdfr.math.emd;
+package mdfr.math.emd.utility;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import mdfr.datastructure.Data;
+import mdfr.math.emd.InstantFrequency;
 import mdfr.math.emd.datastructure.LocalExtremas;
 import mdfr.utility.DataListOperator;
 import mdfr.utility.Print;

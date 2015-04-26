@@ -1,11 +1,13 @@
 package mdfr.math.emd;
 
 import mdfr.datastructure.TimeSeries;
-import mdfr.math.emd.DataListPropertyExtractor;
 import mdfr.math.emd.datastructure.Envelopes;
 import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
 import mdfr.math.emd.datastructure.LocalExtremas;
+import mdfr.math.emd.utility.DataListCalculator;
+import mdfr.math.emd.utility.DataListEnvelopCalculator;
+import mdfr.math.emd.utility.DataListPropertyExtractor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -1,4 +1,4 @@
-package mdfr.core;
+package mdfr.math.emd;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class IMFAnalysis {
 	}
 	
 	/*
-	 * Private parameters
+	 * Private parameters for Window extraction
 	 */
 	public void setWhiteNoiseLevel(double whitenoiselevel){
 		this.noise_whitenoiselevel = whitenoiselevel;
@@ -112,6 +112,7 @@ public class IMFAnalysis {
 		 * STEP 2: Calculate the normalized wave length of the given IMF.
 		 */
 		
+		
 		// T is normalised as half of a wavelength, which similar to the count of zero-crossings.
 		double T = imf.averageWavelength()/ts.normalisedWhiteNoiseWaveLength();
 		
@@ -123,9 +124,16 @@ public class IMFAnalysis {
 		if(T >= imf.size()){
 			logger.info("No Instant Frequency exist for this IMF");
 			return true;
-		}else if(StatisticalProperty.getInstance().isStatisticalSignificance(sb, T, ed, noise_threshold)){
+		}
+		// Here is the standard solution which consider both upper bound and lower bound.
+		else if(StatisticalProperty.getInstance().isStatisticalSignificance(sb, T, ed, noise_threshold)){
 			return true;
-		}else{
+		}
+//		// Here only consider upper bound. This is to fix the energy normalization error.
+//		else if(StatisticalProperty.getInstance().isUpperBoundStatisticalSignificance(sb, T, ed, noise_threshold)){
+//			return true;
+//		}
+		else{
 			return false;
 		}
 	}

@@ -10,7 +10,7 @@ import mdfr.learning.datastructure.TrainingSet;
 
 public class LRAngleLearning extends AngleLearning {
 	private static Log logger = LogFactory.getLog(LRAngleLearning.class);
-	double[] coeff;
+	private double[] coeff;
 	
 	public LRAngleLearning(LinkedList<TrainingSet> ts) {
 		trainingParameters(ts);

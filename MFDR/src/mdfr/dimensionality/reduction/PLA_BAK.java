@@ -13,14 +13,11 @@ import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.dimensionality.datastructure.PLAData;
 import mdfr.distance.Distance;
-import mdfr.math.statistic.LinearEstimator;
-import mdfr.math.statistic.LinearRegression;
-import mdfr.math.statistic.TheilSenEstimator;
 
-public class PLA extends DimensionalityReduction {
-	private static Log logger = LogFactory.getLog(PLA.class);
+public class PLA_BAK extends DimensionalityReduction {
+	private static Log logger = LogFactory.getLog(PLA_BAK.class);
 	
-	public PLA(double windowsize){
+	public PLA_BAK(double windowsize){
 		setWindowSize(windowsize);
 	}
 	
@@ -100,11 +97,11 @@ public class PLA extends DimensionalityReduction {
 				// Add PLA result to dr
 				double[] x = new double[temp.size()];
 				double[] y = new double[temp.size()];
+				// TODO This can be extracted to Utility
 				convertMapToArray(temp, x, y);
-				// ********** TEST ************* //
-				LinearRegression reg = new LinearEstimator(x, y) ;
-				double[] coeff = reg.getEstimates();
-				// ***************************** //
+				Regression reg = new Regression(x, y);
+				reg.linear();
+				double[] coeff = reg.getBestEstimates();
 				pla.add(new PLAData(init_time, coeff[0], coeff[1]));		
 			} catch (Exception e) {
 				logger.info("PLAData Conversion Error" + e);
@@ -123,7 +120,6 @@ public class PLA extends DimensionalityReduction {
 			index++;
 		}
 	}
-
 
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {

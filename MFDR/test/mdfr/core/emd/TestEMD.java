@@ -7,10 +7,10 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mdfr.core.IMFAnalysis;
 import mdfr.datastructure.Data;
 import mdfr.datastructure.TimeSeries;
 import mdfr.math.emd.EMD;
+import mdfr.math.emd.IMFAnalysis;
 import mdfr.math.emd.datastructure.IMF;
 import mdfr.math.emd.datastructure.IMFS;
 import mdfr.math.emd.datastructure._BAK_IMFs;
@@ -59,6 +59,10 @@ public class TestEMD extends TestCase {
 		EMD emd = new EMD(residual, zerocrossingaccuracy, IFparamaters[0], IFparamaters[1], IFparamaters[2]);
 		// Calculate IMF with EMD
 		IMFS imfs = emd.getIMFs(MAXLEVEL);
+		IMFS imfs_test = new IMFS();
+		for(int i = 0 ; i < 3 ; i++){
+			imfs_test.add(imfs.get(i));
+		}
 		// Create IMF analysis object
 		IMFAnalysis analysis = new IMFAnalysis(residual, imfs, noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
 		
@@ -84,15 +88,15 @@ public class TestEMD extends TestCase {
 		 *  Store Results
 		 */
 		// Save Time References
-//		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm.csv");
+		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
 		
 		// Save Original Signal
-//		File.getInstance().saveLinkedListToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm.csv");
+		File.getInstance().saveLinkedListToFile(" " ,residual, "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
 				
 		// Save IMFs
-//		for(int i = 0 ; i < imfs.size() ; i++){
-//			File.getInstance().saveLinkedListToFile(imfs.getIMF(i).getDataList(), "C:\\TEST\\MDFR\\IMFTest_Norm.csv");
-//		}
+		for(int i = 0 ; i < imfs.size() ; i++){
+			File.getInstance().saveLinkedListToFile(" " ,imfs.get(i), "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
+		}
 		
 		// Save instant
 //		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm_Freq.csv");
@@ -173,7 +177,7 @@ public class TestEMD extends TestCase {
 			if(analysis.isFreq(imfs.get(i))){
 				System.out.println("FREQUENCY");
 			}else{
-				System.out.println("Trend");
+				System.out.println("TREND");
 			}
 		}
 	}
@@ -188,13 +192,13 @@ public class TestEMD extends TestCase {
 			double noise = 0; 
 			noise = r.nextGaussian() * Math.sqrt(5);
 //			double value = noise;
-			double trend = 10*Math.pow(i, 0.5);
-			if(i > size/2){
-				trend = -trend;
-			}
-//			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + trend;
-			double value = noise;
-//			double value = 9.5 * Math.sin(i*Math.PI / 16) + 9.5 * Math.sin(i*Math.PI / 8);
+			double trend = 1*Math.pow(i, 0.5);
+//			if(i > size/2){
+//				trend = -trend;
+//			}
+//			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise;
+//			double value = noise;
+			double value = 9.5 * Math.sin(i*Math.PI / 64) + trend + noise;
 			residual.add(new Data(i, value));
 		}
 		return (double)1/6;

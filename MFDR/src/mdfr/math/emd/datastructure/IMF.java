@@ -190,4 +190,5 @@ public class IMF extends TimeSeries {
 	public double averageWavelength() throws ArithmeticException{
 		return 1 / averageFrequency();
 	}
+	
 }

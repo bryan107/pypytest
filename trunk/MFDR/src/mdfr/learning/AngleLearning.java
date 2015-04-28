@@ -34,7 +34,9 @@ public abstract class AngleLearning {
 	protected double angleEquation(double a, double b, double c){
 		double numerator = Math.pow(a, 2) + Math.pow(b, 2) - Math.pow(c, 2);
 		double denominator = 2*a*b;
-		return  Math.acos(numerator/denominator);
+		double num = numerator/denominator;
+		double angle = Math.acos(numerator/denominator);
+		return  angle;
 	}
 	
 }

@@ -17,7 +17,7 @@ public class File {
 	private static File self = new File();
 	DecimalFormat valuedf = new DecimalFormat("0.0000");
 	DecimalFormat timedf = new DecimalFormat("0.00");
-	FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\MFDR\\", "C:\\TEST\\MFDR\\NULL.txt");
+	FileAccessAgent agent = new FileAccessAgent("C:\\TEST\\MDFR\\", "C:\\TEST\\MDFR\\NULL.txt");
 	
 	private File(){
 		

@@ -1,8 +1,11 @@
 package mfdr.learning;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedList;
 
 import mdfr.datastructure.Data;
+import mdfr.datastructure.MFDRDistanceDetails;
 import mdfr.datastructure.TimeSeries;
 import mdfr.dimensionality.reduction.MFDR;
 import mdfr.dimensionality.reduction.PLA;
@@ -14,9 +17,9 @@ import mdfr.learning.datastructure.TrainingSet;
 import junit.framework.TestCase;
 
 public class TestLRAngleLearning extends TestCase {
-	private final int datalength = 1024;
+	private final int datalength = 4096;
 	private int setsize = 5;
-	private final double T1 = 64;
+	private final double T1 = 512;
 	private final double T2 = 16;
 	private final double ANGLE = Math.PI;
 
@@ -27,40 +30,88 @@ public class TestLRAngleLearning extends TestCase {
 		Distance d = new EuclideanDistance();
 		TimeSeries[][] ts = new TimeSeries[setsize][2];
 		LinkedList<TrainingSet> trainingset = new LinkedList<TrainingSet>();
+		System.out.println();
+		
+		// ****** DATA GENERATION ******* //
+		long starttime = System.currentTimeMillis();
 		for (int i = 0; i < setsize; i++) {
 			ts[i] = generateTimeSeries();
 		}
+		System.out.println("Data Generation Time: " + (System.currentTimeMillis() - starttime));
+		// ****************************** //
+		
+		// ********** DISTANCE DECOMPOSITION ************ //
+		long sstarttime = System.currentTimeMillis();
 		for (int i = 0; i < setsize; i++) {
+			
 			// TODO replace getdistanceDetails with a return object.
-			double pladist = mfdr.getDistanceDetails(ts[i][0], ts[i][1], d)
-					.pla();
-			double dwtdist = mfdr.getDistanceDetails(ts[i][0], ts[i][1], d)
-					.dwt();
+			TimeSeries t1 = mfdr.getTrend(ts[i][0]);
+			TimeSeries t2 = mfdr.getTrend(ts[i][1]);
+			
+			starttime = System.currentTimeMillis();
+			double trenddist = d.calDistance(t1, t2, ts[i][0]);
+			System.out.println("P1: " + (System.currentTimeMillis() - starttime));
+			
+			starttime = System.currentTimeMillis();
+			double freqdist = d.calDistance(mfdr.getResidual(ts[i][0]), mfdr.getResidual(ts[i][1]), ts[i][0]);
+			System.out.println("P2: " + (System.currentTimeMillis() - starttime));
+			
+			starttime = System.currentTimeMillis();
 			double oridist = d.calDistance(ts[i][0], ts[i][1], ts[i][0]);
-			trainingset.add(new TrainingSet(pladist, dwtdist, oridist));
+			System.out.println("P3: " + (System.currentTimeMillis() - starttime));
+			
+			trainingset.add(new TrainingSet(trenddist, freqdist, oridist));
 		}
-
+		System.out.println("Prepare Training Time: " + (System.currentTimeMillis() - sstarttime));
+		// ********************************************** //
+		
+		// ***************** ANGLE LEARNING ************** //
+		starttime = System.currentTimeMillis();
 		LRAngleLearning alearn = new LRAngleLearning(trainingset);
+		System.out.println("Angle Training Time: " + (System.currentTimeMillis() - starttime));
+		// *********************************************** //
+		
+		// ************* TEST EXAMPLE ************ //
 		double pladist = mfdr.getDistanceDetails(ts[0][0], ts[0][1], d).pla();
 		double dwtdist = mfdr.getDistanceDetails(ts[0][0], ts[0][1], d).dwt();
+		System.out.println("=TEST EXAMPLE=");
 		System.out.println("PLA:" + pladist + "  DWT:" + dwtdist);
 		System.out.println("Angle:" + alearn.getAngle(pladist, dwtdist));
-		double angle = alearn.getAngle(pladist, dwtdist);
+		System.out.println();
+		// *************************************** //
+		
 		// Error Training
 		TimeSeries[] gg = new TimeSeries[2];
 		for (int i = 0; i < 2; i++) {
 			gg = generateTimeSeries();
 		}
-		VarienceLearning vlearn = new VarienceLearning(trainingset, angle, 3);
-		pladist = mfdr.getDistanceDetails(gg[0], gg[1], d).pla();
-		dwtdist = mfdr.getDistanceDetails(gg[0], gg[1], d).dwt();
+		
+		starttime = System.currentTimeMillis();
+		VarienceLearning vlearn = new VarienceLearning(trainingset, alearn, 3);
+		System.out.println("Varience Training Time: " + (System.currentTimeMillis() - starttime));
+		
+		// *************   PRINT RESTULS *************//
+		starttime = System.currentTimeMillis();
+		MFDRDistanceDetails mdfrdetails = mfdr.getDistanceDetails(gg[0], gg[1], d);
+		pladist = mdfrdetails.pla();
+		dwtdist = mdfrdetails.dwt();
+		starttime = System.currentTimeMillis();
+		double d1 = pla.getDistance(gg[0], gg[1], d);
+		System.out.println("D1: " + (System.currentTimeMillis() - starttime));
+		double d2 = dtw.getDistance(gg[0], gg[1], d);
+		System.out.println("D2: " + (System.currentTimeMillis() - starttime));
 		System.out.println("PLA:" + pla.getDistance(gg[0], gg[1], d) + "  DWT:" + dtw.getDistance(gg[0], gg[1], d));
+		
+		double angle = alearn.getAngle(pladist, dwtdist);
 		mfdr.updateAngle(angle);
+		starttime = System.currentTimeMillis();
 		double mfdrdistance = mfdr.getDistance(gg[0], gg[1], d);
+		System.out.println("E2: " + (System.currentTimeMillis() - starttime));
 		System.out.println("Origin:" + d.calDistance(gg[0], gg[1], gg[0]));
 		System.out.println("MFDR:" + mfdrdistance);
 		System.out.println("MFDR_Corrected:" + vlearn.getGuaranteedCompensation(mfdrdistance));
 		System.out.println("Compensation:" + vlearn.getGuaranteedCompensation());
+		System.out.println("End Time: " + (System.currentTimeMillis() - starttime));
 	}
 
 	private TimeSeries[] generateTimeSeries() {

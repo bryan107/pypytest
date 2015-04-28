@@ -191,12 +191,16 @@ public class MFDR extends DimensionalityReduction {
 	}
 	// ************** TEST ZONE ***********************
 	
-	public TimeSeries getRes(TimeSeries ts) {
+	public TimeSeries getResidual(TimeSeries ts) {
 		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
+		return getResidual(ts, trendfull);
+	}
+	
+	public TimeSeries getResidual(TimeSeries ts, TimeSeries trendfull ) {
 		return DataListOperator.getInstance().linkedtListSubtraction(ts, trendfull);
 	}
 	
-	public TimeSeries getPLA(TimeSeries ts) {
+	public TimeSeries getTrend(TimeSeries ts) {
 		return this.pla.getFullResolutionDR(ts);
 	}
 	
@@ -283,5 +287,6 @@ public class MFDR extends DimensionalityReduction {
 		updateAngle(angle);
 		return getDistance(mfdr1, mfdr2, ref, distance);
 	}
+	
 
 }

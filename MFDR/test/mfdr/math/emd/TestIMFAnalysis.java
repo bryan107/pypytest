@@ -1,4 +1,4 @@
-package mfdr.core.emd;
+package mfdr.math.emd;
 
 import junit.framework.TestCase;
 

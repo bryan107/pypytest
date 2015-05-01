@@ -1,7 +1,5 @@
 package mfdr.core;
 
-import java.util.Collections;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -56,23 +54,35 @@ public class WhiteNoiseFilter {
 		this.original_time_series = original_time_series;
 	}
 
-	/*
-	 * Return the windowsize when a IMFs is consider as a white noise
+	/**
+	 * Return the white noise related window size
+	 * 
+	 * This is a naive implementation which defines the window size using the
+	 * first IMF set with 50% more white noise IMFs 
+	 * 
+	 * @param imfs
+	 * @param original_time_series
+	 * @return white_noise_window
 	 */
-	public double getWhiteNoiseWindowSize(IMFS imfs) {
-		IMFS imfs_temp = new IMFS();
-		Collections.copy(imfs, imfs_temp);
+	public double getWhiteNoiseWindowSizeNaive(IMFS imfs,
+			TimeSeries original_time_series) {
+		setOriginalTimeSeries(original_time_series);
+		IMFS imfs_temp = (IMFS) imfs.clone();
 
-		for (int i = 0; i < imfs_temp.size(); i++) {
-			// If an (trimmed) IMF is regarded as a white noise, return the windowsize of its frequency,
-			// Otherwise remove the last IMF with lowest frequency (which is potentially a signal).
-			if (isWhiteNoise(imfs_temp)) {
-				return imfs_temp.peekLast().averageWavelength();	
+		while (!imfs_temp.isEmpty()) {
+			logger.info("IMF NUM:" + imfs_temp.size());
+			// If an (trimmed) IMF is regarded as a white noise, return the
+			// windowsize of its frequency,
+			// Otherwise remove the last IMF with lowest frequency (which is
+			// potentially a signal).
+			if (isWhiteNoiseNaive(imfs_temp)) {
+				return imfs_temp.peekLast().averageWavelength();
 			} else { // If
 				imfs_temp.removeLast();
 			}
+			System.out.println();
 		}
-		// No IMF combination is white noise. 
+		// No IMF combination is white noise.
 		return 0;
 	}
 
@@ -81,7 +91,7 @@ public class WhiteNoiseFilter {
 	 * noise. If 50% more IMF is signal than the combination of IMFS is regarded
 	 * as a signal, otherwise white noise.
 	 */
-	public boolean isSignal(IMFS imfs) {
+	public boolean isSignalNaive(IMFS imfs) {
 		int signal_num = 0, whitenoise_num = 0;
 		for (int i = 0; i < imfs.size(); i++) {
 			if (isSignal(imfs, imfs.get(i))) {
@@ -100,8 +110,66 @@ public class WhiteNoiseFilter {
 	/*
 	 * Mirror function of isSignal(IMFS imfs)
 	 */
-	public boolean isWhiteNoise(IMFS imfs) {
-		return !isSignal(imfs);
+	public boolean isWhiteNoiseNaive(IMFS imfs) {
+		return !isSignalNaive(imfs);
+	}
+
+	
+	/**
+	 * Return the white noise related window size
+	 * This solution uses the IMF set with highest proportion of white noise to define window size
+	 * 
+	 * @param imfs
+	 * @param original_time_series
+	 * @return white_noise_window
+	 */
+	public double getWhiteNoiseWindowSize(IMFS imfs,
+			TimeSeries original_time_series) {
+		setOriginalTimeSeries(original_time_series);
+		double highestrank = 0;
+		int index = 0;
+		IMFS imfs_temp = (IMFS) imfs.clone();
+
+		for (int i = imfs.size() - 1; i >= 0; i--) {
+			logger.info("IMF NUM:" + imfs_temp.size());
+			// If an (trimmed) IMF is regarded as a white noise, return the
+			// windowsize of its frequency,
+			// Otherwise remove the last IMF with lowest frequency (which is
+			// potentially a signal).
+			double noiserank = isWhiteNoise(imfs_temp);
+			logger.info("W_Rank[" + i + "]:" + noiserank + "  C_Rank[" + index
+					+ "]:" + highestrank);
+			if (noiserank > highestrank) {
+				highestrank = noiserank;
+				index = i;
+			}
+			imfs_temp.removeLast();
+			System.out.println();
+		}
+		// No IMF combination is white noise.
+		return imfs.get(index).averageWavelength();
+	}
+
+	/*
+	 * This function exam whether a set of IMFs is a combination of a white
+	 * noise. Return rank of white noise.
+	 */
+	public double isSignal(IMFS imfs) {
+		double signal_num = 0;
+		for (int i = 0; i < imfs.size(); i++) {
+			System.out.print("IMF[" + i + "]:");
+			if (isSignal(imfs, imfs.get(i))) {
+				signal_num++;
+			}
+		}
+		return signal_num / imfs.size();
+	}
+
+	/*
+	 * Mirror function of isSignalRank(IMFS imfs)
+	 */
+	public double isWhiteNoise(IMFS imfs) {
+		return 1 - isSignal(imfs);
 	}
 
 	/*
@@ -116,7 +184,8 @@ public class WhiteNoiseFilter {
 		// one of them
 		// OPTOIN1: Normalization regarding the energy density of the original
 		// signal.
-		// double ed = imf.normalizedEnergyDensity(ts.energyNormalizedFactor());
+		// double ed =
+		// imf.normalizedEnergyDensity(original_time_series.energyNormalizedFactor());
 
 		// OPTOIN2: Normalization regarding the sum of all IMFs.
 		double ed = imf.energyDensity() / imfs.totalEnergyDensity();

@@ -3,7 +3,6 @@ package mfdr.math.statistic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mfdr.datastructure.TimeSeries;
 import mfdr.math.emd.datastructure._BAK_IMF;
 
 public class StatisticalProperty {

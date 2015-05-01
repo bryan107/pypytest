@@ -2,19 +2,19 @@ package mfdr.core;
 
 public class WindowSize {
 
-	final private double noisewindowsize, trendwindowsize;
+	final private double windowsize_noise, windowsize_trend;
 	
-	public WindowSize(double noisewindowsize, double trendwindowsize) {
-		this.noisewindowsize = noisewindowsize;
-		this.trendwindowsize = trendwindowsize;
+	public WindowSize(double windowsize_noise, double windowsize_trend) {
+		this.windowsize_noise = windowsize_noise;
+		this.windowsize_trend = windowsize_trend;
 	}
 	
 	public double noise(){
-		return noisewindowsize;
+		return windowsize_noise;
 	}
 	
 	public double trend(){
-		return trendwindowsize;
+		return windowsize_trend;
 	}
 	
 }

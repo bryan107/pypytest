@@ -50,17 +50,19 @@ public class TrendFilter {
 	 * Get the window size for trend / frequency distinguishing.
 	 */
 	// TODO fix the potential 0 frequency error
-	public double getTrendWindowSize(IMFS imfs) {
+	public double getTrendWindowSize(IMFS imfs, double windowsize_noise) {
 		for (int i = 0; i < imfs.size()-1; i++) {
+			if (imfs.get(i).averageWavelength() < windowsize_noise)
+				continue;
 			// If a imf is a trend
-			if (isTrend(imfs.get(i)))
+			if (isTrend(imfs.get(i))){
 				try {
 					return imfs.get(i).averageWavelength();
 				} catch (Exception e) {
 					logger.info("Set Time Length as Trend window");
 					return imfs.peekLast().timeLength();
 				}
-
+			}
 		}
 		// If no can be formed
 		logger.info("Set Time Length as Trend window");
@@ -104,6 +106,7 @@ public class TrendFilter {
 			// Store the energy of the Kth-Motif in kenergy
 		}
 		// return the energy ratio between K-Motifs and whole IMF
+		double all = imf.normalizedEnergy(imf.maxValue());
 		return kenergy / imf.normalizedEnergy(imf.maxValue());
 	}
 

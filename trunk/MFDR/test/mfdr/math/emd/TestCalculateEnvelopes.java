@@ -1,4 +1,4 @@
-package mfdr.core.emd;
+package mfdr.math.emd;
 //package mdfr.core.emd;
 //
 //import java.util.Iterator;

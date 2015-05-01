@@ -1,4 +1,4 @@
-package mfdr.core.emd;
+package mfdr.math.emd;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
@@ -25,7 +25,7 @@ public class TestEMD extends TestCase {
 	
 	private static Log logger = LogFactory.getLog(TestEMD.class);
 	private double zerocrossingaccuracy = 0.0001;
-	private long datasize = 2000;  
+	private long datasize = 1024;  
 	private double[] IFparamaters = {4,2,1}; 
 	private final int MAXLEVEL = 10;
 	DecimalFormat df = new DecimalFormat("0.0");

@@ -53,21 +53,23 @@ public class TrendFilter {
 	 * @return trend_window_size
 	 */
 	public double getTrendWindowSize(IMFS imfs, double windowsize_noise) {
-		for (int i = 0; i < imfs.size()-1; i++) {
+		for (int i = 0; i < imfs.size(); i++) {
 			double imf_wavelength;
 			// Catch infinite wavelength exceptions.
 			try {
 				imf_wavelength = imfs.get(i).averageWavelength();
 			} catch (Exception e) {
-				logger.info("Set Time Length as Trend window" + e);
-				return imfs.get(i).timeLength();
+				logger.info("Cannot extract wavelength from IMF[" + i + "], set IMF[" + (i - 1)+ "]'s frequency as trend window size");
+				return imfs.get(i-1).averageWavelength();
 			}
 			// If this imf is a white noise
 			if (imf_wavelength <= windowsize_noise)
 				continue;
 			// If this imf is a trend
 			if (isTrend(imfs.get(i))){
- 					return imf_wavelength;
+				return imfs.get(i-1).averageWavelength();
+
+ 					
 			}
 		}
 		// If no can be formed

@@ -46,22 +46,28 @@ public class TrendFilter {
 		this.motif_threshold = motif_threshold;
 	}
 
-	/*
-	 * Get the window size for trend / frequency distinguishing.
+	/**
+	 * Get the window size for trend / seasonal components distinguishing.
+	 * @param imfs
+	 * @param windowsize_noise
+	 * @return trend_window_size
 	 */
-	// TODO fix the potential 0 frequency error
 	public double getTrendWindowSize(IMFS imfs, double windowsize_noise) {
 		for (int i = 0; i < imfs.size()-1; i++) {
-			if (imfs.get(i).averageWavelength() < windowsize_noise)
+			double imf_wavelength;
+			// Catch infinite wavelength exceptions.
+			try {
+				imf_wavelength = imfs.get(i).averageWavelength();
+			} catch (Exception e) {
+				logger.info("Set Time Length as Trend window" + e);
+				return imfs.get(i).timeLength();
+			}
+			// If this imf is a white noise
+			if (imf_wavelength <= windowsize_noise)
 				continue;
-			// If a imf is a trend
+			// If this imf is a trend
 			if (isTrend(imfs.get(i))){
-				try {
-					return imfs.get(i).averageWavelength();
-				} catch (Exception e) {
-					logger.info("Set Time Length as Trend window");
-					return imfs.peekLast().timeLength();
-				}
+ 					return imf_wavelength;
 			}
 		}
 		// If no can be formed
@@ -102,6 +108,7 @@ public class TrendFilter {
 		while (it.hasNext()) {
 			LinkedList<Integer> linkedList = (LinkedList<Integer>) it.next();
 			// The energy of the given motif
+			double engergy = getMotifEnergy(motif, linkedList);
 			kenergy += getMotifEnergy(motif, linkedList);
 			// Store the energy of the Kth-Motif in kenergy
 		}

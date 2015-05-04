@@ -53,7 +53,10 @@ public class IMF extends TimeSeries {
 	 * Retrieve IMF properties
 	 */
 	
-
+	/**
+	 * Get the total time length of this IMF
+	 * @return
+	 */
 	public double timeLength() {
 		return peekLast().time() - peekFirst().time();
 	}
@@ -159,7 +162,7 @@ public class IMF extends TimeSeries {
 		double accumulatefreq = 0;
 		Data freq_start = null, freq_end = null;
 		Iterator<Data> it = freq.iterator();
-		if (freq.size() < 2) {
+		if (freq.size() < 1) {
 			logger.warn("No freq can be retrieved");
 			return 0;
 		}
@@ -188,7 +191,10 @@ public class IMF extends TimeSeries {
 
 	// Get average wavelength of this IMF
 	public double averageWavelength() throws ArithmeticException{
-		return 1 / averageFrequency();
+		double freq = averageFrequency();
+		if(freq == 0)
+			throw new ArithmeticException("Division by zero!");
+		return 1 / freq;
 	}
 	
 }

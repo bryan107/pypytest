@@ -29,13 +29,14 @@ public class WhiteNoiseFilter {
 	 * IMF as the error of approximation sotlution adopted in IMFAnalyse grow
 	 * significant after certain level. (See paper Huang 2004.)
 	 */
-	private double white_noise_level, white_noise_threshold;
+	private double white_noise_level, white_noise_threshold, min_NSratio;
 	private TimeSeries original_time_series;
 
 	public WhiteNoiseFilter(double white_noise_level,
-			double white_noise_threshold) {
+			double white_noise_threshold, double min_NTratio) {
 		setWhiteNoiseLevel(white_noise_level);
 		setWhiteNoiseThreshold(white_noise_threshold);
+		setMinNSRatio(min_NTratio);
 		setOriginalTimeSeries(original_time_series);
 	}
 
@@ -50,6 +51,10 @@ public class WhiteNoiseFilter {
 		this.white_noise_threshold = white_noise_threshold;
 	}
 
+	public void setMinNSRatio(double min_NSratio){
+		this.min_NSratio = min_NSratio;
+	}
+	
 	public void setOriginalTimeSeries(TimeSeries original_time_series) {
 		this.original_time_series = original_time_series;
 	}
@@ -126,16 +131,14 @@ public class WhiteNoiseFilter {
 	public double getWhiteNoiseWindowSize(IMFS imfs,
 			TimeSeries original_time_series) {
 		setOriginalTimeSeries(original_time_series);
-		double highestrank = 0;
+		double highestrank = this.min_NSratio;
 		int index = 0;
 		IMFS imfs_temp = (IMFS) imfs.clone();
 
 		for (int i = imfs.size() - 1; i >= 0; i--) {
 			logger.info("IMF NUM:" + imfs_temp.size());
-			// If an (trimmed) IMF is regarded as a white noise, return the
-			// windowsize of its frequency,
-			// Otherwise remove the last IMF with lowest frequency (which is
-			// potentially a signal).
+			// If an (trimmed) IMF is regarded as a white noise, return the windowsize of its frequency,
+			// Otherwise remove the last IMF with lowest frequency (which is potentially a signal).
 			double noiserank = isWhiteNoise(imfs_temp);
 			logger.info("W_Rank[" + i + "]:" + noiserank + "  C_Rank[" + index
 					+ "]:" + highestrank);
@@ -198,8 +201,14 @@ public class WhiteNoiseFilter {
 		// of zero-crossings.
 		// The normalisation is done regarding the highest possible frequency in
 		// the original time series
-		double T = imf.averageWavelength()
-				/ this.original_time_series.normalisedWhiteNoiseWaveLength();
+		double T;
+		try {
+			T = imf.averageWavelength()
+					/ this.original_time_series.normalisedWhiteNoiseWaveLength();
+		} catch (Exception e) {
+			logger.info("No Instant Frequency exist for this IMF");
+			return true;
+		}
 
 		/*
 		 * STEP 3: Calculate the upper and lower bounds with regard to T.
@@ -208,13 +217,9 @@ public class WhiteNoiseFilter {
 		// noise
 		StatisticalBounds sb = new StatisticalBoundsWhiteNoise(
 				this.white_noise_level, imf.size());
-		if (T >= imf.size()) {
-			logger.info("No Instant Frequency exist for this IMF");
-			return true;
-		}
 		// Here is the standard solution which consider both upper bound and
 		// lower bound.
-		else if (StatisticalProperty.getInstance().isStatisticalSignificance(
+		if (StatisticalProperty.getInstance().isStatisticalSignificance(
 				sb, T, ed, this.white_noise_threshold)) {
 			return true;
 		}

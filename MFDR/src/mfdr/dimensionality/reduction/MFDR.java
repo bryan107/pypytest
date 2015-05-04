@@ -107,7 +107,6 @@ public class MFDR extends DimensionalityReduction {
 		return this.angle;
 	}
 
-	// TODO TEST THIS!!!
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries output = new TimeSeries();

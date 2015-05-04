@@ -19,5 +19,4 @@ public class LearningResults {
 	public VarienceLearning vlearn(){
 		return vlearn;
 	}
-	
 }

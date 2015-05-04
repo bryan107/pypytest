@@ -13,7 +13,7 @@ public class TestMFDRFacade extends TestCase {
 	private double motif_threshold = 0.1;
 
 	public void testLearnWindowSize() {
-		TimeSeries ts = generateTimeSeries(5000);
+		TimeSeries ts = generateTimeSeries(2000);
 		MFDRFacade facade = new MFDRFacade(white_noise_level,
 				white_noise_threshold, min_NSratio, motif_FTratio, motif_k, motif_threshold);
 		WindowSize ws= facade.learnWindowSizes(ts);

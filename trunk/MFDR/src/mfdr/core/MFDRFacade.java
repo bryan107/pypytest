@@ -1,5 +1,6 @@
 package mfdr.core;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
@@ -44,14 +45,14 @@ public class MFDRFacade {
 
 	// ************************************
 
-	public MFDRFacade(double white_noise_level, double white_noise_threshold, double FTratio, int motif_k, double motif_threshold) {
+	public MFDRFacade(double white_noise_level, double white_noise_threshold, double min_NSratio, double FTratio, int motif_k, double motif_threshold) {
 		this.mfdr = new MFDR();
-		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold);
+		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold, min_NSratio);
 		updateTrendFilter(FTratio, motif_k, motif_threshold);
 	}
 
-	public void updateWhiteNoiseFilter(double white_noise_level, double white_noise_threshold){
-		wfilter = new WhiteNoiseFilter(white_noise_level, white_noise_threshold);
+	public void updateWhiteNoiseFilter(double white_noise_level, double white_noise_threshold, double min_NSratio){
+		wfilter = new WhiteNoiseFilter(white_noise_level, white_noise_threshold, min_NSratio);
 	}
 	
 	public void updateTrendFilter(double FTratio, int motif_k, double motif_threshold){
@@ -77,7 +78,15 @@ public class MFDRFacade {
 				IFparamaters[1], IFparamaters[2]);
 		// Calculate IMF with EMD
 		IMFS imfs = emd.getIMFs(MAXLEVEL);
-
+		
+		for(int i = 0 ; i < imfs.size() ; i++){
+			try {
+				System.out.println("IMF[" + i + "]: " + imfs.get(i).averageWavelength());
+			} catch (Exception e) {
+				System.out.println("IMF[" + i + "]: Infinit");
+			}
+		}
+		
 		// STEP 2: AYALYZE IMFs
 		double windowsize_noise = wfilter.getWhiteNoiseWindowSize(imfs, ts);
 		// TODO TREND Filter has BUG!!! FIX!!!!!

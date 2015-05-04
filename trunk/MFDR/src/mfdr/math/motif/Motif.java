@@ -1,7 +1,10 @@
 package mfdr.math.motif;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,7 +86,7 @@ public class Motif {
 	 **/
 	public LinkedList<LinkedList<Integer>> getKMotifs(int k, double threshold){
 		LinkedList<LinkedList<Integer>> kmotif = new LinkedList<LinkedList<Integer>>();
-		LinkedList<LinkedList<Integer>> matchpool = new LinkedList<LinkedList<Integer>>();
+		Map<Integer, LinkedList<Integer>> matchpool = new HashMap<Integer, LinkedList<Integer>>();
 		Distance d = new EuclideanDistance();
 		// 1. Initiate pool instances.
 		initMatchPool(matchpool);
@@ -99,31 +102,26 @@ public class Motif {
 	 * These are implementations that serve getKMotifs()
 	 */
 	private void extractKMotif(int k, LinkedList<LinkedList<Integer>> kmotif,
-			LinkedList<LinkedList<Integer>> matchpool) {
-		boolean flag = false;
+			Map<Integer, LinkedList<Integer>> matchpool) {
 		int compensation = 1;
 		if(lastsubsigavailable)
 			compensation = 0;
 		for(int i = 0 ; i < k && i < subsignals.size() - compensation; i++){
-			Integer current_best_location = 0;
+			Integer current_best_location = -1;
 			Integer current_best_num = 0;
 			// Get current level 1-Motif
 			current_best_location = findBestMatchMotif(matchpool,
 					current_best_location, current_best_num);
-			// If not motif can be extracted.
-			if(current_best_location == 0){
-				if(flag){
-					break;
-				}
-				flag = true;
-			}
+			// If no motif can be extracted.
+			if(current_best_location == -1)
+				break;
 			// Save the 1-Motif matchs in the map
 			matchpool = saveBestMatchMotif(kmotif, matchpool, current_best_location);
 		}
 	}
 
 	private void establishMatchPool(double threshold,
-			LinkedList<LinkedList<Integer>> matchpool, Distance d) {
+			Map<Integer, LinkedList<Integer>> matchpool, Distance d) {
 		int compensation = 1;
 		if(lastsubsigavailable)
 			compensation = 0;
@@ -141,10 +139,13 @@ public class Motif {
 		}
 	}
 
-	private void initMatchPool(LinkedList<LinkedList<Integer>> matchpool) {
+	private void initMatchPool(Map<Integer, LinkedList<Integer>> matchpool) {
+		int compensation = 1;
+		if(lastsubsigavailable)
+			compensation = 0;
 		// Ensure that the last motif (which may not contain enough data) is not included.
-		for(int i = 0 ; i < subsignals.size() - 1 ; i++){
-			matchpool.add(new LinkedList<Integer>());
+		for(int i = 0 ; i < subsignals.size() - compensation ; i++){
+			matchpool.put(i, new LinkedList<Integer>());
 		}
 	}
 
@@ -152,47 +153,62 @@ public class Motif {
 	 * These are implementations that serve extractKMotif()
 	 */
 	private Integer findBestMatchMotif(
-			LinkedList<LinkedList<Integer>> matchpool,
+			Map<Integer, LinkedList<Integer>> matchpool,
 			Integer current_best_location, Integer current_best_num) {
-		for(int j = 0 ; j < matchpool.size() ; j++){
-			if(matchpool.get(j).size() > current_best_num){
-				current_best_location = j;
-				current_best_num = matchpool.get(j).size();
+		Iterator<Integer> it = matchpool.keySet().iterator();
+		while (it.hasNext()) {
+			Integer index = (Integer) it.next();
+			if(matchpool.get(index).size() > current_best_num){
+				// Here use the number of matched motifs, which may be duplicated.
+				current_best_location = index;
+				current_best_num = matchpool.get(index).size();
 			}
 		}
 		return current_best_location;
 	}
 
-	private LinkedList<LinkedList<Integer>> saveBestMatchMotif(LinkedList<LinkedList<Integer>> kmotif,
-			LinkedList<LinkedList<Integer>> matchpool,
+	private Map<Integer, LinkedList<Integer>> saveBestMatchMotif(LinkedList<LinkedList<Integer>> kmotif,
+			Map<Integer, LinkedList<Integer>> matchpool,
 			Integer current_best_location) {
 		LinkedList<Integer> motifs = new LinkedList<Integer>();
 		motifs.add(current_best_location);
+		
 		Iterator<Integer> it = matchpool.get(current_best_location).iterator();
+		// Add match segments to motifs
 		while (it.hasNext()) {
-			Integer index = (Integer) it.next();
-			// Add match to motifs
-			motifs.add(index);
-			
-			/*
-			 * K-Motif selection, can only use one of them
-			 */
-			
-			// 1.Naive K-Motif
-			//   Remove object current_best_location from others
-//			matchpool.get(index).remove(current_best_location);
-			
-			// 2.Standard K-Motif proposed in KDD 02'
-			//   Remove object that has been included in cluster of current_best_location.
-			//   This ensures that there is no overlap between clusters.
-			matchpool.get(index).clear();
+			motifs.add(it.next());
 		}
-		matchpool.get(current_best_location).clear();
 		kmotif.add(motifs);
+		// Remove this motif from the match pool
+		removeElement(matchpool, current_best_location);
 		return matchpool;
 	}
 	
-	
+	/*
+	 * Remove element from map
+	 * 1. Remove each element of the given motif from other motifs.
+	 * 2. Remove the lists of each element of the given motif.
+	 * 3. Remove the given motif centered element list.
+	 */
+	private void removeElement(Map<Integer, LinkedList<Integer>> map, int index){
+		// iterator through the index elements.
+		Iterator<Integer> it = map.get(index).iterator();
+		while (it.hasNext()) {
+			// First element
+			Integer index1= (Integer) it.next();
+			// Remove this element from other lists.
+			Iterator<Integer> it2 = map.get(index1).iterator();
+			while (it2.hasNext()) {
+				Integer index2 = (Integer) it2.next();
+				if(index2 == index)
+					continue;
+				map.get(index2).removeAll(Collections.singleton(index1));
+			}
+			// Remove the element list from map
+			map.remove(index1);
+		}
+		map.remove(index);
+	}
 
 	
 }

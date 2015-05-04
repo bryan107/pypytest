@@ -202,7 +202,6 @@ public class _BAK_IMF {
 	 * IMF property retrieving functions
 	 */
 
-//	// TODO REFACTOR WITH TimeSeries
 //	// Get the energy Density of Average Density
 //	public double energyDensity() {
 //		double energy = 0;
@@ -215,7 +214,6 @@ public class _BAK_IMF {
 //		return energy / datapoints.size();
 //	}
 //	
-//	// TODO REFACTOR WITH TimeSeries
 //	public double normalizedEnergyDensity(){
 //		// Normalize IMF to acquire normalized energy density 
 //		LinkedList<Data> norm_datapoints = DataListOperator.getInstance().normalize(datapoints);

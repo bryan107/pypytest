@@ -25,7 +25,7 @@ public class TestEMD extends TestCase {
 	
 	private static Log logger = LogFactory.getLog(TestEMD.class);
 	private double zerocrossingaccuracy = 0.0001;
-	private long datasize = 1024;  
+	private long datasize = 5000;  
 	private double[] IFparamaters = {4,2,1}; 
 	private final int MAXLEVEL = 10;
 	DecimalFormat df = new DecimalFormat("0.0");
@@ -88,14 +88,14 @@ public class TestEMD extends TestCase {
 		 *  Store Results
 		 */
 		// Save Time References
-		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
+		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
 		
 		// Save Original Signal
-		File.getInstance().saveLinkedListToFile(" " ,residual, "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
+		File.getInstance().saveLinkedListToFile(" " ,residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
 				
 		// Save IMFs
 		for(int i = 0 ; i < imfs.size() ; i++){
-			File.getInstance().saveLinkedListToFile(" " ,imfs.get(i), "C:\\TEST\\MDFR\\_IMFTest_Norm.csv");
+			File.getInstance().saveLinkedListToFile(" " ,imfs.get(i), "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
 		}
 		
 		// Save instant
@@ -191,13 +191,11 @@ public class TestEMD extends TestCase {
 			java.util.Random r = new java.util.Random();
 			double noise = 0; 
 			noise = r.nextGaussian() * Math.sqrt(5);
-//			double value = noise;
 			double trend = 1*Math.pow(i, 0.5);
-//			if(i > size/2){
-//				trend = -trend;
-//			}
+			if(i%200 == 0){
+				trend = trend + r.nextGaussian() * Math.sqrt(50);
+			}
 //			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise;
-//			double value = noise;
 			double value = 9.5 * Math.sin(i*Math.PI / 64) + trend + noise;
 			residual.add(new Data(i, value));
 		}

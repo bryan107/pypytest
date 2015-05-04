@@ -90,7 +90,6 @@ public class ReversedMFDR extends DimensionalityReduction {
 		return this.weight_freq;
 	}
 
-	// TODO TEST THIS!!!
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries output = new TimeSeries();

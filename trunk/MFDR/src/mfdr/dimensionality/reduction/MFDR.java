@@ -195,7 +195,6 @@ public class MFDR extends DimensionalityReduction {
 		for (int i = 0; i < sub_freq.size(); i++) {
 			freq.add(this.dwt.getDR(sub_freq.get(i)));
 		}
-		// Check the correctness of PLA and DWT
 		if (trend.size() != freq.size()) {
 			logger.info("The length of trend and freq objects does not match");
 			return null;

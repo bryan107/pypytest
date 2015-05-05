@@ -6,11 +6,13 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import flanagan.analysis.Stat;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.reduction.MFDR;
 import mfdr.distance.Distance;
 import mfdr.learning.AngleLearning;
+import mfdr.learning.LR3DAngleLearning;
 import mfdr.learning.VarienceLearning;
 import mfdr.learning.datastructure.TrainingSet;
 import mfdr.math.emd.EMD;
@@ -64,12 +66,64 @@ public class MFDRFacade {
 	 * PHASE 1: Learn Window Size
 	 */
 
-	public WindowSize learnWindowSizes(LinkedList<TimeSeries> ts){
-		return null;
+	/**
+	 * Learn window size with LinkedList input TimeSeries 
+	 * @param ts
+	 * @return WindowSize
+	 */
+	public WindowSize learnWindowSizes(LinkedList<TimeSeries> ts) {
+		double[] windowsize_noises = new double[ts.size()];
+		double[] windowsize_trends = new double[ts.size()];
+		WindowSize ws;
+		// Learn Window sizes of with the training data set
+		for(int i = 0 ; i < ts.size() ; i++){
+			ws = learnWindowSizes(ts.get(i));
+			windowsize_noises[i] = ws.noise();
+			windowsize_trends[i] = ws.trend();
+		}
+		// Take the medians as final results
+		double windowsize_noise = Stat.median(windowsize_noises);
+		double windowsize_trend = Stat.median(windowsize_trends);
+		// Adjust window sizes to fit the sampling rate of input time series. 
+		windowsize_noise = (int) (windowsize_noise / ts.peek().timeInterval()) * ts.peek().timeInterval();
+		windowsize_trend = (int) (Math.log((windowsize_trend / windowsize_noise))/ Math.log(2));
+		windowsize_trend = Math.pow(2, windowsize_trend) *windowsize_noise;
+		this.windowsize = new WindowSize(windowsize_noise, windowsize_trend);
+		this.windowsizetrain = true;
+		return new WindowSize(windowsize_noise,windowsize_trend);
 	}
 	
-	/*
-	 * TTT
+	/**
+	 * Learn window size with Array input TimeSeries 
+	 * @param ts
+	 * @return
+	 */
+	public WindowSize learnWindowSizes(TimeSeries[] ts) {
+		double[] windowsize_noises = new double[ts.length];
+		double[] windowsize_trends = new double[ts.length];
+		WindowSize ws;
+		// Learn Window sizes of with the training data set
+		for(int i = 0 ; i < ts.length ; i++){
+			ws = learnWindowSizes(ts[i]);
+			windowsize_noises[i] = ws.noise();
+			windowsize_trends[i] = ws.trend();
+		}
+		// Take the medians as final results
+		double windowsize_noise = Stat.median(windowsize_noises);
+		double windowsize_trend = Stat.median(windowsize_trends);
+		// Adjust window sizes to fit the sampling rate of input time series. 
+		windowsize_noise = (int) (windowsize_noise / ts[0].timeInterval()) * ts[0].timeInterval();
+		windowsize_trend = (int) (Math.log((windowsize_trend / windowsize_noise))/ Math.log(2));
+		windowsize_trend = Math.pow(2, windowsize_trend) *windowsize_noise;
+		this.windowsize = new WindowSize(windowsize_noise, windowsize_trend);
+		this.windowsizetrain = true;
+		return new WindowSize(windowsize_noise,windowsize_trend);
+	}
+	
+	/**
+	 * This function learns the window sizes from a time series
+	 * @param ts
+	 * @return
 	 */
 	public WindowSize learnWindowSizes(TimeSeries ts) {
 		// STEP 1 : EMD
@@ -89,35 +143,39 @@ public class MFDRFacade {
 		
 		// STEP 2: AYALYZE IMFs
 		double windowsize_noise = wfilter.getWhiteNoiseWindowSize(imfs, ts);
-		// TODO TREND Filter has BUG!!! FIX!!!!!
 		double windowsize_trend = tfilter.getTrendWindowSize(imfs, windowsize_noise);
-		this.windowsize = new WindowSize(windowsize_noise, windowsize_trend);
 		
-		// STEP 3: Set training result;
+		// STEP 4: Set training result;
 		mfdr.updateFrequencyWindowsize(windowsize_noise);
 		mfdr.updateTrendWindowsize(windowsize_trend);
-		this.windowsizetrain = true;
 		return new WindowSize(windowsize_noise, windowsize_trend);
 	}
 
+	
 	// PHASE 2: Learn Angle and Variations
-	public LearningResults learnParameters(LinkedList<TimeSeries> ts, AngleLearning alearn,
-			VarienceLearning vlearn, double tolerancevarience, Distance d) {
-		this.alearn = alearn;
-		// STEP 1: Setup training set
+	public LearningResults learnParameters(LinkedList<TimeSeries> ts, double tolerancevarience, Distance d) {
+		if(this.windowsizetrain != true){
+			logger.info("Window sizes are needed to be trained first");
+			return null;
+		}
+			
+		this.alearn = new LR3DAngleLearning();		// STEP 1: Setup training set
 
 		// This function trains with original distances
 		// It provides less lower bound violation
-		// LinkedList<TrainingSet> trainingset = prepareTrainingSet(ts,
-		// windowsize.noise(), windowsize.trend(), d);
+		 LinkedList<TrainingSet> trainingset = prepareTrainingSet(ts,
+		 windowsize.noise(), windowsize.trend(), d);
 		/*
 		 * This function trains with reduced distance (should be more accurate)
 		 * It provides higher lower bound results and make for sense in terms of
 		 * learning. While inputs are at the same form as when use.
+		 * 
+		 * **** IT DOES NOT WORK......IT VIOLATES the TRIANGLE INEQUALITY
 		 */
-		LinkedList<TrainingSet> trainingset = prepareReducedTrainingSet(ts,
-				this.windowsize.noise(), this.windowsize.trend(), d);
+//		LinkedList<TrainingSet> trainingset = prepareReducedTrainingSet(ts,
+//				this.windowsize.noise(), this.windowsize.trend(), d);
 
+		this.alearn = new LR3DAngleLearning();
 		// STEP 2: Train Alearn before use.
 		this.alearn.trainingParameters(trainingset);
 
@@ -149,33 +207,33 @@ public class MFDRFacade {
 	 * This function prepares FULL RESOLUTION signals as inputs for training
 	 * Which does not fully reflex the needs
 	 */
-//	private LinkedList<TrainingSet> prepareTrainingSet(
-//			LinkedList<TimeSeries> ts, double windowsize_freq,
-//			double windowsize_trend, Distance d) {
-//		LinkedList<TrainingSet> trainingset = new LinkedList<TrainingSet>();
-//		MFDR mfdr = new MFDR(windowsize_trend, windowsize_freq);
-//		double trainingsize = (ts.size() - 1) * (ts.size()) / 2;
-//		// ********** DISTANCE DECOMPOSITION ************ //
-//		for (int i = 0; i < trainingsize; i++) {
-//			for (int j = i + 1; j < ts.size(); j++) {
-//				// Prepare training time series
-//				TimeSeries ts1 = ts.get(i);
-//				TimeSeries ts2 = ts.get(j);
-//				TimeSeries trend1 = mfdr.getTrend(ts1);
-//				TimeSeries trend2 = mfdr.getTrend(ts2);
-//				TimeSeries residual1 = mfdr.getResidual(ts1, trend1);
-//				TimeSeries residual2 = mfdr.getResidual(ts2, trend2);
-//				// calculate training distances
-//				double origindist = d.calDistance(ts1, ts2, ts1);
-//				double trenddist = d.calDistance(trend1, trend2, ts1);
-//				double freqdist = d.calDistance(residual1, residual2, ts1);
-//				// store results
-//				trainingset
-//						.add(new TrainingSet(trenddist, freqdist, origindist));
-//			}
-//		}
-//		return trainingset;
-//	}
+	private LinkedList<TrainingSet> prepareTrainingSet(
+			LinkedList<TimeSeries> ts, double windowsize_freq,
+			double windowsize_trend, Distance d) {
+		LinkedList<TrainingSet> trainingset = new LinkedList<TrainingSet>();
+		MFDR mfdr = new MFDR(windowsize_trend, windowsize_freq);
+		double trainingsize = (ts.size() - 1) * (ts.size()) / 2;
+		// ********** DISTANCE DECOMPOSITION ************ //
+		for (int i = 0; i < trainingsize; i++) {
+			for (int j = i + 1; j < ts.size(); j++) {
+				// Prepare training time series
+				TimeSeries ts1 = ts.get(i);
+				TimeSeries ts2 = ts.get(j);
+				TimeSeries trend1 = mfdr.getTrend(ts1);
+				TimeSeries trend2 = mfdr.getTrend(ts2);
+				TimeSeries residual1 = mfdr.getResidual(ts1, trend1);
+				TimeSeries residual2 = mfdr.getResidual(ts2, trend2);
+				// calculate training distances
+				double origindist = d.calDistance(ts1, ts2, ts1);
+				double trenddist = d.calDistance(trend1, trend2, ts1);
+				double freqdist = d.calDistance(residual1, residual2, ts1);
+				// store results
+				trainingset
+						.add(new TrainingSet(trenddist, freqdist, origindist));
+			}
+		}
+		return trainingset;
+	}
 
 	/*
 	 * Prepare training set for angle learning. The input set is calculated with

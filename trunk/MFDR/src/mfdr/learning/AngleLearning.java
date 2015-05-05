@@ -2,6 +2,9 @@ package mfdr.learning;
 
 import java.util.LinkedList;
 
+import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.reduction.MFDR;
+import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
 //TODO create a validation class to choose learning model: Either constant or LR
@@ -33,6 +36,12 @@ public abstract class AngleLearning {
 	 */
 	public abstract void trainingParameters(LinkedList<TrainingSet> ts);
 	
+	
+	public abstract void trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d);
+	
+		
+	public abstract LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDR mfdr, Distance d);
+	
 	/*
 	 * Theorem of triangulation:
 	 * angle = arccos((a^2+b^2-c^2)/2ab)
@@ -43,5 +52,7 @@ public abstract class AngleLearning {
 		double angle = Math.acos(numerator/denominator);
 		return  angle;
 	}
+	
+	public abstract double[] getParameters();
 	
 }

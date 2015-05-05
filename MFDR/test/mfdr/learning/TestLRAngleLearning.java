@@ -11,7 +11,7 @@ import mfdr.dimensionality.reduction.MFDR;
 import mfdr.dimensionality.reduction.PLA;
 import mfdr.distance.Distance;
 import mfdr.distance.EuclideanDistance;
-import mfdr.learning.LRAngleLearning;
+import mfdr.learning.LR3DAngleLearning;
 import mfdr.learning.VarienceLearning;
 import mfdr.learning.datastructure.TrainingSet;
 import junit.framework.TestCase;
@@ -67,7 +67,8 @@ public class TestLRAngleLearning extends TestCase {
 		
 		// ***************** ANGLE LEARNING ************** //
 		starttime = System.currentTimeMillis();
-		LRAngleLearning alearn = new LRAngleLearning(trainingset);
+		LR3DAngleLearning alearn = new LR3DAngleLearning();
+		alearn.trainingParameters(trainingset);
 		System.out.println("Angle Training Time: " + (System.currentTimeMillis() - starttime));
 		// *********************************************** //
 		

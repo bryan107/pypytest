@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import math.jwave.Transform;
+import math.jwave.transforms.AncientEgyptianDecomposition;
 import math.jwave.transforms.FastWaveletTransform;
 import math.jwave.transforms.wavelets.haar.*;
 import mfdr.datastructure.Data;
@@ -59,11 +60,11 @@ public class DWT extends DimensionalityReduction {
 	 */
 	@Override
 	public DWTData getDR(TimeSeries ts) {
-		double tslength = Math.log(ts.size())/Math.log(2);
+		double tslength = Math.log(ts.size()/windowsize)/Math.log(2);
 		// TODO reconstruct this to have a more flexible solution.
 		if(tslength % 1 != 0){
 			logger.info("The input Time Series length does not match the windowsize");
-			return null;
+//			return null;
 		}
 		LinkedList<Double> tsvalues = DataListOperator.getInstance().getValueList(ts);
 		double[] valuearray = DataListOperator.getInstance().linkedDoubleListToArray(tsvalues);
@@ -71,7 +72,7 @@ public class DWT extends DimensionalityReduction {
 	}
 	
 	public DWTData getDR(double[] valuearray){
-		Transform t = new Transform(new FastWaveletTransform(new Haar1()));
+		Transform t = new Transform(new AncientEgyptianDecomposition(new FastWaveletTransform(new Haar1())));
 		DWTData tsHilb = new DWTData(t.forward(valuearray));
 		// This calculates log_2(x).
 		double resolution = Math.log(windowsize)/Math.log(2);
@@ -111,20 +112,24 @@ public class DWT extends DimensionalityReduction {
 	 * @return
 	 */
 	public double getDistance(LinkedList<DWTData> dwt_list1 , LinkedList<DWTData> dwt_list2 , Distance distance){
-		double[] hilb1 = new double[dwt_list1.peek().hilb().length * dwt_list1.size()];
-		double[] hilb2 = new double[dwt_list2.peek().hilb().length * dwt_list2.size()];
-		if(hilb1.length != hilb2.length){
+		LinkedList<Double> dwt_list1_double = new LinkedList<Double>();
+		LinkedList<Double> dwt_list2_double = new LinkedList<Double>();
+		for(int i = 0 ; i < dwt_list1.size() ; i++){
+			for(int j = 0 ; j <dwt_list1.get(i).hilb().length ; j++){
+				dwt_list1_double.add(dwt_list1.get(i).hilb()[j]);
+			}
+		}
+		for(int i = 0 ; i < dwt_list2.size() ; i++){
+			for(int j = 0 ; j <dwt_list2.get(i).hilb().length ; j++){
+				dwt_list2_double.add(dwt_list2.get(i).hilb()[j]);
+			}
+		}
+		if(dwt_list1_double.size() != dwt_list2_double.size()){
 			logger.info("The length of input dwt LinkedList is not equal.");
 			return 0;
 		}
-		int datalength = dwt_list1.size();
-		int datasize = dwt_list1.peek().hilb().length;
-		for(int i = 0 ; i < datalength ; i++){
-			for(int j = 0 ; j < datasize ; j++){
-				hilb1[i*datasize+j] = dwt_list1.get(i).hilb()[j]; 
-				hilb2[i*datasize+j] = dwt_list2.get(i).hilb()[j]; 
-			}
-		}
+		double[] hilb1 = DataListOperator.getInstance().linkedDoubleListToArray(dwt_list1_double);
+		double[] hilb2 = DataListOperator.getInstance().linkedDoubleListToArray(dwt_list2_double);
 		return distance.calDistance(hilb1, hilb2);
 	}
 

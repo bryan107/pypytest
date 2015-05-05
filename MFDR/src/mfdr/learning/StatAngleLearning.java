@@ -6,6 +6,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import flanagan.analysis.Stat;
+import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.reduction.MFDR;
+import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
 public class StatAngleLearning extends AngleLearning {
@@ -41,6 +44,24 @@ public class StatAngleLearning extends AngleLearning {
 			angles[i] = angleEquation(ts.get(i).trendDist(), ts.get(i).freqDist(), ts.get(i).originDist());
 		}
 		this.angle = Stat.median(angles);
+	}
+
+	@Override
+	public void trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts,MFDR mfdr, Distance d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getParameters() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

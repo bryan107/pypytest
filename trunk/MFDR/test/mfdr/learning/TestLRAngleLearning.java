@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.reduction.DWT;
 import mfdr.dimensionality.reduction.MFDR;
 import mfdr.dimensionality.reduction.PLA;
 import mfdr.distance.Distance;
@@ -21,11 +22,10 @@ public class TestLRAngleLearning extends TestCase {
 	private int setsize = 5;
 	private final double T1 = 512;
 	private final double T2 = 16;
-	private final double ANGLE = Math.PI;
 
 	public void testTrainingParameters() {
 		PLA pla= new PLA(T1);
-		PLA dtw= new PLA(T1);
+		DWT dtw= new DWT(T1);
 		MFDR mfdr = new MFDR(T1, T2);
 		Distance d = new EuclideanDistance();
 		TimeSeries[][] ts = new TimeSeries[setsize][2];
@@ -104,7 +104,7 @@ public class TestLRAngleLearning extends TestCase {
 		System.out.println("PLA:" + pla.getDistance(gg[0], gg[1], d) + "  DWT:" + dtw.getDistance(gg[0], gg[1], d));
 		
 		double angle = alearn.getAngle(pladist, dwtdist);
-		mfdr.updateAngle(angle);
+//		mfdr.updateAngle(angle);
 		starttime = System.currentTimeMillis();
 		double mfdrdistance = mfdr.getDistance(gg[0], gg[1], d);
 		System.out.println("E2: " + (System.currentTimeMillis() - starttime));

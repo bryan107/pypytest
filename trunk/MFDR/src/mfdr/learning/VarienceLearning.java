@@ -66,10 +66,18 @@ public class VarienceLearning {
 		for (int i = 0; i < trainingset.size(); i++) {
 			// Here is error is defined as the differences with regard of the
 			// original distance..
-			double computed = edgeEquation(trainingset.get(i).trendDist(),
-					trainingset.get(i).freqDist(), alearn.getAngle(
-							trainingset.get(i).trendDist(), trainingset
-									.get(i).freqDist()));
+			
+			/*
+			 * Codes here are for the direct learning version.
+			 */
+			double computed = alearn.getParameters()[0] + alearn.getParameters()[1]*trainingset.get(i).trendDist() + alearn.getParameters()[2]*trainingset.get(i).freqDist();
+			/*
+			 * Codes here are for the angle version.
+			 */
+//			double computed = edgeEquation(trainingset.get(i).trendDist(),
+//					trainingset.get(i).freqDist(), alearn.getAngle(
+//							trainingset.get(i).trendDist(), trainingset
+//									.get(i).freqDist()));
 			double original = trainingset.get(i).originDist();
 			error[i] = computed - original;
 		}
@@ -103,6 +111,8 @@ public class VarienceLearning {
 	 * of MFDR that has to be deducted. Directly add it to MFDR raw results
 	 */
 	public double getGuaranteedCompensation() {
+		double mean = getMean();
+		double standarddeviation = getStandardDeviation();
 		return getMean() + this.tolerancevarience * getStandardDeviation();
 	}
 

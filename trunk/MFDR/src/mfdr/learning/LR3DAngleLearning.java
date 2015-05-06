@@ -63,8 +63,9 @@ public class LR3DAngleLearning extends AngleLearning {
 		for (int i = 0; i < ts.size(); i++) {
 			traininginput[0][i] = ts.get(i).trendDist();
 			traininginput[1][i] = ts.get(i).freqDist();
-			trainingoutput[i] = angleEquation(ts.get(i).trendDist(), ts.get(i)
-					.freqDist(), ts.get(i).originDist());
+			trainingoutput[i] = ts.get(i).originDist();
+//			trainingoutput[i] = angleEquation(ts.get(i).trendDist(), ts.get(i)
+//					.freqDist(), ts.get(i).originDist());
 		}
 		// multidimentional input Linear regression
 		Regression reg = new Regression(traininginput, trainingoutput);

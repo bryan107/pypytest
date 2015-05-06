@@ -32,13 +32,16 @@ public class TestMFDRFacade extends TestCase {
 		for(int i = 0 ; i < 10 ; i++){
 			ts.add(generateTimeSeries(2048));
 		}
+		
+		// STEP 1
 		WindowSize ws= facade.learnWindowSizes(ts);
 		System.out.println("TREND: " + ws.trend() + " NOISE: " + ws.noise());
 		mfdr = new MFDR(ws.trend(), ws.noise());
 		
 		//-------------
 		
-		LearningResults results = facade.learnParameters(ts,tolerancevarience , new EuclideanDistance());
+		// STEP 2
+		LearningResults results = facade.learnParameters(ts,tolerancevarience , new EuclideanDistance(), ws);
 		System.out.print("A Learn:");
 		for(int i = 0; i < 3 ; i++){
 			System.out.print("[" + i + "]" + results.alearn().getParameters()[i]);
@@ -55,7 +58,10 @@ public class TestMFDRFacade extends TestCase {
 		Distance d = new EuclideanDistance();
 		PLA pla = new PLA(ws.noise());
 		DWT dwt = new DWT(ws.noise());
-		double distance = facade.getDistance(test.peekFirst(), test.peekLast(), d);
+		// STEP 3
+		double distance = facade.getDistance(test.peekFirst(), test.peekLast(), d, ws, results);
+		
+		// Print Restuls
 		System.out.println("Original Distance:" + d.calDistance(test.peekFirst(), test.peekLast(), test.peekFirst()));
 		System.out.println("PLA:" + pla.getDistance(test.peekFirst(), test.peekLast(), d));
 		pla = new PLA(ws.trend());

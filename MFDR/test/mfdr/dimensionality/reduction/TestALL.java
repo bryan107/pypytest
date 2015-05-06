@@ -32,7 +32,7 @@ public class TestALL extends TestCase {
 			"C:\\TEST\\MFDR\\TEST_GGGG.csv" };
 
 	public void testALL() {
-		PLA pla = new PLA(T1);
+		PLA pla = new PLA(T2);
 		DWT dwt = new DWT(T2);
 		DFT dft = new DFT(T2);
 		MFDR mfdr = new MFDR(T1, T2, ANGLE);

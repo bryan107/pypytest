@@ -13,10 +13,10 @@ import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 import mfdr.utility.DataListOperator;
 
-public class MFDR extends DimensionalityReduction {
-	private static Log logger = LogFactory.getLog(MFDR.class);
+public class MFDR_BAK extends DimensionalityReduction {
+	private static Log logger = LogFactory.getLog(MFDR_BAK.class);
 	private double windowsize_trend, windowsize_freq;
-//	private double angle;
+	private double angle;
 	private PLA pla;
 	private DWT dwt;
 
@@ -46,10 +46,10 @@ public class MFDR extends DimensionalityReduction {
 	 * @param weight_trend
 	 * @param weight_freq
 	 */
-	public MFDR(double windowsize_trend, double windowsize_freq, double angle) {
+	public MFDR_BAK(double windowsize_trend, double windowsize_freq, double angle) {
 		updateTrendWindowsize(windowsize_trend);
 		updateFrequencyWindowsize(windowsize_freq);
-//		updateAngle(angle);
+		updateAngle(angle);
 		this.pla = new PLA(this.windowsize_trend);
 		this.dwt = new DWT(this.windowsize_freq);
 	}
@@ -61,10 +61,10 @@ public class MFDR extends DimensionalityReduction {
 	 * @param windowsize_trend
 	 * @param windowsize_freq
 	 */
-	public MFDR(double windowsize_trend, double windowsize_freq) {
+	public MFDR_BAK(double windowsize_trend, double windowsize_freq) {
 		updateTrendWindowsize(windowsize_trend);
 		updateFrequencyWindowsize(windowsize_freq);
-//		updateAngle(Math.PI);
+		updateAngle(Math.PI);
 		this.pla = new PLA(this.windowsize_trend);
 		this.dwt = new DWT(this.windowsize_freq);
 	}
@@ -73,10 +73,10 @@ public class MFDR extends DimensionalityReduction {
 	 * Constructor without specifying any parameter
 	 * Window sizes and angle MUST be updated later before use.
 	 */
-	public MFDR(){
+	public MFDR_BAK(){
 		updateTrendWindowsize(0);
 		updateFrequencyWindowsize(0);
-//		updateAngle(Math.PI);
+		updateAngle(Math.PI);
 		this.pla = new PLA(this.windowsize_trend);
 		this.dwt = new DWT(this.windowsize_freq);
 	}
@@ -91,9 +91,9 @@ public class MFDR extends DimensionalityReduction {
 		this.dwt = new DWT(this.windowsize_freq);
 	}
 
-//	public void updateAngle(double angle) {
-//		this.angle = angle;
-//	}
+	public void updateAngle(double angle) {
+		this.angle = angle;
+	}
 
 	public double windowSizeTrend() {
 		return this.windowsize_trend;
@@ -103,9 +103,9 @@ public class MFDR extends DimensionalityReduction {
 		return this.windowsize_freq;
 	}
 
-//	public double angle() {
-//		return this.angle;
-//	}
+	public double angle() {
+		return this.angle;
+	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
@@ -247,35 +247,22 @@ public class MFDR extends DimensionalityReduction {
 
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		logger.info("Please specify combining paramaters");
-		return 0;
-	}
-
-	/**
-	 * Get the combining distance with angle
-	 * @param ts1
-	 * @param ts2
-	 * @param distance
-	 * @param angle
-	 * @return
-	 */
-	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double angle) {
 		LinkedList<MFDRData> mfdr1 = getDR(ts1);
 		LinkedList<MFDRData> mfdr2 = getDR(ts2);
 		// ts1 is used as the sampling reference
-		return getDistance(mfdr1, mfdr2, ts1, distance, angle);
+		return getDistance(mfdr1, mfdr2, ts1, distance);
 	}
 	
 	public double getDistance(LinkedList<MFDRData> mfdr1,
-			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance, double angle) {
+			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance) {
 		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
 				distance);
-		return getDistance(details, angle);
+		return getDistance(details, this.angle);
 	}
 
-//	public double getDistance(MFDRDistanceDetails details){
-//		return getDistance(details, this.angle);
-//	}
+	public double getDistance(MFDRDistanceDetails details){
+		return getDistance(details, this.angle);
+	}
 	
 	public double getDistance(MFDRDistanceDetails details, double angle){
 		try {
@@ -289,20 +276,6 @@ public class MFDR extends DimensionalityReduction {
 					+ e);
 			return 0;
 		}
-	}
-	
-	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double[] w) {
-		LinkedList<MFDRData> mfdr1 = getDR(ts1);
-		LinkedList<MFDRData> mfdr2 = getDR(ts2);
-		// ts1 is used as the sampling reference
-		return getDistance(mfdr1, mfdr2, ts1, distance, w);
-	}
-	
-	public double getDistance(LinkedList<MFDRData> mfdr1,
-			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance, double[] w) {
-		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
-				distance);
-		return getDistance(details, w);
 	}
 	
 	public double getDistance(MFDRDistanceDetails details, double[] w){

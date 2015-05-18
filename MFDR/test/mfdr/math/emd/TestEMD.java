@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import mfdr.core.TrendFilter;
+import mfdr.core.WhiteNoiseFilter;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
 import mfdr.file.FileAccessAgent;
@@ -64,7 +66,10 @@ public class TestEMD extends TestCase {
 			imfs_test.add(imfs.get(i));
 		}
 		// Create IMF analysis object
-		BAK_IMFAnalysis analysis = new BAK_IMFAnalysis(residual, imfs, noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
+//		BAK_IMFAnalysis analysis = new BAK_IMFAnalysis(residual, imfs, noise_whitenoiselevel, noise_threshold, FTratio, motif_k, motif_threshold);
+//		WhiteNoiseFilter wfilter = new WhiteNoiseFilter(noise_whitenoiselevel, noise_threshold, FTratio);
+//		TrendFilter tfilter = new TrendFilter(FTratio, motif_k, motif_threshold);
+		
 		
 		double oimfd = 0;
 		Iterator<IMF> it = imfs.iterator();
@@ -88,15 +93,15 @@ public class TestEMD extends TestCase {
 		 *  Store Results
 		 */
 		// Save Time References
-		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
+//		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
 		
 		// Save Original Signal
-		File.getInstance().saveLinkedListToFile(" " ,residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
+//		File.getInstance().saveLinkedListToFile(" " ,residual, "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
 				
 		// Save IMFs
-		for(int i = 0 ; i < imfs.size() ; i++){
-			File.getInstance().saveLinkedListToFile(" " ,imfs.get(i), "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
-		}
+//		for(int i = 0 ; i < imfs.size() ; i++){
+//			File.getInstance().saveLinkedListToFile(" " ,imfs.get(i), "C:\\TEST\\MFDR\\_IMFTest_Norm.csv");
+//		}
 		
 		// Save instant
 //		File.getInstance().saveTimeToFile(residual, "C:\\TEST\\MDFR\\IMFTest_Norm_Freq.csv");
@@ -164,21 +169,21 @@ public class TestEMD extends TestCase {
 //				System.out.println(e);
 //			}
 			
-			System.out.println();
-			// Print IMF[i] Noise condition
-			if(analysis.isWhiteNoise(imfs.get(i))){
-				System.out.println("WHITENOISE");
-			}else{
-				System.out.println("SIGNAL");
-			}
-			
-			
-			//  Print IMF[i] Frequency/Trend condition
-			if(analysis.isFreq(imfs.get(i))){
-				System.out.println("FREQUENCY");
-			}else{
-				System.out.println("TREND");
-			}
+//			System.out.println();
+//			// Print IMF[i] Noise condition
+//			if(wfilter.isWhiteNoise(imfs.get(i))){
+//				System.out.println("WHITENOISE");
+//			}else{
+//				System.out.println("SIGNAL");
+//			}
+//			
+//			
+//			//  Print IMF[i] Frequency/Trend condition
+//			if(analysis.isFreq(imfs.get(i))){
+//				System.out.println("FREQUENCY");
+//			}else{
+//				System.out.println("TREND");
+//			}
 		}
 	}
 	

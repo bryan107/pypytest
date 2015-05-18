@@ -197,4 +197,17 @@ public class IMF extends TimeSeries {
 		return 1 / freq;
 	}
 	
+	public double getZeroCrossingCount(){
+		double count = 0;
+		Iterator<Data> it = this.iterator();
+		double previous = it.next().value();
+		while (it.hasNext()) {
+			Data data = (Data) it.next();
+			if(previous*data.value() <= 0)
+				count ++;
+			previous = data.value();
+		}
+		return count;
+	}
+	
 }

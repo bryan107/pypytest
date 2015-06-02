@@ -34,7 +34,7 @@ public class TestALL extends TestCase {
 	public void testALL() {
 		PLA pla = new PLA(T2);
 		DWT dwt = new DWT(T2);
-		DFT dft = new DFT(T2);
+		DFT dft = new DFT(T2,2);
 		MFDR mfdr = new MFDR(T1, T2, ANGLE);
 		TimeSeries[] ts = generateTimeSeries();
 //		// **** Write *****

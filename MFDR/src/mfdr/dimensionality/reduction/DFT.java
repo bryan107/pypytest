@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import math.jwave.Transform;
+import math.jwave.transforms.AncientEgyptianDecomposition;
 import math.jwave.transforms.DiscreteFourierTransform;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
@@ -15,22 +16,29 @@ import mfdr.utility.DataListOperator;
 
 public class DFT extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(DFT.class);
+	private int noc;
 	
-	public DFT(double windowsize) {
+	public DFT(double windowsize, int noc) {
 		setWindowSize(windowsize);
+		setNOC(noc);
+	}
+	
+	public void setNOC(int noc){
+		this.noc = noc;
 	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
-		DFTData dwt = getDR(ts);
-		return getFullResolutionDR(dwt, ts);
+		DFTData dft = getDR(ts);
+		return getFullResolutionDR(dft, ts, this.noc);
 	}
 
-	public TimeSeries getFullResolutionDR( DFTData dwt, TimeSeries ref) {
+	public TimeSeries getFullResolutionDR(DFTData dft, TimeSeries ref, int noc) {
 		TimeSeries drfull = new TimeSeries();
-		double[] tsHilb = dwt.hilb();
-		tsHilb = recoverNullHighFrequency(tsHilb, ref.size());
-		Transform t = new Transform(new DiscreteFourierTransform());
+		double[] tsHilb = dft.hilb(noc);
+		// TODO Fix here is a bug
+//		tsHilb = recoverNullHighFrequency(tsHilb, ref.size());
+		Transform t = new Transform(new AncientEgyptianDecomposition(new DiscreteFourierTransform()));
 		double[] value = t.reverse(tsHilb);
 		for(int i = 0 ; i < ref.size() ; i++){
 			drfull.add(new Data(ref.get(i).time(), value[i]));
@@ -62,7 +70,7 @@ public class DFT extends DimensionalityReduction {
 		// TODO reconstruct this to have a more flexible solution.
 		if(tslength % 1 != 0){
 			logger.info("The input Time Series length does not match the windowsize");
-			return null;
+//			return null;
 		}
 		LinkedList<Double> tsvalues = DataListOperator.getInstance().getValueList(ts);
 		double[] valuearray = DataListOperator.getInstance().linkedDoubleListToArray(tsvalues);
@@ -70,7 +78,7 @@ public class DFT extends DimensionalityReduction {
 	}
 	
 	public DFTData getDR(double[] valuearray){
-		Transform t = new Transform(new DiscreteFourierTransform());
+		Transform t = new Transform(new AncientEgyptianDecomposition(new DiscreteFourierTransform()));
 		DFTData tsHilb = new DFTData(t.forward(valuearray));
 		// This calculates log_2(x).
 		double resolution = Math.log(windowsize)/Math.log(2);

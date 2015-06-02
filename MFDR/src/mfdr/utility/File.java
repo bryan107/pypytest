@@ -29,6 +29,17 @@ public class File {
 	
 	public LinkedList<Data> readTimeSeriesFromFile(String fileaddress){
 		TimeSeries ts = new TimeSeries();
+		String values = this.agent.readLineFromFile(fileaddress);
+		String[] valuearray = values.split(",");
+		// Read start from 1 as the first column is reserved for tags. 
+		for(int i = 1 ; i < valuearray.length ; i++){
+			ts.add(new Data(Double.valueOf(i), Double.valueOf(valuearray[i])));
+		}
+		return ts;
+	}
+	
+	public LinkedList<Data> readTimedTimeSeriesFromFile(String fileaddress){
+		TimeSeries ts = new TimeSeries();
 		String times = this.agent.readLineFromFile(fileaddress);
 		String values = this.agent.readLineFromFile();
 		String[] timearray = times.split(",");

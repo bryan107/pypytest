@@ -13,24 +13,8 @@ public class TheilSenEstimator implements LinearRegression {
 	private static Log logger = LogFactory.getLog(TheilSenEstimator.class);
 
 	public TheilSenEstimator(double[] x, double[] y) {
-		updateData(x, y);
 	}
 
-	@Override
-	public void updateData(double[] x, double[] y) {
-		// Here save datapoints
-		if (x.length == y.length) {
-			this.datapoints = new double[x.length][2];
-			for (int i = 0; i < x.length; i++) {
-				this.datapoints[i][0] = x[i];
-				this.datapoints[i][1] = y[i];
-			}
-		} else {
-			logger.info("The sizes of input arraies do not match");
-		}
-
-		// calcLinear(x, y);
-	}
 
 	// private void calcLinear(double[] x, double[] y){
 	//
@@ -38,7 +22,17 @@ public class TheilSenEstimator implements LinearRegression {
 
 	// TODO Test this function
 	@Override
-	public double[] getEstimates() {
+	public double[] getEstimates(double[] x, double[] y) {
+		// Here save datapoints
+				if (x.length == y.length) {
+					this.datapoints = new double[x.length][2];
+					for (int i = 0; i < x.length; i++) {
+						this.datapoints[i][0] = x[i];
+						this.datapoints[i][1] = y[i];
+					}
+				} else {
+					logger.info("The sizes of input arraies do not match");
+				}
 		double[] coeff = new double[2]; 
 		// Prepare Linear coeffs
 		coeff[0] = datapoints[0][1];

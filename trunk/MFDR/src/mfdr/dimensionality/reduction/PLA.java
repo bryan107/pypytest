@@ -102,8 +102,8 @@ public class PLA extends DimensionalityReduction {
 				double[] y = new double[temp.size()];
 				convertMapToArray(temp, x, y);
 				// ********** TEST ************* //
-				LinearRegression reg = new LinearEstimator(x, y) ;
-				double[] coeff = reg.getEstimates();
+				LinearRegression reg = new LinearEstimator() ;
+				double[] coeff = reg.getEstimates(x, y);
 				// ***************************** //
 				pla.add(new PLAData(init_time, coeff[0], coeff[1]));		
 			} catch (Exception e) {

@@ -14,6 +14,7 @@ import mfdr.dimensionality.reduction.PLA;
 import mfdr.file.FileAccessAgent;
 import mfdr.math.emd.EMD;
 import mfdr.math.emd.datastructure.IMFS;
+import mfdr.math.emd.utility.DataListCalculator;
 import mfdr.utility.DataListOperator;
 import mfdr.utility.File;
 import mfdr.utility.Print;
@@ -23,19 +24,19 @@ public class TestData extends TestCase {
 
 	private double zerocrossingaccuracy = 0.0001;
 	private double[] IFparamaters = {4,2,1}; 
-	
+//	
 	public void testTrend(){
 		TimeSeries ts = new TimeSeries();
-		TimeSeries t = new TimeSeries();
-		TimeSeries s = new TimeSeries();
-		TimeSeries n = new TimeSeries();
+//		TimeSeries t = new TimeSeries();
+//		TimeSeries s = new TimeSeries();
+//		TimeSeries n = new TimeSeries();
 		for(int i = 0 ; i < 128 ; i++){
 			java.util.Random r = new java.util.Random();
 			double noise = r.nextGaussian() * Math.sqrt(0.5);
 			double seasonal = 10*Math.sin(0.05*i*Math.PI);
 			double trend = i*0.1;
 //			double trend = 1*Math.pow(i, 0.5);
-			double data = seasonal + noise;
+			double data = trend + seasonal + noise;
 			ts.add(new Data(i, data));
 //			t.add(new Data(i,trend));
 //			s.add(new Data(i, seasonal));
@@ -47,18 +48,39 @@ public class TestData extends TestCase {
 		
 		
 
-		File.getInstance().saveLinkedListToFile("Original" ,ts , "C:\\TEST\\MDFR\\Data\\Example.csv");
+//		File.getInstance().saveLinkedListToFile("Original" ,ts , "C:\\TEST\\MDFR\\Data\\Example.csv");
 		
-//		DFT dft = new DFT(1,2);
+		DFT dft = new DFT(1,2);
 		PLA pla = new PLA(64);
-//		PAA paa = new PAA(64);
+		PAA paa = new PAA(64);
 		
-		for(int i = 128 ; i>8 ; i=i/2 ){
-			pla.setWindowSize(i);
-			File.getInstance().saveLinkedListToFile("PLA["+ i + "]" ,pla.getFullResolutionDR(ts), "C:\\TEST\\MDFR\\Data\\Example.csv");		
+		double[] pla_residuals = new double[128];
+		double[] paa_residuals = new double[128];
+		double[] dft_residuals = new double[128];
+		double ts_engergy_density = ts.energyDensity();
+		for(int i = 0 ; i < 128 ; i++ ){
+			System.out.println("I:" + i);
+			pla.setWindowSize(128/(i+1));
+			paa.setWindowSize(128/(i+1));
+			dft.setNOC(i+1);
+			TimeSeries pla_r = DataListCalculator.getInstance().getDifference(ts, pla.getFullResolutionDR(ts));
+			TimeSeries paa_r = DataListCalculator.getInstance().getDifference(ts, paa.getFullResolutionDR(ts));
+			TimeSeries dft_r = DataListCalculator.getInstance().getDifference(ts, dft.getFullResolutionDR(ts));
+			pla_residuals[i] = pla_r.energyDensity()/ts_engergy_density;
+			paa_residuals[i] = paa_r.energyDensity()/ts_engergy_density;
+			dft_residuals[i] = dft_r.energyDensity()/ts_engergy_density;
 		}
+		
+		File.getInstance().saveLinkedListToFile("Origin" ,ts, "C:\\TEST\\MDFR\\Data\\Error_Coefficient_Ratio.csv");
+		
+		File.getInstance().saveArrayToFile("PLA", pla_residuals, "C:\\TEST\\MDFR\\Data\\Error_Coefficient_Ratio.csv");
+		File.getInstance().saveArrayToFile("PAA", paa_residuals, "C:\\TEST\\MDFR\\Data\\Error_Coefficient_Ratio.csv");
+		File.getInstance().saveArrayToFile("DFT", dft_residuals, "C:\\TEST\\MDFR\\Data\\Error_Coefficient_Ratio.csv");
+		//		for(int i = 128 ; i>8 ; i=i/2 ){
+//			pla.setWindowSize(i);
+//			File.getInstance().saveLinkedListToFile("PLA["+ i + "]" ,pla.getFullResolutionDR(ts), "C:\\TEST\\MDFR\\Data\\Example.csv");		
+//		}
 //		File.getInstance().saveLinkedListToFile("DFT[2]" ,dft.getFullResolutionDR(ts), "C:\\TEST\\MDFR\\Data\\Example.csv");
-
 //		File.getInstance().saveLinkedListToFile("PAA" ,paa.getFullResolutionDR(ts), "C:\\TEST\\MDFR\\Data\\Example.csv");
 		
 		
@@ -89,7 +111,7 @@ public class TestData extends TestCase {
 //    	
 //		FileAccessAgent fagent = new FileAccessAgent("C:\\TEST\\MDFR\\Data\\NULL.txt", "C:\\TEST\\MDFR\\Data\\power_data.txt");
 //		DataParser parser = new DataParser(new OneLineOneData(), fagent);
-//		TimeSeries ts = parser.getTimeSeries();
+//		TimeSeries ts = parser.getTimeSeries(300,4500);
 //		EMD emd = new EMD(ts, zerocrossingaccuracy, IFparamaters[0], IFparamaters[1], IFparamaters[2]);
 //		System.out.println("EMD Init " + sdf.format(cal.getTime()) );
 //		IMFS imfs = emd.getIMFs(100);
@@ -99,14 +121,14 @@ public class TestData extends TestCase {
 //		 *  Store Results
 //		 */
 //		// Save Time References
-//		File.getInstance().saveTimeToFile(ts, "C:\\TEST\\MDFR\\_EMD_Example.csv");
+//		File.getInstance().saveTimeToFile(ts, "C:\\TEST\\MDFR\\_EMD_Example2.csv");
 //		
 //		// Save Original Signal
-//		File.getInstance().saveLinkedListToFile("Original" ,ts, "C:\\TEST\\MDFR\\_EMD_Example.csv");
+//		File.getInstance().saveLinkedListToFile("Original" ,ts, "C:\\TEST\\MDFR\\_EMD_Example2.csv");
 //				
 //		// Save IMFs
 //		for(int i = 0 ; i < imfs.size() ; i++){
-//			File.getInstance().saveLinkedListToFile("IMF" + i ,imfs.get(i), "C:\\TEST\\MDFR\\_EMD_Example.csv");
+//			File.getInstance().saveLinkedListToFile("IMF" + i ,imfs.get(i), "C:\\TEST\\MDFR\\_EMD_Example2.csv");
 //		}
 //		System.out.println("Store Complete " + sdf.format(cal.getTime()) );
 //		

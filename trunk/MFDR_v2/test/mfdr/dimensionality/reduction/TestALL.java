@@ -105,7 +105,7 @@ public class TestALL extends TestCase {
 		System.out.println("MFDR_RAW_PLA: "	+ distance.calDistance(mfdr.getTrend(ts[0]), mfdr.getTrend(ts[1]), ts[0]));
 		System.out.println("MFDR_RAW_RES: "	+ distance.calDistance(mfdr.getResidual(ts[0]), mfdr.getResidual(ts[1]), ts[0]));
 		System.out.println("MFDR_DWT_FULL_RESO: "
-		+ distance.calDistance(mfdr.getFullResolutionDWT(ts[0]), mfdr.getFullResolutionDWT(ts[1]),ts[0]));
+		+ distance.calDistance(mfdr.getFullResolutionSeasonal(ts[0]), mfdr.getFullResolutionSeasonal(ts[1]),ts[0]));
 		
 
 		// *********** TEST ZONE ***************

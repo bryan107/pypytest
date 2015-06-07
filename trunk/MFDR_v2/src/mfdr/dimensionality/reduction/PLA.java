@@ -20,8 +20,8 @@ import mfdr.math.statistic.TheilSenEstimator;
 public class PLA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PLA.class);
 	
-	public PLA(double windowsize){
-		setWindowSize(windowsize);
+	public PLA(int NoC){
+		setNoC(NoC);
 	}
 	
 	@Override
@@ -74,6 +74,7 @@ public class PLA extends DimensionalityReduction {
 	@Override
 	public LinkedList<PLAData> getDR(TimeSeries ts) {
 		LinkedList<PLAData> pla = new LinkedList<PLAData>();
+		int PLAwindowsize = ts.size()/NoC;
 		boolean isfirstround = true;
 		Data data = new Data(0, 0);
 		Iterator<Data> it = ts.iterator();
@@ -84,9 +85,9 @@ public class PLA extends DimensionalityReduction {
 				data = (Data) it.next();
 				isfirstround = false;
 			}
+			int count = 0;
 			double init_time = data.time();
-			double end_time = data.time();
-			while((end_time - init_time) < this.windowsize ){
+			while(count < PLAwindowsize ){
 				// Add data to temp
 				temp.put(data.time(), data.value());
 				// If no next item.
@@ -94,7 +95,6 @@ public class PLA extends DimensionalityReduction {
 					break;
 				// iterate the next item.
 				data = it.next();
-				end_time = data.time();
 			}
 			try {
 				// Add PLA result to dr

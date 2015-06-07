@@ -71,6 +71,10 @@ public class TimeSeries extends LinkedList<Data> {
 		return max;
 	}
 	
+	public double timeLength(){
+		return this.peekLast().time() - this.peekFirst().time() + this.timeInterval();
+	}
+	
 	public double timeInterval(){
 		Iterator<Data> it = iterator();
 		double t1 = 0, t2 = 0;

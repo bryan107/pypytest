@@ -17,9 +17,9 @@ import mfdr.utility.DataListOperator;
 
 public class DWT extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(DWT.class);
-	
-	public DWT(double windowsize) {
-		setWindowSize(windowsize);
+	private double windowsize;
+	public DWT(int NoC) {
+		setNoC(NoC);
 	}
 
 	@Override
@@ -60,6 +60,7 @@ public class DWT extends DimensionalityReduction {
 	 */
 	@Override
 	public DWTData getDR(TimeSeries ts) {
+		this.windowsize = ts.timeLength()/this.NoC;
 		double tslength = Math.log(ts.size()/windowsize)/Math.log(2);
 		// TODO reconstruct this to have a more flexible solution.
 		if(tslength % 1 != 0){

@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.datastructure.DFTData;
 import mfdr.dimensionality.datastructure.DWTData;
 import mfdr.dimensionality.datastructure.MFDRData;
 import mfdr.dimensionality.datastructure.PLAData;
@@ -15,10 +16,11 @@ import mfdr.utility.DataListOperator;
 
 public class MFDR extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(MFDR.class);
-	private double windowsize_trend, windowsize_freq;
+	private int NoC_t, NoC_s;
+	private double noise_freq;
 //	private double angle;
 	private PLA pla;
-	private DWT dwt;
+	private DFT dft;
 
 	/**
 	 * MFDR provides a dimensionality reduction function that combines: <li>
@@ -46,66 +48,39 @@ public class MFDR extends DimensionalityReduction {
 	 * @param weight_trend
 	 * @param weight_freq
 	 */
-	public MFDR(double windowsize_trend, double windowsize_freq, double angle) {
-		updateTrendWindowsize(windowsize_trend);
-		updateFrequencyWindowsize(windowsize_freq);
-//		updateAngle(angle);
-		this.pla = new PLA(this.windowsize_trend);
-		this.dwt = new DWT(this.windowsize_freq);
+	public MFDR(int NoC_t, int NoC_s, double noise_freq) {
+		updateTrendComponent(NoC_t);
+		updateSeasonalComponent(NoC_s, noise_freq);
+	}
+
+	/*
+	 * Setting up parameters
+	 */
+	public void updateTrendComponent(int NoC_t) {
+		this.NoC_t = NoC_t;
+		this.pla = new PLA(NoC_t);
+	}
+
+	public void updateSeasonalComponent(int NoC_s, double noise_freq) {
+		this.NoC_s = NoC_s;
+		this.noise_freq = noise_freq;
+		this.dft = new DFT(NoC_s, noise_freq);
+	}
+
+	/*
+	 * Read Parameters
+	 */
+	public int NoCTrend() {
+		return this.NoC_t;
+	}
+
+	public int NoCSeasonal(){
+		return this.NoC_s;
 	}
 	
-	/**
-	 * Constructor without specifying angle, which use PI as default setting.
-	 * Angle can be updated later.
-	 * 
-	 * @param windowsize_trend
-	 * @param windowsize_freq
-	 */
-	public MFDR(double windowsize_trend, double windowsize_freq) {
-		updateTrendWindowsize(windowsize_trend);
-		updateFrequencyWindowsize(windowsize_freq);
-//		updateAngle(Math.PI);
-		this.pla = new PLA(this.windowsize_trend);
-		this.dwt = new DWT(this.windowsize_freq);
+	public double whiteNoiseFrequency(){
+		return this.noise_freq;
 	}
-	
-	/**
-	 * Constructor without specifying any parameter
-	 * Window sizes and angle MUST be updated later before use.
-	 */
-	public MFDR(){
-		updateTrendWindowsize(0);
-		updateFrequencyWindowsize(0);
-//		updateAngle(Math.PI);
-		this.pla = new PLA(this.windowsize_trend);
-		this.dwt = new DWT(this.windowsize_freq);
-	}
-
-	public void updateTrendWindowsize(double windowsize_trend) {
-		this.windowsize_trend = windowsize_trend;
-		this.pla = new PLA(this.windowsize_trend);
-	}
-
-	public void updateFrequencyWindowsize(double windowsize_freq) {
-		this.windowsize_freq = windowsize_freq;
-		this.dwt = new DWT(this.windowsize_freq);
-	}
-
-//	public void updateAngle(double angle) {
-//		this.angle = angle;
-//	}
-
-	public double windowSizeTrend() {
-		return this.windowsize_trend;
-	}
-
-	public double windowSizeFreq() {
-		return this.windowsize_freq;
-	}
-
-//	public double angle() {
-//		return this.angle;
-//	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
@@ -118,12 +93,12 @@ public class MFDR extends DimensionalityReduction {
 			dwtlist.add(mdfrlist.get(i).dwt());
 		}
 		TimeSeries plafull = this.pla.getFullResolutionDR(plalist, ts);
-		TimeSeries dwtfull = reconstructFullResolutionDWT(ts, dwtlist);
+		TimeSeries dwtfull = reconstructFullResolutionSeasonal(ts, dwtlist);
 		output = DataListOperator.getInstance().linkedListSum(plafull, dwtfull);
 		return output;
 	}
 	
-	public TimeSeries getFullResolutionPLA(TimeSeries ts){
+	public TimeSeries getFullResolutionTrend(TimeSeries ts){
 		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
 		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
 		for (int i = 0; i < mdfrlist.size(); i++) {
@@ -132,16 +107,16 @@ public class MFDR extends DimensionalityReduction {
 		return this.pla.getFullResolutionDR(plalist, ts);
 	}
 	
-	public TimeSeries getFullResolutionDWT(TimeSeries ts){
+	public TimeSeries getFullResolutionSeasonal(TimeSeries ts){
 		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
 		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
 		for (int i = 0; i < mdfrlist.size(); i++) {
 			dwtlist.add(mdfrlist.get(i).dwt());
 		}
-		return reconstructFullResolutionDWT(ts, dwtlist);
+		return reconstructFullResolutionSeasonal(ts, dwtlist);
 	}
 
-	public TimeSeries reconstructFullResolutionDWT(TimeSeries ts,
+	public TimeSeries reconstructFullResolutionSeasonal(TimeSeries ts,
 			LinkedList<DWTData> dwtlist) {
 		// Stores each DWT segment with full resolution.
 		LinkedList<TimeSeries> dwttemp = new LinkedList<TimeSeries>();
@@ -183,22 +158,21 @@ public class MFDR extends DimensionalityReduction {
 	public LinkedList<MFDRData> getDR(TimeSeries ts) {
 		LinkedList<MFDRData> mdfrlist = new LinkedList<MFDRData>();
 
-		// Prepare PLAs
+		// STEP 1: Calculate Trend Series
 		LinkedList<PLAData> trend = this.pla.getDR(ts);
-		// Prepare DWTs
+		// STEP 1-1: Prepare Residual Series
 		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
-		TimeSeries freqfull = DataListOperator.getInstance()
+		TimeSeries residualfull = DataListOperator.getInstance()
 				.linkedtListSubtraction(ts, trendfull);
-		LinkedList<TimeSeries> sub_freq = DataListOperator.getInstance()
-				.linkedListDivision(freqfull, this.windowsize_trend);
-		LinkedList<DWTData> freq = new LinkedList<DWTData>();
-		for (int i = 0; i < sub_freq.size(); i++) {
-			freq.add(this.dwt.getDR(sub_freq.get(i)));
-		}
-		if (trend.size() != freq.size()) {
-			logger.info("The length of trend and freq objects does not match");
-			return null;
-		}
+		// STEP 2: Calculate Seasonal Components
+		DFTData seasonal = this.dft.getDR(ts);
+		// STEP 2-2: Prepare Residual 2 Series
+		TimeSeries seasonalfull = this.dft.getFullResolutionDR(ts);
+		TimeSeries residualfull2 = DataListOperator.getInstance()
+				.linkedtListSubtraction(ts, seasonalfull);
+		// STEP 3: Calculate Residual Energy Density
+					
+		
 		// Save results to MDFRDatas
 		for (int i = 0; i < trend.size(); i++) {
 			mdfrlist.add(new MFDRData(trend.get(i).time(), trend.get(i), freq

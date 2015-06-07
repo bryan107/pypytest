@@ -56,6 +56,8 @@ public class DFTData {
 		return sortedhilb;
 	}
 	
+	
+	
 	public double[] hilb(boolean normalize, int signallength){
 		double[] normalizedhilb = new double[this.hilb.length]; 
 		for(int i = 0 ; i < this.hilb.length ; i++){

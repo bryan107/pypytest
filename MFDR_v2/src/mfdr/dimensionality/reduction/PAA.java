@@ -15,7 +15,6 @@ public class PAA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PAA.class);
 	
 	public PAA(double windowsize){
-		setWindowSize(windowsize);
 	}
 	
 	@Override
@@ -67,6 +66,7 @@ public class PAA extends DimensionalityReduction {
 	@Override
 	public LinkedList<PAAData> getDR(TimeSeries ts) {
 		LinkedList<PAAData> paa = new LinkedList<PAAData>();
+		int PAAwindowsize = ts.size()/NoC;
 		boolean isfirstround = true;
 		Data data = new Data(0, 0);
 		Iterator<Data> it = ts.iterator();
@@ -79,8 +79,7 @@ public class PAA extends DimensionalityReduction {
 			double sum = 0;
 			int count = 0;
 			double init_time = data.time();
-			double end_time = data.time();
-			while((end_time - init_time) < this.windowsize ){
+			while(count < PAAwindowsize){
 				// Add data to temp
 				sum += data.value();
 				count++;
@@ -89,7 +88,6 @@ public class PAA extends DimensionalityReduction {
 					break;
 				// iterate the next item.
 				data = it.next();
-				end_time = data.time();
 			}
 			try {
 				// Add PAA result to dr

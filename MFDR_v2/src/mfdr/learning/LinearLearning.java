@@ -8,7 +8,7 @@ import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
 //TODO create a validation class to choose learning model: Either constant or LR
-public abstract class AngleLearning {
+public abstract class LinearLearning {
 
 	/**
 	 * Get the Learning Type Name
@@ -17,30 +17,18 @@ public abstract class AngleLearning {
 	public abstract String getType();
 	
 	/**
-	 * This function can only be used with StatAngle
-	 * @return
-	 */
-	public abstract double getAngle();
-
-	/**
-	 * Get angle with respect to the given inputs
-	 * @param trendlength
-	 * @param freqlength
-	 * @return
-	 */
-	public abstract double getAngle(double trendlength, double freqlength);
-	
-	/**
 	 * Train and learn the angle with TrainingSets
 	 * @return
 	 */
-	public abstract void trainingParameters(LinkedList<TrainingSet> ts);
+	public abstract LinearLearningResults trainingParameters(LinkedList<TrainingSet> ts);
 	
 	
-	public abstract void trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d);
+	public abstract LinearLearningResults trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d);
 	
 		
 	public abstract LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDR mfdr, Distance d);
+	
+	public abstract LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts, MFDR mfdr, Distance d);
 	
 	/*
 	 * Theorem of triangulation:
@@ -53,6 +41,5 @@ public abstract class AngleLearning {
 		return  angle;
 	}
 	
-	public abstract double[] getParameters();
 	
 }

@@ -11,24 +11,13 @@ import mfdr.dimensionality.reduction.MFDR;
 import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
-public class StatAngleLearning extends AngleLearning {
+public class StatAngleLearning extends LinearLearning {
 	private static Log logger = LogFactory.getLog(StatAngleLearning.class);
-	private double angle;
 
 	@Override
 	public String getType() {
 		logger.info("Using Static Angle Learning");
 		return "StatAngle";
-	}
-	
-	@Override
-	public double getAngle() {
-		return this.angle;
-	}
-
-	@Override
-	public double getAngle(double trendlength, double freqlength) {
-		return getAngle();
 	}
 
 	/*
@@ -38,18 +27,18 @@ public class StatAngleLearning extends AngleLearning {
 	 */
 	
 	@Override
-	public void trainingParameters(LinkedList<TrainingSet> ts) {
+	public LinearLearningResults trainingParameters(LinkedList<TrainingSet> ts) {
 		double[] angles = new double[ts.size()];
-		for(int i = 0 ; i < ts.size() ; i++){
-			angles[i] = angleEquation(ts.get(i).trendDist(), ts.get(i).freqDist(), ts.get(i).originDist());
-		}
-		this.angle = Stat.median(angles);
+//		for(int i = 0 ; i < ts.size() ; i++){
+//			angles[i] = angleEquation(ts.get(i).trendDist(), ts.get(i).freqDist(), ts.get(i).originDist());
+//		}
+		return null;
 	}
 
 	@Override
-	public void trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d) {
+	public LinearLearningResults trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d) {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
 	@Override
@@ -58,8 +47,10 @@ public class StatAngleLearning extends AngleLearning {
 		return null;
 	}
 
+
 	@Override
-	public double[] getParameters() {
+	public LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts,
+			MFDR mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -2,20 +2,25 @@ package mfdr.datastructure;
 
 public class MFDRDistanceDetails {
 
-	private final double dist_pla;
-	private final double dist_dwt;
-	
-	public MFDRDistanceDetails(double dist_pla, double dist_dwt){
-		this.dist_pla = dist_pla;
-		this.dist_dwt = dist_dwt;
+	private final double dist_trends;
+	private final double dist_seasonal;
+	private final double dist_noise;
+	public MFDRDistanceDetails(double dist_trends, double dist_seasonal, double dist_noise){
+		this.dist_trends = dist_trends;
+		this.dist_seasonal = dist_seasonal;
+		this.dist_noise = dist_noise;
 	}
 	
-	public double pla(){
-		return this.dist_pla;
+	public double trend(){
+		return this.dist_trends;
 	}
 	
-	public double dwt(){
-		return this.dist_dwt;
+	public double seasonal(){
+		return this.dist_seasonal;
+	}
+	
+	public double noise(){
+		return this.dist_noise;
 	}
 	
 }

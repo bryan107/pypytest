@@ -19,27 +19,64 @@ import mfdr.dimensionality.datastructure.NewDFTData;
 import mfdr.dimensionality.reduction.DFT;
 import mfdr.distance.Distance;
 import mfdr.distance.EuclideanDistance;
-import mfdr.utility.DataListOperator;
 import mfdr.utility.File;
-import mfdr.utility.Print;
-import mfdr.utility.ValueComparator;
 import junit.framework.TestCase;
 
 public class TestDFT extends TestCase {
 	private final String[] readaddress = { "C:\\TEST\\MFDR\\TEST_FFFF.csv",
 			"C:\\TEST\\MFDR\\TEST_FFFF.csv" };
-	private final String[] writeaddress = { "C:\\TEST\\MFDR\\TEST_FFFF.csv",
-			"C:\\TEST\\MFDR\\TEST_FFFF.csv" };
+	private final String[] writeaddress = { "C:\\TEST\\MDFR\\Data\\DFT.csv",
+			"C:\\TEST\\MDFR\\Data\\OOO.csv" };
 
+	public void testEnergyDensity(){
+		TimeSeries ts = new TimeSeries();
+		java.util.Random r = new java.util.Random();
+		for (double i = 0; i < 8192; i += 1) {
+			double noise = r.nextGaussian() * 10;
+			ts.add(new Data(i, noise));
+		}
+		
+		TimeSeries noise =  getFullResolutionNoise(ts.energyDensity(), ts);
+		File.getInstance().saveLinkedListToFile("TS", ts, writeaddress[1]);
+		File.getInstance().saveLinkedListToFile("Noise", noise, writeaddress[1]);
+		System.out.println("TS_Energy_Density:" + ts.energyDensity());
+		System.out.println("Noise_Energy_Density:" + noise.energyDensity());
+	}
+	
+	private TimeSeries getFullResolutionNoise(double noise_energy_density, TimeSeries ref){
+		TimeSeries noisefull = new TimeSeries();
+		// Energy Density = Varience
+		double standard_deviation = Math.pow(noise_energy_density, 0.5);
+		System.out.println("Standard_Deviation:" + standard_deviation);
+		java.util.Random r = new java.util.Random();
+		for(int i = 0 ; i < ref.size() ; i++){
+			noisefull.add(new Data(ref.get(i).time(), r.nextGaussian() * standard_deviation));
+		}
+		return noisefull;
+	}
+	
+	public void testNewDFTEnergy(){
+		TimeSeries[] ts = {new TimeSeries(), new TimeSeries()};
+		generateTimeSeries(ts[0], 8, 0, 256);
+		generateTimeSeries(ts[1], 4, 0, 256);
+		DFT dft = new DFT(16);
+		double[] freq_0 = dft.converTSToFrequency(ts[0]);
+		System.out.println("TS_0_Energy:" + ts[0].energyDensity());
+		double sum = 0;
+		for(int i = 0 ; i < freq_0.length ; i++){
+			sum+= Math.pow(freq_0[i], 2);
+		}System.out.println();
+		System.out.println("Freq_0_Energy:" + Math.pow(sum, 0.5)/freq_0.length);
+	}
 	
 	
 	public void testNewDFT(){
 		TimeSeries[] ts = {new TimeSeries(), new TimeSeries()};
-		generateTimeSeries(ts[0], 64, 0, 512);
-		generateTimeSeries(ts[1], 16, 0, 512);
+		generateTimeSeries(ts[0], 64, 0, 500);
+		generateTimeSeries(ts[1], 4, 0, 500);
 		
-		File.getInstance().saveLinkedListToFile("TS_0", ts[0], "C:\\Programming\\TEST\\DFT.csv");
-		File.getInstance().saveLinkedListToFile("TS_1", ts[1], "C:\\Programming\\TEST\\DFT.csv");
+		File.getInstance().saveLinkedListToFile("TS_0", ts[0], writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("TS_1", ts[1], writeaddress[0]);
 		
 		DFT dft = new DFT(8);
 		NewDFTData dftdata1, dftdata2;
@@ -49,8 +86,14 @@ public class TestDFT extends TestCase {
 		drfull[0] = dft.getFullResolutionDR(ts[0]);
 		drfull[1] = dft.getFullResolutionDR(ts[1]);
 				
-		File.getInstance().saveLinkedListToFile("DR_0", drfull[0], "C:\\Programming\\TEST\\DFT.csv");
-		File.getInstance().saveLinkedListToFile("DR_1", drfull[1], "C:\\Programming\\TEST\\DFT.csv");
+		File.getInstance().saveLinkedListToFile("DR_0", drfull[0], writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("DR_1", drfull[1], writeaddress[0]);
+		double[] freq = dft.converTSToFrequency(ts[1]);
+		double[] noise = dft.extractHighFrequency(freq, 4, ts[1].timeInterval());
+		NewDFTData testdata = dft.getDR(freq);
+		drfull[1] = dft.getFullResolutionDR(testdata, ts[1]);
+		File.getInstance().saveLinkedListToFile("DR_1_T", drfull[1], writeaddress[0]);
+		
 		
 		Distance dist = new EuclideanDistance();
 		System.out.println("Original Dist:" + dist.calDistance(ts[0], ts[1], ts[0]));

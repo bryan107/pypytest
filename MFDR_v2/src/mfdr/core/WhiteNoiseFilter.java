@@ -59,6 +59,40 @@ public class WhiteNoiseFilter {
 		this.original_time_series = original_time_series;
 	}
 
+	
+	/**
+	 * Return the white noise related window size
+	 * This solution uses the IMF set with highest proportion of white noise to define window size
+	 * 
+	 * @param imfs
+	 * @param original_time_series
+	 * @return white_noise_window
+	 */
+	public double getWhiteNoisePeriod(IMFS imfs,
+			TimeSeries original_time_series) {
+		setOriginalTimeSeries(original_time_series);
+		double highestrank = this.min_NSratio;
+		int index = 0;
+		IMFS imfs_temp = (IMFS) imfs.clone();
+
+		for (int i = imfs.size() - 1; i >= 0; i--) {
+			logger.info("IMF NUM:" + imfs_temp.size());
+			// If an (trimmed) IMF is regarded as a white noise, return the windowsize of its frequency,
+			// Otherwise remove the last IMF with lowest frequency (which is potentially a signal).
+			double noiserank = isWhiteNoise(imfs_temp);
+			logger.info("W_Rank[" + i + "]:" + noiserank + "  C_Rank[" + index
+					+ "]:" + highestrank);
+			if (noiserank > highestrank) {
+				highestrank = noiserank;
+				index = i;
+			}
+			imfs_temp.removeLast();
+			System.out.println();
+		}
+		// No IMF combination is white noise.
+		return imfs.get(index).averageWavelength();
+	}
+	
 	/**
 	 * Return the white noise related window size
 	 * 
@@ -117,40 +151,6 @@ public class WhiteNoiseFilter {
 	 */
 	public boolean isWhiteNoiseNaive(IMFS imfs) {
 		return !isSignalNaive(imfs);
-	}
-
-	
-	/**
-	 * Return the white noise related window size
-	 * This solution uses the IMF set with highest proportion of white noise to define window size
-	 * 
-	 * @param imfs
-	 * @param original_time_series
-	 * @return white_noise_window
-	 */
-	public double getWhiteNoiseWindowSize(IMFS imfs,
-			TimeSeries original_time_series) {
-		setOriginalTimeSeries(original_time_series);
-		double highestrank = this.min_NSratio;
-		int index = 0;
-		IMFS imfs_temp = (IMFS) imfs.clone();
-
-		for (int i = imfs.size() - 1; i >= 0; i--) {
-			logger.info("IMF NUM:" + imfs_temp.size());
-			// If an (trimmed) IMF is regarded as a white noise, return the windowsize of its frequency,
-			// Otherwise remove the last IMF with lowest frequency (which is potentially a signal).
-			double noiserank = isWhiteNoise(imfs_temp);
-			logger.info("W_Rank[" + i + "]:" + noiserank + "  C_Rank[" + index
-					+ "]:" + highestrank);
-			if (noiserank > highestrank) {
-				highestrank = noiserank;
-				index = i;
-			}
-			imfs_temp.removeLast();
-			System.out.println();
-		}
-		// No IMF combination is white noise.
-		return imfs.get(index).averageWavelength();
 	}
 
 	/*

@@ -17,4 +17,13 @@ public class EuclideanDistance extends Distance {
 		return Math.pow(sum, 0.5);
 	}
 
+	@Override
+	public double calWhiteNoiseDistance(double e1, double e2, int length) {
+		return Math.sqrt(length*e1+length*e2);
+	}
+
+	
+
+
+
 }

@@ -6,8 +6,13 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import flanagan.analysis.Stat;
+import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.reduction.MFDR;
+import mfdr.distance.Distance;
 import mfdr.math.emd.datastructure.IMF;
 import mfdr.math.emd.datastructure.IMFS;
+import mfdr.math.emd.utility.DataListCalculator;
 import mfdr.math.motif.Motif;
 
 /**
@@ -24,11 +29,15 @@ public class TrendFilter {
 	private static Log logger = LogFactory.getLog(TrendFilter.class);
 	private double FTratio, motif_threshold;
 	private int motif_k;
-
+	private Distance dist;
 	public TrendFilter(double FTratio, int motif_k, double motif_threshold) {
 		setFTRatio(FTratio);
 		setMotifK(motif_k);
 		setMotifThreshold(motif_threshold);
+	}
+	
+	public TrendFilter(Distance dist) {
+
 	}
 
 	/*
@@ -46,6 +55,51 @@ public class TrendFilter {
 		this.motif_threshold = motif_threshold;
 	}
 
+	public void setDistance(Distance dist){
+		this.dist = dist;
+	}
+	
+	/**
+	 * Calculate candidate Trend NoC and Noise NoC using IMFs as indicator.
+	 * @param ts
+	 * @param imfs
+	 * @param NoC
+	 * @param lowestperiod
+	 * @return int[0] = NoC_t; int[1] = NoC_s
+	 */
+	
+	public int[] getMFDRNoCs(TimeSeries ts, IMFS imfs, int NoC, double lowestperiod){
+		int[] candidateNoCs = {1 , NoC-1};
+		double candidateError = -1;
+		for (int i = imfs.size()-1 ; i >= 0; i--) {
+
+			// If no average wavelength can be extracted.
+			if(!imfs.get(i).hasAverageWavelength())
+				continue;
+			
+			// Wave Length Test
+			double imf_wavelength = imfs.get(i).averageWavelength();
+			if (imf_wavelength <= lowestperiod)
+				break;
+
+			// Trend NoC Test
+			int NoC_t = (int) (imfs.get(i).timeLength()/imf_wavelength);
+			if(NoC_t >= NoC)
+				break;
+			
+			int NoC_s = NoC - NoC_t;
+			MFDR mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
+			TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
+			double error = residual.energyDensity()/ts.energyDensity();
+			if(candidateError == -1 || error < candidateError ){
+				candidateError = error;
+				candidateNoCs[0] = NoC_t;
+				candidateNoCs[1] = NoC_s;
+			} 
+		}
+		return candidateNoCs;
+	}
+	
 	/**
 	 * Get the window size for trend / seasonal components distinguishing.
 	 * @param imfs
@@ -68,8 +122,6 @@ public class TrendFilter {
 			// If this imf is a trend
 			if (isTrend(imfs.get(i))){
 				return imfs.get(i-1).averageWavelength();
-
- 					
 			}
 		}
 		// If no can be formed

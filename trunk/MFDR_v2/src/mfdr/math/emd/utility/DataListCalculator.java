@@ -54,8 +54,11 @@ public class DataListCalculator {
 		return mean;
 	}
 
-	/*
-	 * Get differences
+	/**
+	 * Calculate the residual series of list1-list2
+	 * @param list1
+	 * @param list2
+	 * @return
 	 */
 	public TimeSeries getDifference(TimeSeries list1,
 			TimeSeries list2) {

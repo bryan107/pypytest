@@ -189,13 +189,26 @@ public class IMF extends TimeSeries {
 		return accumulatefreq / totaltime;
 	}
 
-	// Get average wavelength of this IMF
+	/**
+	 * Retrieve average wavelength of this IMF
+	 * @return
+	 * @throws ArithmeticException
+	 */
 	public double averageWavelength() throws ArithmeticException{
 		double freq = averageFrequency();
 		if(freq == 0)
 			throw new ArithmeticException("Division by zero!");
 		return 1 / freq;
 	}
+	
+	
+	public boolean hasAverageWavelength(){
+		if(averageFrequency() == 0){
+			return false;
+		}
+		return true;
+	}
+	
 	
 	public double getZeroCrossingCount(){
 		double count = 0;

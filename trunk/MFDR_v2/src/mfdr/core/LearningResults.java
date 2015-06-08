@@ -1,22 +1,21 @@
 package mfdr.core;
 
-import mfdr.learning.AngleLearning;
-import mfdr.learning.VarienceLearning;
+import mfdr.learning.LinearLearningResults;
 
 public class LearningResults {
-	final private AngleLearning alearn;
-	final private VarienceLearning vlearn;
+	final private LinearLearningResults lresults;
+	final private double guaranteed_compensation;
 	
-	public LearningResults(AngleLearning alearn, VarienceLearning vlearn){
-		this.alearn = alearn;
-		this.vlearn = vlearn;
+	public LearningResults(LinearLearningResults lresults, double guaranteed_compensation){
+		this.lresults = lresults;
+		this.guaranteed_compensation = guaranteed_compensation;
 	}
 	
-	public AngleLearning alearn(){
-		return alearn;
+	public LinearLearningResults combinationWeights(){
+		return this.lresults;
 	}
 	
-	public VarienceLearning vlearn(){
-		return vlearn;
+	public double compensation(){
+		return this.guaranteed_compensation;
 	}
 }

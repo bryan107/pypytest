@@ -11,7 +11,7 @@ import mfdr.dimensionality.reduction.MFDR;
 import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
-public class LR1DAngleLearning extends AngleLearning {
+public class LR1DAngleLearning extends LinearLearning {
 	private static Log logger = LogFactory.getLog(LR1DAngleLearning.class);
 	private double angle;
 	
@@ -26,24 +26,15 @@ public class LR1DAngleLearning extends AngleLearning {
 	}
 
 	@Override
-	public double getAngle() {
-		return angle;
-	}
-
-	@Override
-	public double getAngle(double trendlength, double freqlength) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void trainingParameters(LinkedList<TrainingSet> ts) {
+	public LinearLearningResults trainingParameters(LinkedList<TrainingSet> ts) {
+		return null;
 		// TODO Use AR model.
 		// This is can be extended to stream version with ARIMA model
 	}
 
 	@Override
-	public void trainingParameters(TimeSeries[] ts, MFDR mfdr, Distance d) {
+	public LinearLearningResults trainingParameters(TimeSeries[] ts, MFDR mfdr, Distance d) {
+		return null;
 		// TODO Auto-generated method stub
 		
 	}
@@ -54,8 +45,11 @@ public class LR1DAngleLearning extends AngleLearning {
 		return null;
 	}
 
+
+
 	@Override
-	public double[] getParameters() {
+	public LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts,
+			MFDR mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}

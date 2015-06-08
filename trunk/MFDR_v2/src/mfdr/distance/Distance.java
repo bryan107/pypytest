@@ -14,6 +14,15 @@ public abstract class Distance {
 	public abstract double calDistance(double[] xx, double[] yy);
 
 	/**
+	 * Calculate the distance between two white noise series with their energy densities.
+	 * @param energy density 1 (double)
+	 * @param energy density 2 (double)
+	 * @param series length (integer)
+	 * @return Distance (double)
+	 */
+	public abstract double calWhiteNoiseDistance(double e1, double e2, int length);
+	
+	/**
 	 * Calculate the distance between two TimeSeries Objects. The third
 	 * Parameter provides time references aligning the two input Time Series.
 	 * Linear Interpolation is used when the time stamps of two input time

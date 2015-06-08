@@ -52,7 +52,7 @@ public class TrendFilter {
 	 * @param windowsize_noise
 	 * @return trend_window_size
 	 */
-	public double getTrendWindowSize(IMFS imfs, double windowsize_noise) {
+	public double getTrendNoC(IMFS imfs, double windowsize_noise) {
 		for (int i = 0; i < imfs.size(); i++) {
 			double imf_wavelength;
 			// Catch infinite wavelength exceptions.

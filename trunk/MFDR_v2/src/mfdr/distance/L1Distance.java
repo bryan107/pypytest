@@ -13,4 +13,10 @@ public class L1Distance extends Distance {
 		return sum;
 	}
 
+	@Override
+	public double calWhiteNoiseDistance(double e1, double e2, int length) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

@@ -2,24 +2,29 @@ package mfdr.learning.datastructure;
 
 public class TrainingSet {
 
-	private final double trenddist, freqdist, origindist;
+	private final double dist_trend, dist_seasonal, dist_noise, dist_origianl;
 	
-	public TrainingSet(double trenddist, double freqdist, double origindist){
-		this.trenddist = trenddist;
-		this.freqdist = freqdist;
-		this.origindist = origindist;
+	public TrainingSet(double dist_trend, double dist_seasonal, double dist_noise, double dist_origianl){
+		this.dist_trend = dist_trend;
+		this.dist_seasonal = dist_seasonal;
+		this.dist_noise = dist_noise;
+		this.dist_origianl = dist_origianl;
 	}
 	
 	public double trendDist(){
-		return this.trenddist;
+		return this.dist_trend;
 	}
 	
-	public double freqDist(){
-		return this.freqdist;
+	public double seasonalDist(){
+		return this.dist_seasonal;
 	}
 	
-	public double originDist(){
-		return this.origindist;
+	public double noiseDist(){
+		return this.dist_noise;
+	}
+	
+	public double originalDist(){
+		return this.dist_origianl;
 	}
 	
 }

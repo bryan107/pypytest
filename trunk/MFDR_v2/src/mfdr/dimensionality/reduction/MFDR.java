@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import mfdr.datastructure.Data;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.datastructure.DFTData;
-import mfdr.dimensionality.datastructure.DWTData;
 import mfdr.dimensionality.datastructure.MFDRData;
+import mfdr.dimensionality.datastructure.NewDFTData;
 import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 import mfdr.utility.DataListOperator;
@@ -17,7 +17,7 @@ import mfdr.utility.DataListOperator;
 public class MFDR extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(MFDR.class);
 	private int NoC_t, NoC_s;
-	private double noise_freq;
+	private double lowestperiod;
 //	private double angle;
 	private PLA pla;
 	private DFT dft;
@@ -61,10 +61,10 @@ public class MFDR extends DimensionalityReduction {
 		this.pla = new PLA(NoC_t);
 	}
 
-	public void updateSeasonalComponent(int NoC_s, double noise_freq) {
+	public void updateSeasonalComponent(int NoC_s, double lowestperiod) {
 		this.NoC_s = NoC_s;
-		this.noise_freq = noise_freq;
-		this.dft = new DFT(NoC_s, noise_freq);
+		this.lowestperiod = lowestperiod;
+		this.dft = new DFT(NoC_s);
 	}
 
 	/*
@@ -78,64 +78,71 @@ public class MFDR extends DimensionalityReduction {
 		return this.NoC_s;
 	}
 	
-	public double whiteNoiseFrequency(){
-		return this.noise_freq;
+	public double whiteNoiseLowestPeriod(){
+		return this.lowestperiod;
 	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries output = new TimeSeries();
-		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
-		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
-		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
-		for (int i = 0; i < mdfrlist.size(); i++) {
-			plalist.add(mdfrlist.get(i).pla());
-			dwtlist.add(mdfrlist.get(i).dwt());
-		}
-		TimeSeries plafull = this.pla.getFullResolutionDR(plalist, ts);
-		TimeSeries dwtfull = reconstructFullResolutionSeasonal(ts, dwtlist);
-		output = DataListOperator.getInstance().linkedListSum(plafull, dwtfull);
+		MFDRData mfdrdata = getDR(ts);
+		TimeSeries trendfull = this.pla.getFullResolutionDR(mfdrdata.trends(), ts);
+		TimeSeries seasonalfull = this.dft.getFullResolutionDR(mfdrdata.seasonal(), ts);
+		TimeSeries noisefull = getFullResolutionNoise(mfdrdata.noiseEnergyDensity(), ts);
+		output = DataListOperator.getInstance().linkedListSum(trendfull, seasonalfull);
+		output = DataListOperator.getInstance().linkedListSum(output, noisefull);
 		return output;
 	}
 	
-	public TimeSeries getFullResolutionTrend(TimeSeries ts){
-		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
-		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
-		for (int i = 0; i < mdfrlist.size(); i++) {
-			plalist.add(mdfrlist.get(i).pla());
+	private TimeSeries getFullResolutionNoise(double noise_energy_density, TimeSeries ref){
+		TimeSeries noisefull = new TimeSeries();
+		// Energy Density = Varience
+		double standard_deviation = Math.pow(noise_energy_density, 0.5);
+		System.out.println("Standard_Deviation:" + standard_deviation);
+		java.util.Random r = new java.util.Random();
+		for(int i = 0 ; i < ref.size() ; i++){
+			noisefull.add(new Data(ref.get(i).time(), r.nextGaussian() * standard_deviation));
 		}
-		return this.pla.getFullResolutionDR(plalist, ts);
+		return noisefull;
 	}
+//	public TimeSeries getFullResolutionTrend(TimeSeries ts){
+//		LinkedList<PLAData> plalist = new LinkedList<PLAData>();
+//		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
+//		for (int i = 0; i < mdfrlist.size(); i++) {
+//			plalist.add(mdfrlist.get(i).pla());
+//		}
+//		return this.pla.getFullResolutionDR(plalist, ts);
+//	}
 	
-	public TimeSeries getFullResolutionSeasonal(TimeSeries ts){
-		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
-		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
-		for (int i = 0; i < mdfrlist.size(); i++) {
-			dwtlist.add(mdfrlist.get(i).dwt());
-		}
-		return reconstructFullResolutionSeasonal(ts, dwtlist);
-	}
+//	public TimeSeries getFullResolutionSeasonal(TimeSeries ts){
+//		LinkedList<MFDRData> mdfrlist = (LinkedList<MFDRData>) getDR(ts);
+//		LinkedList<DWTData> dwtlist = new LinkedList<DWTData>();
+//		for (int i = 0; i < mdfrlist.size(); i++) {
+//			dwtlist.add(mdfrlist.get(i).dwt());
+//		}
+//		return reconstructFullResolutionSeasonal(ts, dwtlist);
+//	}
 
-	public TimeSeries reconstructFullResolutionSeasonal(TimeSeries ts,
-			LinkedList<DWTData> dwtlist) {
-		// Stores each DWT segment with full resolution.
-		LinkedList<TimeSeries> dwttemp = new LinkedList<TimeSeries>();
-		// Time reference for DWT
-		LinkedList<TimeSeries> sub_ref = DataListOperator.getInstance()
-				.linkedListDivision(ts, this.windowsize_trend);
-		for (int i = 0; i < dwtlist.size(); i++) {
-			dwttemp.add(this.dwt.getFullResolutionDR(dwtlist.get(i),
-					sub_ref.get(i)));
-		}
-		return (TimeSeries) DataListOperator.getInstance()
-				.linkedListCombinition(dwttemp);
-	}
+//	public TimeSeries reconstructFullResolutionSeasonal(TimeSeries ts,
+//			LinkedList<DWTData> dwtlist) {
+//		// Stores each DWT segment with full resolution.
+//		LinkedList<TimeSeries> dwttemp = new LinkedList<TimeSeries>();
+//		// Time reference for DWT
+//		LinkedList<TimeSeries> sub_ref = DataListOperator.getInstance()
+//				.linkedListDivision(ts, this.windowsize_trend);
+//		for (int i = 0; i < dwtlist.size(); i++) {
+//			dwttemp.add(this.dwt.getFullResolutionDR(dwtlist.get(i),
+//					sub_ref.get(i)));
+//		}
+//		return (TimeSeries) DataListOperator.getInstance()
+//				.linkedListCombinition(dwttemp);
+//	}
 
 	/**
 	 * MFDR is NOT comparable to this function, please use another one provided.
 	 */
 	@Override
-	public TimeSeries getFullResolutionDR(TimeSeries ts, double windowsize) {
+	public TimeSeries getFullResolutionDR(TimeSeries ts, int NoC) {
 		logger.info("MFDR is NOT comparable to this function, please use another one provided");
 		return null;
 	}
@@ -148,37 +155,39 @@ public class MFDR extends DimensionalityReduction {
 	 * @return LinkedList<MDFRData>
 	 */
 	public TimeSeries getFullResolutionDR(TimeSeries ts,
-			double windowsize_trend, double windowsize_freq) {
-		updateTrendWindowsize(windowsize_trend);
-		updateFrequencyWindowsize(windowsize_freq);
+			int NoC_t, int NoC_s, double noise_freq) {
+		updateTrendComponent(NoC_t);
+		updateSeasonalComponent(NoC_s, noise_freq);
 		return getFullResolutionDR(ts);
 	}
 
 	@Override
-	public LinkedList<MFDRData> getDR(TimeSeries ts) {
-		LinkedList<MFDRData> mdfrlist = new LinkedList<MFDRData>();
+	public MFDRData getDR(TimeSeries ts) {
 
 		// STEP 1: Calculate Trend Series
-		LinkedList<PLAData> trend = this.pla.getDR(ts);
+		LinkedList<PLAData> trends = this.pla.getDR(ts);
 		// STEP 1-1: Prepare Residual Series
 		TimeSeries trendfull = this.pla.getFullResolutionDR(ts);
 		TimeSeries residualfull = DataListOperator.getInstance()
 				.linkedtListSubtraction(ts, trendfull);
 		// STEP 2: Calculate Seasonal Components
-		DFTData seasonal = this.dft.getDR(ts);
-		// STEP 2-2: Prepare Residual 2 Series
-		TimeSeries seasonalfull = this.dft.getFullResolutionDR(ts);
-		TimeSeries residualfull2 = DataListOperator.getInstance()
-				.linkedtListSubtraction(ts, seasonalfull);
-		// STEP 3: Calculate Residual Energy Density
-					
+		double[] freq = dft.converTSToFrequency(residualfull);
+		double[] noise = dft.extractHighFrequency(freq, this.lowestperiod, residualfull.timeInterval());
+		NewDFTData seasonal = dft.getDR(freq);
+	
+		// STEP 3: Calculate Noise Energy Density
+		double noise_energy_density = noiseEnergyDensity(noise);
 		
-		// Save results to MDFRDatas
-		for (int i = 0; i < trend.size(); i++) {
-			mdfrlist.add(new MFDRData(trend.get(i).time(), trend.get(i), freq
-					.get(i)));
+		// Save results to MDFRData and return
+		return new MFDRData(trends, seasonal, noise_energy_density);
+	}
+	
+	private double noiseEnergyDensity(double[] noise){
+		double sum = 0;
+		for(int i = 0 ; i < noise.length ; i++){
+			sum+= Math.pow(noise[i], 2);
 		}
-		return mdfrlist;
+		return Math.pow(sum, 0.5)/noise.length;
 	}
 	// ************** TEST ZONE ***********************
 	
@@ -200,7 +209,7 @@ public class MFDR extends DimensionalityReduction {
 	 * MFDR is NOT comparable to this function, please use another one provided.
 	 */
 	@Override
-	public Object getDR(TimeSeries ts, double windowsize) {
+	public Object getDR(TimeSeries ts, int NoC) {
 		logger.info("MFDR is NOT comparable to this function, please use another one");
 		return null;
 	}
@@ -212,104 +221,103 @@ public class MFDR extends DimensionalityReduction {
 	 * @parameter windowsize_trend, windowsize_freq.
 	 * @return LinkedList<MDFRData>
 	 */
-	public Object getDR(TimeSeries ts, double windowsize_trend,
-			double windowsize_freq) {
-		updateTrendWindowsize(windowsize_trend);
-		updateFrequencyWindowsize(windowsize_freq);
+	public Object getDR(TimeSeries ts, int NoC_t, int NoC_s, double noise_freq) {
+		updateTrendComponent(NoC_t);
+		updateSeasonalComponent(NoC_s, noise_freq);
 		return getDR(ts);
 	}
 
 	@Override
+	/**
+	 * This function does not valid in MFDR. Please use 
+	 * getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double[] w)
+	 * 
+	 * @parameter windowsize_trend, windowsize_freq.
+	 * @return LinkedList<MDFRData>
+	 */
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		logger.info("Please specify combining paramaters");
 		return 0;
 	}
 
-	/**
-	 * Get the combining distance with angle
-	 * @param ts1
-	 * @param ts2
-	 * @param distance
-	 * @param angle
-	 * @return
-	 */
-	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double angle) {
-		LinkedList<MFDRData> mfdr1 = getDR(ts1);
-		LinkedList<MFDRData> mfdr2 = getDR(ts2);
-		// ts1 is used as the sampling reference
-		return getDistance(mfdr1, mfdr2, ts1, distance, angle);
-	}
+//	/**
+//	 * Get the combining distance with angle
+//	 * @param ts1
+//	 * @param ts2
+//	 * @param distance
+//	 * @param angle
+//	 * @return
+//	 */
+//	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double angle) {
+//		MFDRData mfdrdata1 = getDR(ts1);
+//		MFDRData mfdrdata2 = getDR(ts2);
+//		// ts1 is used as the sampling reference
+//		return getDistance(mfdrdata1, mfdrdata1, ts1, distance, angle);
+//	}
 	
-	public double getDistance(LinkedList<MFDRData> mfdr1,
-			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance, double angle) {
-		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
-				distance);
-		return getDistance(details, angle);
-	}
+//	public double getDistance(MFDRData mfdr1,
+//			MFDRData mfdr2, TimeSeries ref, Distance distance, double angle) {
+//		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
+//				distance);
+//		return getDistance(details, angle);
+//	}
 
 //	public double getDistance(MFDRDistanceDetails details){
 //		return getDistance(details, this.angle);
 //	}
 	
-	public double getDistance(MFDRDistanceDetails details, double angle){
-		try {
-			// Law of cosines: c^2 = a^2 + b^2 - 2ab*cos(angle)
-			double dist_square = Math.pow(details.pla(), 2)
-					+ Math.pow(details.dwt(), 2) - 2 * details.pla()
-					* details.dwt() * Math.cos(angle);
-			return Math.pow(dist_square, 0.5);
-		} catch (Exception e) {
-			logger.info("Distance cannot be calculated, Please the formats and lengths of the input datas."
-					+ e);
-			return 0;
-		}
-	}
+//	public double getDistance(MFDRDistanceDetails details, double angle){
+//		try {
+//			// Law of cosines: c^2 = a^2 + b^2 - 2ab*cos(angle)
+//			double dist_square = Math.pow(details.pla(), 2)
+//					+ Math.pow(details.dwt(), 2) - 2 * details.pla()
+//					* details.dwt() * Math.cos(angle);
+//			return Math.pow(dist_square, 0.5);
+//		} catch (Exception e) {
+//			logger.info("Distance cannot be calculated, Please the formats and lengths of the input datas."
+//					+ e);
+//			return 0;
+//		}
+//	}
 	
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance, double[] w) {
-		LinkedList<MFDRData> mfdr1 = getDR(ts1);
-		LinkedList<MFDRData> mfdr2 = getDR(ts2);
+		MFDRData mfdrdata1 = getDR(ts1);
+		MFDRData mfdrdata2 = getDR(ts2);
 		// ts1 is used as the sampling reference
-		return getDistance(mfdr1, mfdr2, ts1, distance, w);
+		return getDistance(mfdrdata1, mfdrdata2, ts1, distance, w);
 	}
 	
-	public double getDistance(LinkedList<MFDRData> mfdr1,
-			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance, double[] w) {
-		MFDRDistanceDetails details = getDistanceDetails(mfdr1, mfdr2, ref,
+	public double getDistance(MFDRData mfdrdata1,
+			MFDRData mfdrdata2, TimeSeries ref, Distance distance, double[] w) {
+		MFDRDistanceDetails details = getDistanceDetails(mfdrdata1, mfdrdata2, ref,
 				distance);
 		return getDistance(details, w);
 	}
 	
 	public double getDistance(MFDRDistanceDetails details, double[] w){
-		return w[0] + w[1]*details.pla() + w[2]*details.dwt();
+		return w[0] + w[1]*details.trend() + w[2]*details.seasonal() + w[3]*details.noise();
 	}
 	
 	public MFDRDistanceDetails getDistanceDetails(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		LinkedList<MFDRData> mfdr1 = getDR(ts1);
-		LinkedList<MFDRData> mfdr2 = getDR(ts2);
+		MFDRData mfdr1 = getDR(ts1);
+		MFDRData mfdr2 = getDR(ts2);
 		return getDistanceDetails(mfdr1, mfdr2, ts1, distance);
 	}
 	
-	public MFDRDistanceDetails getDistanceDetails(LinkedList<MFDRData> mfdr1,
-			LinkedList<MFDRData> mfdr2, TimeSeries ref, Distance distance) {
-		if (mfdr1.size() != mfdr2.size()) {
-			logger.info("Input MFDR lists must have the same length");
-			return null;
-		}
+	public MFDRDistanceDetails getDistanceDetails(MFDRData mfdrdata1,
+			MFDRData mfdrdata2, TimeSeries ref, Distance distance) {
 		// Prepare PLA and DWT data structure
-		LinkedList<PLAData> pla1 = new LinkedList<PLAData>();
-		LinkedList<PLAData> pla2 = new LinkedList<PLAData>();
-		LinkedList<DWTData> dwt1 = new LinkedList<DWTData>();
-		LinkedList<DWTData> dwt2 = new LinkedList<DWTData>();
-		for (int i = 0; i < mfdr1.size(); i++) {
-			pla1.add(mfdr1.get(i).pla());
-			pla2.add(mfdr2.get(i).pla());
-			dwt1.add(mfdr1.get(i).dwt());
-			dwt2.add(mfdr2.get(i).dwt());
-		}
+		LinkedList<PLAData> trend1 = mfdrdata1.trends();
+		LinkedList<PLAData> trend2 = mfdrdata2.trends();
+		NewDFTData seasonal1 = mfdrdata1.seasonal();
+		NewDFTData seasonal2 = mfdrdata2.seasonal();
+		double e1 = mfdrdata1.noiseEnergyDensity();
+		double e2 = mfdrdata2.noiseEnergyDensity();
 		// Calculate distances of low frequency pla and high frequency dwt
-		double dist_pla = pla.getDistance(pla1, pla2, ref, distance);
-		double dist_dwt = dwt.getDistance(dwt1, dwt2, distance);
-		return new MFDRDistanceDetails(dist_pla, dist_dwt);
+		double dist_trend = pla.getDistance(trend1, trend2, ref, distance);
+		double dist_seasonal = dft.getDistance(seasonal1, seasonal2, distance, ref.size());
+		double dist_noise = distance.calWhiteNoiseDistance(e1, e2, ref.size());
+		return new MFDRDistanceDetails(dist_trend, dist_seasonal, dist_noise);
 	}
 
 	

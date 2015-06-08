@@ -104,7 +104,7 @@ public class DFT extends DimensionalityReduction {
 	}
 
 	public double[] extractHighFrequency(double[] input, double lowestperiod, double timeinterval){
-		int normalisedperiod = (int)(lowestperiod*timeinterval);
+		int normalisedperiod = (int)(lowestperiod/timeinterval);
 		int keeplength = 1 + input.length*2/normalisedperiod;
 		double[] noisearray = new double[input.length-keeplength];
 		for(int i = keeplength ; i < input.length ; i++){

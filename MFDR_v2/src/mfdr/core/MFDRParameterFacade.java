@@ -69,9 +69,6 @@ public class MFDRParameterFacade {
 		tfilter = new TrendFilter(FTratio, motif_k, motif_threshold);
 	}
 
-	/*
-	 * PHASE 1: Learn MFDR Parameters
-	 */
 
 	/**
 	 * Learn window size with LinkedList input TimeSeries
@@ -164,7 +161,7 @@ public class MFDRParameterFacade {
 		return new MFDRParameters(NoC_t, NoC_s, lowestperiod);
 	}
 
-	// PHASE 2: Learning distance recoveries
+
 	/*
 	 * This function trains with reduced distance (should be more accurate) It
 	 * provides higher lower bound results and make for sense in terms of

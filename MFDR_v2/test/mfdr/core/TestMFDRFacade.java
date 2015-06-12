@@ -1,111 +1,164 @@
-//package mfdr.core;
-//
-//import java.util.LinkedList;
-//
-//import mfdr.datastructure.Data;
-//import mfdr.datastructure.TimeSeries;
-//import mfdr.dimensionality.reduction.DWT;
-//import mfdr.dimensionality.reduction.MFDR;
-//import mfdr.dimensionality.reduction.PLA;
-//import mfdr.distance.Distance;
-//import mfdr.distance.EuclideanDistance;
-//import mfdr.learning.AngleLearning;
-//import mfdr.learning.LR3DAngleLearning;
-//import mfdr.learning.VarienceLearning;
-//import junit.framework.TestCase;
-//
-//public class TestMFDRFacade extends TestCase {
-//	private double white_noise_level = 5;
-//	private double white_noise_threshold = 6.2;
-//	private double min_NSratio = 0.5;
-//	private double motif_FTratio = 0.5;
-//	private int motif_k = 3;
-//	private double motif_threshold = 0.1;
-//	private double tolerancevarience = 3;
-//	// ************** Used variables **************
-//	private MFDRFacade facade = new MFDRFacade(white_noise_level,
-//			white_noise_threshold, min_NSratio, motif_FTratio, motif_k, motif_threshold);
-//	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
-//	private MFDR mfdr;
-//	// **************** Test Cases ****************
-//	public void testLearnWindowSize() {
-//		for(int i = 0 ; i < 10 ; i++){
-//			ts.add(generateTimeSeries(2048));
+package mfdr.core;
+
+import java.text.DecimalFormat;
+import java.util.LinkedList;
+
+import mfdr.datastructure.Data;
+import mfdr.datastructure.MFDRDistanceDetails;
+import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.datastructure.MFDRData;
+import mfdr.dimensionality.reduction.DFT;
+import mfdr.dimensionality.reduction.DWT;
+import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.PAA;
+import mfdr.dimensionality.reduction.PLA;
+import mfdr.distance.Distance;
+import mfdr.distance.EuclideanDistance;
+import mfdr.file.FileAccessAgent;
+import mfdr.learning.LR4DLearning;
+import mfdr.learning.LinearLearning;
+import mfdr.learning.LinearLearningResults;
+import mfdr.learning.VarienceLearning;
+import mfdr.utility.DataListOperator;
+import mfdr.utility.File;
+import junit.framework.TestCase;
+
+public class TestMFDRFacade extends TestCase {
+	private final String[] writeaddress = { "C:\\TEST\\MDFR\\Data\\FacadeExample.csv",
+											"C:\\TEST\\MDFR\\Data\\OOO.csv" };
+	private double white_noise_level = 3;
+	private double white_noise_threshold = 6.2;
+	private double min_NSratio = 0.5;
+	private double tolerancevarience = 3;
+	private Distance dist = new EuclideanDistance();
+	// ************** Used variables **************
+	private MFDRParameterFacade facade = new MFDRParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
+	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
+	private MFDR mfdr;
+	private final int datanum = 10;
+	private final int NoC = 6;
+	// **************** Test Cases ****************
+	
+	DecimalFormat format = new DecimalFormat("0.0000");
+	public void testLearnWindowSize() {
+		LinkedList<TimeSeries> tslist = File.getInstance().readreadTimeSeriesFromFile("C:\\TEST\\MDFR\\Data\\DATA\\ECG200.csv", datanum );
+		MFDRParameters p = facade.learnMFDRParameters(tslist, NoC, false);
+		MFDR mfdr = new MFDR(p.trendNoC(), p.seasonalNoC(), p.lowestPeriod());
+		LinkedList<MFDRData> mfdrdata = new LinkedList<MFDRData>();
+		for(int i = 0 ; i < datanum ; i++){
+			mfdrdata.add(mfdr.getDR(tslist.get(i)));
+		}
+		PLA pla = new PLA(NoC);
+		DFT dft = new DFT(NoC);
+		
+		LearningResults dist_parameters = facade.learnParameters(tslist, mfdr, tolerancevarience, dist);
+		
+		double error = 0;
+		int count = 0;
+		for(int i = 0 ; i < datanum -1 ; i++){
+			for(int j = i+1 ; j < datanum ; j++){
+				double originaldist = dist.calDistance(tslist.get(i), tslist.get(j), tslist.get(i));
+//				originaldists.add(originaldist);
+				double mfdrdist = pla.getDistance(mfdrdata.get(i).trends(), mfdrdata.get(j).trends(), tslist.get(i), dist)
+								+ dft.getDistance(mfdrdata.get(i).seasonal(), mfdrdata.get(j).seasonal(), dist, tslist.get(i).size());
+//				mfdrdists.add(mfdrdist);
+				double err = (originaldist-mfdrdist);
+				double compensate_dist = mfdr.getDistance(mfdrdata.get(i), mfdrdata.get(j), tslist.get(i), dist, dist_parameters.combinationWeights(), dist_parameters.compensation());
+				System.out.println("Compensation" + compensate_dist);
+				System.out.println("N["+ i +"] and N[" + j + "]-" 
+				+ "  Original:" + format.format(originaldist) 
+				+ "  MFDR:" + format.format(mfdrdist) 
+				+ "  Compen"+ format.format(compensate_dist) 
+				+ "  Error" + format.format((err)/originaldist) 
+				+ "  CompErr" + format.format((originaldist-compensate_dist)/originaldist));
+				error += err;
+				count++;
+			}
+			
+		}
+		
+		System.out.println("Average Error:" + (error/count));
+//		for(int i = 1 ; i <11 ; i++ ){
+//			test(i, "C:\\TEST\\MDFR\\Data\\GOOD.csv");
 //		}
-//		
-//		// STEP 1
-//		WindowSize ws= facade.learnWindowSizes(ts);
-//		System.out.println("TREND: " + ws.trend() + " NOISE: " + ws.noise());
-//		mfdr = new MFDR(ws.trend(), ws.noise());
-//		
-//		//-------------
-//		
-//		// STEP 2
-//		LearningResults results = facade.learnParameters(ts,tolerancevarience , new EuclideanDistance(), ws);
+	}
+	
+	private void test(int NoC, String readingaddress){
+		TimeSeries ts1 = (TimeSeries) File.getInstance().readTimeSeriesFromFile(readingaddress);
+		
+		MFDRParameters p = facade.learnMFDRParameters(ts1, NoC, false);
+		System.out.println("NoC_t:" + p.trendNoC() + "  NoC_s:" + p.seasonalNoC() + "  Noise Period:" + p.lowestPeriod());
+		mfdr = new MFDR(p.trendNoC(), p.seasonalNoC(), p.lowestPeriod());
+		TimeSeries mfdrfull = mfdr.getFullResolutionDR(ts1);
+		MFDRData data = mfdr.getDR(ts1);
+		PLA pla = new PLA(p.trendNoC());
+		DFT dft = new DFT(p.seasonalNoC());
+		TimeSeries trendfull = pla.getFullResolutionDR(data.trends(), ts1);
+		TimeSeries seasonalfull = dft.getFullResolutionDR(data.seasonal(), ts1);
+		TimeSeries noisefull = mfdr.getFullResolutionNoise(data.noiseEnergyDensity(), ts1);
+		TimeSeries mfdrfullnonoise = DataListOperator.getInstance().linkedListSum(trendfull, seasonalfull);
+		File.getInstance().saveTimeToFile(ts1, writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("Original", ts1, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("MFDRFull", mfdrfull, writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("MFDRFullNoNoise", mfdrfullnonoise, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("Trend", trendfull, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("Seasonal", seasonalfull, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("Nosie", noisefull, writeaddress[0]);
+		
+		pla = new PLA(NoC);
+		dft = new DFT(NoC);
+		PAA paa = new PAA(NoC);
+		TimeSeries trenddd = pla.getFullResolutionDR(ts1);
+		TimeSeries seasonaldd = dft.getFullResolutionDR(ts1);
+		TimeSeries paadd = paa.getFullResolutionDR(ts1);
+		File.getInstance().saveLinkedListToFile("PLA", trenddd, writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("DFT", seasonaldd , writeaddress[0]);
+		File.getInstance().saveLinkedListToFile("PAA", paadd , writeaddress[0]);
+
+		TimeSeries pla_error = DataListOperator.getInstance().linkedtListSubtraction(ts1, trenddd);
+		TimeSeries paa_error = DataListOperator.getInstance().linkedtListSubtraction(ts1, paadd);
+		TimeSeries dft_error = DataListOperator.getInstance().linkedtListSubtraction(ts1, seasonaldd);
+		TimeSeries mfdr_error = DataListOperator.getInstance().linkedtListSubtraction(ts1, mfdrfull);
+		TimeSeries mfdr_no_error = DataListOperator.getInstance().linkedtListSubtraction(ts1, mfdrfullnonoise);
+//		File.getInstance().saveLinkedListToFile("PLA_E", pla_error, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("DFT_E", dft_error, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("MFDR_E", mfdr_error, writeaddress[0]);
+//		File.getInstance().saveLinkedListToFile("MFDR_N_E", mfdr_no_error, writeaddress[0]);
+		System.out.println("PLA:" + pla_error.energyDensity()/ts1.energyDensity());
+		System.out.println("DFT:" + dft_error.energyDensity()/ts1.energyDensity());
+		System.out.println("MFDR:" + mfdr_error.energyDensity()/ts1.energyDensity());
+		System.out.println("MFDR_NO:" + mfdr_no_error.energyDensity()/ts1.energyDensity());
+	}
+
+	public void testLearnParameters() {
+//		LearningResults results = facade.learnParameters(ts,tolerancevarience , new EuclideanDistance());
 //		System.out.print("A Learn:");
 //		for(int i = 0; i < 3 ; i++){
 //			System.out.print("[" + i + "]" + results.alearn().getParameters()[i]);
 //		}
 //		System.out.println();
 //		System.out.println("V Learn:" + results.vlearn().getGuaranteedCompensation());
-//		
-//		//-------------
-//		
-//		LinkedList<TimeSeries> test = new LinkedList<TimeSeries>();
-//		for(int i = 0 ; i < 2 ; i++){
-//			test.add(generateTimeSeries(2048));
-//		}
-//		Distance d = new EuclideanDistance();
-//		PLA pla = new PLA(ws.noise());
-//		DWT dwt = new DWT(ws.noise());
-//		// STEP 3
-//		double distance = facade.getDistance(test.peekFirst(), test.peekLast(), d, ws, results);
-//		
-//		// Print Restuls
-//		System.out.println("Original Distance:" + d.calDistance(test.peekFirst(), test.peekLast(), test.peekFirst()));
-//		System.out.println("PLA:" + pla.getDistance(test.peekFirst(), test.peekLast(), d));
-//		pla = new PLA(ws.trend());
-//		System.out.println("PLA2:" + pla.getDistance(test.peekFirst(), test.peekLast(), d));
-//		System.out.println("DWT:" + dwt.getDistance(test.peekFirst(), test.peekLast(), d));
-//		dwt = new DWT(ws.trend());
-//		System.out.println("DWT2:" + dwt.getDistance(test.peekFirst(), test.peekLast(), d));
-//		System.out.println("Reduced Distance:" + distance);
-//		
-//		// TODO Solution does not work....change the algorithm to train with distance not angle
-////		1. DWT can now deal with various lengths of time series.
-////		2. MFDR does not work with original training, must train with reduced data
-////		    Reduced data violates triangle inequality, must train with original distance rather than angle
-//	}
-//
-//	public void testLearnParameters() {
-////		LearningResults results = facade.learnParameters(ts,tolerancevarience , new EuclideanDistance());
-////		System.out.print("A Learn:");
-////		for(int i = 0; i < 3 ; i++){
-////			System.out.print("[" + i + "]" + results.alearn().getParameters()[i]);
-////		}
-////		System.out.println();
-////		System.out.println("V Learn:" + results.vlearn().getGuaranteedCompensation());
-//	}
-//
-//	public void testGetDistance() {
-//
-//	}
-//	
-//	private TimeSeries generateTimeSeries(long size) {
-//		TimeSeries ts = new TimeSeries();
-//		for (double i = 0; i < size; i+=1) {
-//			java.util.Random r = new java.util.Random();
-//			double noise = 0; 
-//			noise = r.nextGaussian() * Math.sqrt(5);
-//			double trend = 1*Math.pow(i, 0.5);
-//			if(i%200 == 0){
-//				trend = trend + r.nextGaussian() * Math.sqrt(50);
-//			}
-////			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise;
-//			double value = 9.5 * Math.sin(i*Math.PI / 64) + trend + noise;
-//			ts.add(new Data(i, value));
-//		}
-//		return ts;
-////		return 1/(2*Math.PI*3);
-//	}
-//}
+	}
+
+	public void testGetDistance() {
+
+	}
+	
+	private TimeSeries generateTimeSeries(long size) {
+		TimeSeries ts = new TimeSeries();
+		for (double i = 0; i < size; i+=1) {
+			java.util.Random r = new java.util.Random();
+			double noise = 0; 
+			noise = r.nextGaussian() * Math.sqrt(5);
+			double trend = 1*Math.pow(i, 0.5);
+			if(i%200 == 0){
+				trend = trend + r.nextGaussian() * Math.sqrt(50);
+			}
+//			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise;
+			double value = 9.5 * Math.sin(i*Math.PI / 64) + trend + noise;
+			ts.add(new Data(i, value));
+		}
+		return ts;
+//		return 1/(2*Math.PI*3);
+	}
+}

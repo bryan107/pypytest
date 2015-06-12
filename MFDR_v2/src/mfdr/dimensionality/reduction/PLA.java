@@ -40,6 +40,10 @@ public class PLA extends DimensionalityReduction {
 
 	private void calFullResolutionDR(TimeSeries ts, TimeSeries plafull,
 			LinkedList<PLAData> pla) {
+		if(pla == null){
+			getNullTimeSeries(ts, plafull);
+			return;
+		}
 		double init_time = -1;
 		double end_time = -1;
 		try {
@@ -73,6 +77,9 @@ public class PLA extends DimensionalityReduction {
 
 	@Override
 	public LinkedList<PLAData> getDR(TimeSeries ts) {
+		if(NoC == 0){
+			return null;
+		}
 		LinkedList<PLAData> pla = new LinkedList<PLAData>();
 		int PLAwindowsize = ts.size()/NoC;
 		boolean isfirstround = true;
@@ -90,6 +97,7 @@ public class PLA extends DimensionalityReduction {
 			while(count < PLAwindowsize ){
 				// Add data to temp
 				temp.put(data.time(), data.value());
+				count++;
 				// If no next item.
 				if(!it.hasNext())
 					break;
@@ -113,6 +121,12 @@ public class PLA extends DimensionalityReduction {
 		return pla;
 	}
 
+	private void getNullTimeSeries(TimeSeries ts, TimeSeries plafull){
+		for(int i = 0 ; i < ts.size() ; i++){
+			plafull.add(new Data(ts.get(i).time(), 0));
+		}
+	}
+	
 	private void convertMapToArray(Map<Double, Double> temp, double[] x, double[] y) {
 		int index = 0;
 		Iterator<Double> it2 = temp.keySet().iterator(); 

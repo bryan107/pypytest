@@ -29,6 +29,10 @@ public class FileAccessAgent {
 		this.readingpath = readingpath;
 		return setFileReader();
 	}
+	
+	public String readingPath(){
+		return this.readingpath;
+	}
 
 	public boolean setFileReader(){
 		try {

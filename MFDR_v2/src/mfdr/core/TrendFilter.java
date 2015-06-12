@@ -25,7 +25,9 @@ import mfdr.math.motif.Motif;
  **/
 
 public class TrendFilter {
-	// Logger
+	/**
+	 * Use this constructor for old K 1-motif solution
+	 */
 	private static Log logger = LogFactory.getLog(TrendFilter.class);
 	private double FTratio, motif_threshold;
 	private int motif_k;
@@ -36,6 +38,10 @@ public class TrendFilter {
 		setMotifThreshold(motif_threshold);
 	}
 	
+	/**
+	 * Use this constructor for new windowsize solution
+	 * @param dist
+	 */
 	public TrendFilter(Distance dist) {
 
 	}
@@ -60,42 +66,75 @@ public class TrendFilter {
 	}
 	
 	/**
-	 * Calculate candidate Trend NoC and Noise NoC using IMFs as indicator.
+	 * This function uses a brute force algorithm to calculate Candidate trend NoC and Seasonal NoC.
 	 * @param ts
-	 * @param imfs
 	 * @param NoC
 	 * @param lowestperiod
+	 * @return
+	 */
+	public int[] getMFDRNoCs(TimeSeries ts, int NoC, double lowestperiod){
+		int[] candidateNoCs = {0 , NoC};
+		MFDR mfdr = new MFDR(candidateNoCs[0], candidateNoCs[1], lowestperiod);
+		TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
+		double candidateError = residual.energyDensity();
+		for(int NoC_t = 1 ; NoC_t <=NoC ; NoC_t++){
+			int NoC_s = NoC - NoC_t;
+			mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
+			residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
+			double error = residual.energyDensity();
+			if(error < candidateError ){
+				candidateError = error;
+				candidateNoCs[0] = NoC_t;
+				candidateNoCs[1] = NoC_s;
+			} 
+		}
+		return candidateNoCs;
+	}
+	
+	/**
+	 * Calculate candidate Trend NoC and Seasonal NoC using IMFs as indicator.
+	 * @param Input time series: ts
+	 * @param EMD result: imfs
+	 * @param Number of Coefficient: NoC
+	 * @param The lowest period that seperate white noise: lowestperiod
 	 * @return int[0] = NoC_t; int[1] = NoC_s
 	 */
 	
 	public int[] getMFDRNoCs(TimeSeries ts, IMFS imfs, int NoC, double lowestperiod){
-		int[] candidateNoCs = {1 , NoC-1};
-		double candidateError = -1;
+		boolean endflag = false;
+		int[] candidateNoCs = {0 , NoC};
+		MFDR mfdr = new MFDR(candidateNoCs[0], candidateNoCs[1], lowestperiod);
+		TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
+		double candidateError = residual.energyDensity();
 		for (int i = imfs.size()-1 ; i >= 0; i--) {
-
 			// If no average wavelength can be extracted.
 			if(!imfs.get(i).hasAverageWavelength())
 				continue;
 			
 			// Wave Length Test
+			int NoC_t;
 			double imf_wavelength = imfs.get(i).averageWavelength();
-			if (imf_wavelength <= lowestperiod)
-				break;
-
+			if (imf_wavelength <= lowestperiod){
+				NoC_t = NoC;
+				endflag = true;
+			}
 			// Trend NoC Test
-			int NoC_t = (int) (imfs.get(i).timeLength()/imf_wavelength);
-			if(NoC_t >= NoC)
-				break;
-			
+			NoC_t = (int) (imfs.get(i).timeLength()/imf_wavelength);
+			if(NoC_t >= NoC){
+				NoC_t = NoC;
+				endflag = true;
+			}
 			int NoC_s = NoC - NoC_t;
-			MFDR mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
-			TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
-			double error = residual.energyDensity()/ts.energyDensity();
+			mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
+			residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
+			double error = residual.energyDensity();
 			if(candidateError == -1 || error < candidateError ){
 				candidateError = error;
 				candidateNoCs[0] = NoC_t;
 				candidateNoCs[1] = NoC_s;
 			} 
+			if(endflag)
+				break;
 		}
 		return candidateNoCs;
 	}
@@ -106,7 +145,7 @@ public class TrendFilter {
 	 * @param windowsize_noise
 	 * @return trend_window_size
 	 */
-	public double getTrendNoC(IMFS imfs, double windowsize_noise) {
+	public double getTrendWindowSize(IMFS imfs, double windowsize_noise) {
 		for (int i = 0; i < imfs.size(); i++) {
 			double imf_wavelength;
 			// Catch infinite wavelength exceptions.

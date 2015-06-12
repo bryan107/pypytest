@@ -49,6 +49,15 @@ public class MFDRParameterFacade {
 
 	// ************************************
 
+	/**
+	 * This constructor provides the old function with k 1-motif solution
+	 * @param white_noise_level
+	 * @param white_noise_threshold
+	 * @param min_NSratio
+	 * @param FTratio
+	 * @param motif_k
+	 * @param motif_threshold
+	 */
 	public MFDRParameterFacade(double white_noise_level,
 			double white_noise_threshold, double min_NSratio, double FTratio,
 			int motif_k, double motif_threshold) {
@@ -57,7 +66,23 @@ public class MFDRParameterFacade {
 				min_NSratio);
 		updateTrendFilter(FTratio, motif_k, motif_threshold);
 	}
+	
+	/**
+	 * This is the new solution with only dist input
+	 * @param white_noise_level
+	 * @param white_noise_threshold
+	 * @param min_NSratio
+	 * @param dist
+	 */
+	public MFDRParameterFacade(double white_noise_level,
+			double white_noise_threshold, double min_NSratio, Distance dist) {
+		// this.mfdr = new MFDR();
+		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold,
+				min_NSratio);
+		updateTrendFilter(dist);
+	}
 
+	
 	public void updateWhiteNoiseFilter(double white_noise_level,
 			double white_noise_threshold, double min_NSratio) {
 		wfilter = new WhiteNoiseFilter(white_noise_level,
@@ -68,6 +93,10 @@ public class MFDRParameterFacade {
 			double motif_threshold) {
 		tfilter = new TrendFilter(FTratio, motif_k, motif_threshold);
 	}
+	
+	public void updateTrendFilter(Distance dist){
+		tfilter = new TrendFilter(dist);
+	}
 
 
 	/**
@@ -76,14 +105,14 @@ public class MFDRParameterFacade {
 	 * @param ts
 	 * @return WindowSize
 	 */
-	public MFDRParameters learnMFDRParameters(LinkedList<TimeSeries> ts, int NoC) {
+	public MFDRParameters learnMFDRParameters(LinkedList<TimeSeries> ts, int NoC, boolean use_IMF_tfilter) {
 		int[] NoC_t_array = new int[ts.size()];
 		int[] NoC_s_array = new int[ts.size()];
 		double[] lowestperiod_array = new double[ts.size()];
 		MFDRParameters parameters;
 		// Learn Window sizes of with the training data set
 		for (int i = 0; i < ts.size(); i++) {
-			parameters = learnMFDRParameters(ts.get(i), NoC);
+			parameters = learnMFDRParameters(ts.get(i), NoC, use_IMF_tfilter);
 			NoC_t_array[i] = parameters.trendNoC();
 			NoC_s_array[i] = parameters.seasonalNoC();
 			lowestperiod_array[i] = parameters.lowestPeriod();
@@ -104,14 +133,14 @@ public class MFDRParameterFacade {
 	 * @param ts
 	 * @return
 	 */
-	public MFDRParameters learnMFDRParameters(TimeSeries[] ts, int NoC) {
+	public MFDRParameters learnMFDRParameters(TimeSeries[] ts, int NoC, boolean use_IMF_tfilter) {
 		int[] NoC_t_array = new int[ts.length];
 		int[] NoC_s_array = new int[ts.length];
 		double[] lowestperiod_array = new double[ts.length];
 		MFDRParameters parameters;
 		// Learn Window sizes of with the training data set
 		for (int i = 0; i < ts.length; i++) {
-			parameters = learnMFDRParameters(ts[i], NoC);
+			parameters = learnMFDRParameters(ts[i], NoC, use_IMF_tfilter);
 			NoC_t_array[i] = parameters.trendNoC();
 			NoC_s_array[i] = parameters.seasonalNoC();
 			lowestperiod_array[i] = parameters.lowestPeriod();
@@ -128,11 +157,12 @@ public class MFDRParameterFacade {
 
 	/**
 	 * This function learns the window sizes from a time series
-	 * 
-	 * @param ts
+	 * the condition use_IMF_tfilter defines whether to use IMF to boost up tfilter search.
+	 * This booster will degrade performance but gain speed.
+	 * @param ts, NoC, use_IMF_tfilter
 	 * @return
 	 */
-	public MFDRParameters learnMFDRParameters(TimeSeries ts, int NoC) {
+	public MFDRParameters learnMFDRParameters(TimeSeries ts, int NoC, boolean use_IMF_tfilter) {
 		// STEP 1 : EMD
 		// EMD service object
 		EMD emd = new EMD(ts, zerocrossingaccuracy, IFparamaters[0],
@@ -148,16 +178,17 @@ public class MFDRParameterFacade {
 				System.out.println("IMF[" + i + "]: Infinit");
 			}
 		}
-
+		int[] NoCs;
 		// STEP 2: AYALYZE IMFs
 		double lowestperiod = wfilter.getWhiteNoisePeriod(imfs, ts);
-		// *******FIX**********//
-		// double NoC_t = tfilter.getTrendNoC(imfs, lowestperiod);
-
-		int NoC_t = 0;
-		int NoC_s = 0;
-
-		// STEP 4: Set training result;
+		if(use_IMF_tfilter){
+			NoCs = tfilter.getMFDRNoCs(ts, imfs, NoC, lowestperiod);
+		} else{
+			NoCs = tfilter.getMFDRNoCs(ts, NoC, lowestperiod);
+		}
+		int NoC_t = NoCs[0];
+		int NoC_s = NoCs[1];
+		// STEP 3: Set training result;
 		return new MFDRParameters(NoC_t, NoC_s, lowestperiod);
 	}
 
@@ -171,7 +202,7 @@ public class MFDRParameterFacade {
 	 */
 
 	public LearningResults learnParameters(LinkedList<TimeSeries> ts,
-			MFDR mfdr, double tolerancevarience, Distance d, WindowSize ws) {
+			MFDR mfdr, double tolerancevarience, Distance d) {
 
 		LinearLearning alearn = new LR4DLearning(); // STEP 1: Setup training
 													// set

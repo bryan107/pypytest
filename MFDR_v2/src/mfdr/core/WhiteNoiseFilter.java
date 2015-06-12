@@ -72,7 +72,7 @@ public class WhiteNoiseFilter {
 			TimeSeries original_time_series) {
 		setOriginalTimeSeries(original_time_series);
 		double highestrank = this.min_NSratio;
-		int index = 0;
+		int index = -1;
 		IMFS imfs_temp = (IMFS) imfs.clone();
 
 		for (int i = imfs.size() - 1; i >= 0; i--) {
@@ -90,6 +90,10 @@ public class WhiteNoiseFilter {
 			System.out.println();
 		}
 		// No IMF combination is white noise.
+		if(index == -1){
+			return 2;
+		}
+		
 		return imfs.get(index).averageWavelength();
 	}
 	
@@ -208,11 +212,11 @@ public class WhiteNoiseFilter {
 			double T2 = imf.timeLength()/(imf.getZeroCrossingCount()/2)/(this.original_time_series.normalisedWhiteNoiseWaveLength());
 			// OPTION 2: use instant frequency to calculate average period
 //			double T2 = imf.averageWavelength()/(this.original_time_series.normalisedWhiteNoiseWaveLength());
-			logger.info("T2:" + T2);
+//			logger.info("T2:" + T2);
 			// If use instant frequencies
 			T = imf.averageWavelength()
 					/ this.original_time_series.normalisedWhiteNoiseWaveLength();
-			logger.info("T:" + T);
+//			logger.info("T:" + T);
 			
 		} catch (Exception e) {
 			logger.info("No Instant Frequency exist for this IMF");

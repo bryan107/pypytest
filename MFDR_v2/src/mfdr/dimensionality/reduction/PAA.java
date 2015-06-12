@@ -14,7 +14,8 @@ import mfdr.distance.Distance;
 public class PAA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PAA.class);
 	
-	public PAA(double windowsize){
+	public PAA(int NoC){
+		setNoC(NoC);
 	}
 	
 	@Override

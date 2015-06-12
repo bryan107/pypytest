@@ -54,4 +54,11 @@ public class LR1DAngleLearning extends LinearLearning {
 		return null;
 	}
 
+	@Override
+	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,
+			MFDR mfdr, Distance d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

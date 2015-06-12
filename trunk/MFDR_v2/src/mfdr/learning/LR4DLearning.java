@@ -34,12 +34,22 @@ public class LR4DLearning extends LinearLearning {
 		return "LR4D";
 	}
 
+	/**
+	 * This is the main function for training
+	 */
 	@Override
 	public LinearLearningResults trainingParameters(TimeSeries[] ts, MFDR mfdr, Distance d) {
 		LinkedList<TrainingSet> trainingset = getTrainingSet(ts, mfdr, d);
 		return trainingParameters(trainingset);
 	}
 
+	@Override
+	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts, MFDR mfdr, Distance d) {
+		LinkedList<TrainingSet> trainingset = getTrainingSet(ts, mfdr, d);
+		return trainingParameters(trainingset);
+	}
+
+	
 	@Override
 	public LinearLearningResults trainingParameters(LinkedList<TrainingSet> ts) {
 		double[][] traininginput = new double[3][ts.size()];
@@ -48,7 +58,11 @@ public class LR4DLearning extends LinearLearning {
 		for (int i = 0; i < ts.size(); i++) {
 			traininginput[0][i] = ts.get(i).trendDist();
 			traininginput[1][i] = ts.get(i).seasonalDist();
-			traininginput[2][i] = ts.get(i).noiseDist();
+			if(ts.get(i).noiseDist() == 0){
+				traininginput[2][i] = 0.0001;
+			}else{
+				traininginput[2][i] = ts.get(i).noiseDist();
+			}
 			trainingoutput[i] = ts.get(i).originalDist();
 		}
 		// 4D input Linear regression

@@ -55,4 +55,11 @@ public class StatAngleLearning extends LinearLearning {
 		return null;
 	}
 
+	@Override
+	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,
+			MFDR mfdr, Distance d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

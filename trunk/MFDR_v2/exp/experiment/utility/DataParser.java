@@ -22,67 +22,57 @@ public class DataParser {
 	}
 	
 	/**
-	 * Store time series data from file to a TimeSeries object	
+	 * Store time series data from file to a TimeSeries object
+	 * return null when no time series can be extracted from file	
 	 * @return TimeSeries
 	 */
-	public TimeSeries getTimeSeries(){
-		double time = 0;
-		TimeSeries ts = new TimeSeries();
-		// store  
-		String line = fagent.readLineFromFile();
-		while(line != null){
-			fs.perLineExtraction(ts, line, time);
-			time++;
-			line = fagent.readLineFromFile();
-		}
-		return ts;
+	public UCRDataDetails getTimeSeriesDetails(){
+		return fs.perTimeSeriesExtraction(fagent);
 	}
 	
 	/**
 	 * Store time series data from between specific segment	
 	 * @return TimeSeries
 	 */
-	public TimeSeries getTimeSeries(double start, double end){
-		double time = 0;
-		TimeSeries ts = new TimeSeries();
-		// store  
-		String line = fagent.readLineFromFile();
-		while(line != null){
-			if(time < start){
-				time++;
-				continue;
-			} else if(time > end){
-				break;
-			}
-			fs.perLineExtraction(ts, line, time);
-			time++;
-			line = fagent.readLineFromFile();
-		}
-		return ts;
-	}
+//	public TimeSeries getTimeSeries(double start, double end){
+//		double time = 0;
+//		TimeSeries ts = new TimeSeries();
+//		// store  
+//		String line = fagent.readLineFromFile();
+//		while(line != null){
+//			if(time < start){
+//				time++;
+//				continue;
+//			} else if(time > end){
+//				break;
+//			}
+//			fs.perTimeSeriesExtraction(ts, line, time);
+//			time++;
+//			line = fagent.readLineFromFile();
+//		}
+//		return ts;
+//	}
 	
 	/**
 	 * Store time series data from between specific segment with updated reading path
 	 * @param readingpath
 	 * @return TimeSeries
 	 */
-	public TimeSeries getTimeSeries(double start, double end, String readingpath){
-		TimeSeries ts = new TimeSeries();
-		fagent.updatereadingpath(readingpath);
-		getTimeSeries(start, end);
-		return ts;
-	}
+//	public TimeSeries getTimeSeries(double start, double end, String readingpath){
+//		TimeSeries ts = new TimeSeries();
+//		fagent.updatereadingpath(readingpath);
+//		getTimeSeries(start, end);
+//		return ts;
+//	}
 	
 	/**
 	 * Store time series data from file to a TimeSeries object with updated reading path
 	 * @param readingpath
 	 * @return TimeSeries
 	 */
-	public TimeSeries getTimeSeries(String readingpath){
-		TimeSeries ts = new TimeSeries();
+	public UCRDataDetails getTimeSeriesDetails(String readingpath){
 		fagent.updatereadingpath(readingpath);
-		getTimeSeries();
-		return ts;
+		return getTimeSeriesDetails();
 	}
 	
 }

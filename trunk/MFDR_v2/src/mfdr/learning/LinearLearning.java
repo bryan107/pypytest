@@ -25,6 +25,9 @@ public abstract class LinearLearning {
 	
 	public abstract LinearLearningResults trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d);
 	
+
+	public abstract LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,	MFDR mfdr, Distance d);
+	
 		
 	public abstract LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDR mfdr, Distance d);
 	
@@ -40,6 +43,7 @@ public abstract class LinearLearning {
 		double angle = Math.acos(numerator/denominator);
 		return  angle;
 	}
+
 	
 	
 }

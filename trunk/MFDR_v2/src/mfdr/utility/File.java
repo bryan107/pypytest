@@ -113,7 +113,7 @@ public class File {
 	}
 	
 	public void saveArrayToFile(String outputstring, double[] xx, String fileaddress){
-		for (int i = 1 ; i < xx.length ; i++) {
+		for (int i = 0 ; i < xx.length ; i++) {
 			outputstring = outputstring + "," + valuedf.format(xx[i]);
 		}
 		agent.writeLineToFile(outputstring, fileaddress);

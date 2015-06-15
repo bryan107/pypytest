@@ -1,6 +1,6 @@
 package mfdr.math.trigonometric;
 
-import mfdr.utility.DataListOperator;
+import mfdr.dimensionality.datastructure.Wave;
 
 public class Triangle {
 
@@ -18,8 +18,15 @@ public class Triangle {
 			return Math.atan2(sin, cos);
 	}
 	
-	public double getEnergy(double cos, double sin){
+	public double getAmplitude(double cos, double sin){
 		return Math.sqrt(Math.pow(cos, 2)+Math.pow(sin, 2));
+	}
+	
+	public double[] getHilb(Wave wave){
+		double cos = wave.energy() * Math.cos(wave.phaseDelay());
+		double sin = wave.energy() * Math.sin(wave.phaseDelay());
+		double[] hilb = {cos, sin};
+		return hilb;
 	}
 	
 }

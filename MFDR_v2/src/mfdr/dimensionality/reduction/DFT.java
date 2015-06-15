@@ -15,8 +15,8 @@ import math.jwave.transforms.AncientEgyptianDecomposition;
 import math.jwave.transforms.DiscreteFourierTransform;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
+import mfdr.dimensionality.datastructure.DFTDataOld;
 import mfdr.dimensionality.datastructure.DFTData;
-import mfdr.dimensionality.datastructure.NewDFTData;
 import mfdr.distance.Distance;
 import mfdr.utility.DataListOperator;
 import mfdr.utility.ValueComparator;
@@ -30,11 +30,11 @@ public class DFT extends DimensionalityReduction {
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
-		NewDFTData dft = getDR(ts);
+		DFTData dft = getDR(ts);
 		return getFullResolutionDR(dft, ts);
 	}
 
-	public TimeSeries getFullResolutionDR(NewDFTData dft, TimeSeries ref) {
+	public TimeSeries getFullResolutionDR(DFTData dft, TimeSeries ref) {
 		TimeSeries drfull = new TimeSeries();
 		double[] value = recoverFullResolutionFrequency(dft, ref.size());
 		DoubleFFT_1D fft = new DoubleFFT_1D(ref.size());
@@ -45,7 +45,7 @@ public class DFT extends DimensionalityReduction {
 		return drfull;
 	}
 	
-	private double[] recoverFullResolutionFrequency(NewDFTData dft, int length){
+	private double[] recoverFullResolutionFrequency(DFTData dft, int length){
 		double[] output = new double[length];
 		for(int i = 0 ; i < length ; i++){
 			if(dft.getMap().containsKey(i)){
@@ -64,7 +64,7 @@ public class DFT extends DimensionalityReduction {
 	 * @return a double array containing the DWT result in Hilbert Space.
 	 */
 	@Override
-	public NewDFTData getDR(TimeSeries ts) {
+	public DFTData getDR(TimeSeries ts) {
 		return getDR(converTSToFrequency(ts));
 	}
 	
@@ -73,8 +73,8 @@ public class DFT extends DimensionalityReduction {
 	 * @param hilb
 	 * @return
 	 */
-	public NewDFTData getDR(double[] hilb){
-		NewDFTData dftdata = new NewDFTData();
+	public DFTData getDR(double[] hilb){
+		DFTData dftdata = new DFTData();
 		// Get Sorted Hilb
 		Map<Integer, Double> map = new HashMap<Integer, Double>();
 		ValueComparator bvc =  new ValueComparator(map);
@@ -116,12 +116,12 @@ public class DFT extends DimensionalityReduction {
 	
 	@Override
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
-		NewDFTData dr1 = getDR(ts1);
-		NewDFTData dr2 = getDR(ts2);
+		DFTData dr1 = getDR(ts1);
+		DFTData dr2 = getDR(ts2);
 		return getDistance(dr1, dr2, distance,ts1.size());
 	}
 	
-	public double getDistance(NewDFTData dr1, NewDFTData dr2, Distance distance, int signallength){
+	public double getDistance(DFTData dr1, DFTData dr2, Distance distance, int signallength){
 		// Clone Map
 		Map<Integer, Double> dr1map = new HashMap<Integer, Double>(dr1.getMap());
 		Map<Integer, Double> dr2map = new HashMap<Integer, Double>(dr2.getMap());
@@ -165,7 +165,7 @@ public class DFT extends DimensionalityReduction {
 	 * @param distance
 	 * @return
 	 */
-	public double getDistance(LinkedList<DFTData> dft_list1 , LinkedList<DFTData> dft_list2 , Distance distance){
+	public double getDistance(LinkedList<DFTDataOld> dft_list1 , LinkedList<DFTDataOld> dft_list2 , Distance distance){
 		double[] hilb1 = new double[dft_list1.peek().hilb().length * dft_list1.size()];
 		double[] hilb2 = new double[dft_list2.peek().hilb().length * dft_list2.size()];
 		if(hilb1.length != hilb2.length){

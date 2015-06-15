@@ -1,23 +1,22 @@
-package mfdr.math.trigonometric;
+package mfdr.dimensionality.datastructure;
 
-import mfdr.dimensionality.reduction.DFT;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Wave {
 
-	private final double energy, phasedelay, freq;
+	private final double amplitude, phasedelay, freq;
 	private static Log logger = LogFactory.getLog(Wave.class);
 	
-	public Wave(double energy, double phasedelay, double freq){
-		this.energy = energy;
+	public Wave(double amplitude, double phasedelay, double freq){
+		this.amplitude = amplitude;
 		this.phasedelay = phasedelay;
 		this.freq = freq;
 	}
 	
 	public double energy(){
-		return this.energy;
+		return this.amplitude;
 	}
 	
 	public double phaseDelay(){
@@ -28,11 +27,13 @@ public class Wave {
 		return this.freq;
 	}
 	
-	public double getValue(int index, int length){
+	public double getCosValue(int index, int length){
 		if(length < 2*freq){
 			logger.info("time length too small for freq" + freq);
 			return 0;
 		}
-		return energy*Math.cos((freq * 2 * (index + phasedelay) * Math.PI / length));
+		return amplitude*Math.cos((freq * 2 * (index + phasedelay) * Math.PI / length));
 	}
+	
+	
 }

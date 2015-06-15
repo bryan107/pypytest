@@ -13,9 +13,9 @@ import math.jwave.transforms.FastWaveletTransform;
 import math.jwave.transforms.wavelets.haar.Haar1;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.datastructure.DFTData;
+import mfdr.dimensionality.datastructure.DFTDataOld;
 import mfdr.dimensionality.datastructure.DWTData;
-import mfdr.dimensionality.datastructure.NewDFTData;
+import mfdr.dimensionality.datastructure.DFTData;
 import mfdr.dimensionality.reduction.DFT;
 import mfdr.distance.Distance;
 import mfdr.distance.EuclideanDistance;
@@ -79,7 +79,7 @@ public class TestDFT extends TestCase {
 		File.getInstance().saveLinkedListToFile("TS_1", ts[1], writeaddress[0]);
 		
 		DFT dft = new DFT(8);
-		NewDFTData dftdata1, dftdata2;
+		DFTData dftdata1, dftdata2;
 		dftdata1 = dft.getDR(ts[0]);
 		dftdata2 = dft.getDR(ts[1]);
 		TimeSeries[] drfull = {new TimeSeries(), new TimeSeries()};
@@ -90,7 +90,7 @@ public class TestDFT extends TestCase {
 		File.getInstance().saveLinkedListToFile("DR_1", drfull[1], writeaddress[0]);
 		double[] freq = dft.converTSToFrequency(ts[1]);
 		double[] noise = dft.extractHighFrequency(freq, 4, ts[1].timeInterval());
-		NewDFTData testdata = dft.getDR(freq);
+		DFTData testdata = dft.getDR(freq);
 		drfull[1] = dft.getFullResolutionDR(testdata, ts[1]);
 		File.getInstance().saveLinkedListToFile("DR_1_T", drfull[1], writeaddress[0]);
 		

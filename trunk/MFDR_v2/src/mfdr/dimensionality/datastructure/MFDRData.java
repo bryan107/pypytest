@@ -4,10 +4,10 @@ import java.util.LinkedList;
 
 public class MFDRData {
 	private final LinkedList<PLAData> trends;
-	private final NewDFTData seasonal;
+	private final DFTData seasonal;
 	private final double noise_energy_density;
 	
-	public MFDRData(LinkedList<PLAData> trends, NewDFTData seasonal, double noise_energy_density){
+	public MFDRData(LinkedList<PLAData> trends, DFTData seasonal, double noise_energy_density){
 		this.trends = trends;
 		this.seasonal = seasonal;
 		this.noise_energy_density = noise_energy_density;
@@ -17,7 +17,7 @@ public class MFDRData {
 		return this.trends;
 	}
 	
-	public NewDFTData seasonal(){
+	public DFTData seasonal(){
 		return this.seasonal;
 	}
 	

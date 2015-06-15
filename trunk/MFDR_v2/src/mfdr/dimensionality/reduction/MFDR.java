@@ -10,7 +10,7 @@ import mfdr.datastructure.Data;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.MFDRData;
-import mfdr.dimensionality.datastructure.NewDFTData;
+import mfdr.dimensionality.datastructure.DFTData;
 import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 import mfdr.learning.LinearLearningResults;
@@ -184,7 +184,7 @@ public class MFDR extends DimensionalityReduction {
 		double[] freq = dft.converTSToFrequency(residualfull);
 		double[] noise = dft.extractHighFrequency(freq, this.lowestperiod,
 				residualfull.timeInterval());
-		NewDFTData seasonal = dft.getDR(freq);
+		DFTData seasonal = dft.getDR(freq);
 
 		// STEP 3: Calculate Noise Energy Density
 		double noise_energy_density = noiseEnergyDensity(noise);
@@ -338,8 +338,8 @@ public class MFDR extends DimensionalityReduction {
 		// Prepare PLA and DWT data structure
 		LinkedList<PLAData> trend1 = mfdrdata1.trends();
 		LinkedList<PLAData> trend2 = mfdrdata2.trends();
-		NewDFTData seasonal1 = mfdrdata1.seasonal();
-		NewDFTData seasonal2 = mfdrdata2.seasonal();
+		DFTData seasonal1 = mfdrdata1.seasonal();
+		DFTData seasonal2 = mfdrdata2.seasonal();
 		double e1 = mfdrdata1.noiseEnergyDensity();
 		double e2 = mfdrdata2.noiseEnergyDensity();
 		// Calculate distances of low frequency pla and high frequency dwt

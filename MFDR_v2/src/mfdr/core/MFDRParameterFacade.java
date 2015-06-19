@@ -10,7 +10,7 @@ import flanagan.analysis.Stat;
 import flanagan.control.LowPassPassive;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.distance.Distance;
 import mfdr.learning.LinearLearning;
 import mfdr.learning.LR4DLearning;
@@ -202,7 +202,7 @@ public class MFDRParameterFacade {
 	 */
 
 	public LearningResults learnParameters(LinkedList<TimeSeries> ts,
-			MFDR mfdr, double tolerancevarience, Distance d) {
+			MFDRWave mfdr, double tolerancevarience, Distance d) {
 
 		LinearLearning alearn = new LR4DLearning(); // STEP 1: Setup training
 													// set

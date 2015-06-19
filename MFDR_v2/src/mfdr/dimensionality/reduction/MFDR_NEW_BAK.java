@@ -16,8 +16,8 @@ import mfdr.distance.Distance;
 import mfdr.learning.LinearLearningResults;
 import mfdr.utility.DataListOperator;
 
-public class MFDR extends DimensionalityReduction {
-	private static Log logger = LogFactory.getLog(MFDR.class);
+public class MFDR_NEW_BAK extends DimensionalityReduction {
+	private static Log logger = LogFactory.getLog(MFDR_NEW_BAK.class);
 	private int NoC_t, NoC_s;
 	private double lowestperiod;
 	// private double angle;
@@ -50,7 +50,7 @@ public class MFDR extends DimensionalityReduction {
 	 * @param weight_trend
 	 * @param weight_freq
 	 */
-	public MFDR(int NoC_t, int NoC_s, double noise_freq) {
+	public MFDR_NEW_BAK(int NoC_t, int NoC_s, double noise_freq) {
 		updateTrendComponent(NoC_t);
 		updateSeasonalComponent(NoC_s, noise_freq);
 	}

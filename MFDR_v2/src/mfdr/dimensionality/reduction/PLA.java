@@ -8,14 +8,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import flanagan.analysis.Regression;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 import mfdr.math.statistic.LinearEstimator;
 import mfdr.math.statistic.LinearRegression;
-import mfdr.math.statistic.TheilSenEstimator;
 
 public class PLA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PLA.class);
@@ -146,16 +144,26 @@ public class PLA extends DimensionalityReduction {
 		return distance.calDistance(dr1full, dr2full, dr1full);
 	}
 	
-	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, TimeSeries ref, Distance distance) {
+	public double getDistanceOld(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, TimeSeries ref, Distance distance) {
 		TimeSeries dr1full = getFullResolutionDR(dr1, ref);
 		TimeSeries dr2full = getFullResolutionDR(dr2, ref);
 		return distance.calDistance(dr1full, dr2full, dr1full);
 	}
 	// TODO These are only temperate distance functions, need to implement a real one
-	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, Distance distance) {
-//		TimeSeries dr1full = getFullResolutionDR(dr1, ref);
-//		TimeSeries dr2full = getFullResolutionDR(dr2, ref);
-//		return distance.calDistance(dr1full, dr2full, dr1full);
-		return 0;
+	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2, TimeSeries ref, Distance distance) {
+		if(dr1.size() != dr2.size()){
+			logger.info("PLA inputs are at different lengths");
+			return 0;
+		}
+		double dist_total = 0;
+		for(int i = 0 ; i < dr1.size() ; i++){
+			PLAData pla_1 = dr1.get(i);
+			PLAData pla_2 = dr1.get(i);
+			double a = pla_1.a1()-pla_2.a1();
+			double b = pla_1.a0()-pla_2.a0();
+			double l = ref.size()/dr1.size();
+			dist_total += (l*(l+1)*(2l+1))*Math.pow(a, 2)/6 + l*(l+1)*a*b + l*Math.pow(b, 2);
+		}
+		return Math.sqrt(dist_total);
 	}
 }

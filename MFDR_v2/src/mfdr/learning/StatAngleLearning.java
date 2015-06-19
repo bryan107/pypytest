@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import flanagan.analysis.Stat;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
@@ -36,13 +36,13 @@ public class StatAngleLearning extends LinearLearning {
 	}
 
 	@Override
-	public LinearLearningResults trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d) {
+	public LinearLearningResults trainingParameters(TimeSeries[] ts , MFDRWave mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts,MFDR mfdr, Distance d) {
+	public LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts,MFDRWave mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -50,14 +50,14 @@ public class StatAngleLearning extends LinearLearning {
 
 	@Override
 	public LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts,
-			MFDR mfdr, Distance d) {
+			MFDRWave mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,
-			MFDR mfdr, Distance d) {
+			MFDRWave mfdr, Distance d) {
 		// TODO Auto-generated method stub
 		return null;
 	}

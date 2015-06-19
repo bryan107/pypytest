@@ -23,10 +23,18 @@ public class PLAData {
 		return this.time;
 	}
 	
+	/**
+	 * a0 is constant, which is b
+	 * @return
+	 */
 	public double a0(){
 		return this.a0;
 	}
 	
+	/**
+	 * a1 is scale, which is a
+	 * @return
+	 */
 	public double a1(){
 		return this.a1;
 	}

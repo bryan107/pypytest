@@ -3,7 +3,7 @@ package mfdr.learning;
 import java.util.LinkedList;
 
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
@@ -23,15 +23,15 @@ public abstract class LinearLearning {
 	public abstract LinearLearningResults trainingParameters(LinkedList<TrainingSet> ts);
 	
 	
-	public abstract LinearLearningResults trainingParameters(TimeSeries[] ts , MFDR mfdr, Distance d);
+	public abstract LinearLearningResults trainingParameters(TimeSeries[] ts , MFDRWave mfdr, Distance d);
 	
 
-	public abstract LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,	MFDR mfdr, Distance d);
+	public abstract LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts,	MFDRWave mfdr, Distance d);
 	
 		
-	public abstract LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDR mfdr, Distance d);
+	public abstract LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDRWave mfdr, Distance d);
 	
-	public abstract LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts, MFDR mfdr, Distance d);
+	public abstract LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts, MFDRWave mfdr, Distance d);
 	
 	/*
 	 * Theorem of triangulation:

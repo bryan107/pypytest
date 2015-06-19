@@ -7,9 +7,11 @@ import mfdr.datastructure.Data;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.MFDRData;
+import mfdr.dimensionality.datastructure.MFDRWaveData;
 import mfdr.dimensionality.reduction.DFT;
+import mfdr.dimensionality.reduction.DFTWave;
 import mfdr.dimensionality.reduction.DWT;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.dimensionality.reduction.PAA;
 import mfdr.dimensionality.reduction.PLA;
 import mfdr.distance.Distance;
@@ -34,7 +36,7 @@ public class TestMFDRFacade extends TestCase {
 	// ************** Used variables **************
 	private MFDRParameterFacade facade = new MFDRParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
 	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
-	private MFDR mfdr;
+	private MFDRWave mfdr;
 	private final int datanum = 10;
 	private final int NoC = 6;
 	// **************** Test Cases ****************
@@ -43,8 +45,8 @@ public class TestMFDRFacade extends TestCase {
 	public void testLearnWindowSize() {
 		LinkedList<TimeSeries> tslist = File.getInstance().readreadTimeSeriesFromFile("C:\\TEST\\MDFR\\Data\\DATA\\ECG200.csv", datanum );
 		MFDRParameters p = facade.learnMFDRParameters(tslist, NoC, false);
-		MFDR mfdr = new MFDR(p.trendNoC(), p.seasonalNoC(), p.lowestPeriod());
-		LinkedList<MFDRData> mfdrdata = new LinkedList<MFDRData>();
+		MFDRWave mfdr = new MFDRWave(p.trendNoC(), p.seasonalNoC());
+		LinkedList<MFDRWaveData> mfdrdata = new LinkedList<MFDRWaveData>();
 		for(int i = 0 ; i < datanum ; i++){
 			mfdrdata.add(mfdr.getDR(tslist.get(i)));
 		}
@@ -59,19 +61,10 @@ public class TestMFDRFacade extends TestCase {
 			for(int j = i+1 ; j < datanum ; j++){
 				double originaldist = dist.calDistance(tslist.get(i), tslist.get(j), tslist.get(i));
 //				originaldists.add(originaldist);
-				double mfdrdist = pla.getDistance(mfdrdata.get(i).trends(), mfdrdata.get(j).trends(), tslist.get(i), dist)
-								+ dft.getDistance(mfdrdata.get(i).seasonal(), mfdrdata.get(j).seasonal(), dist, tslist.get(i).size());
-//				mfdrdists.add(mfdrdist);
-				double err = (originaldist-mfdrdist);
-				double compensate_dist = mfdr.getDistance(mfdrdata.get(i), mfdrdata.get(j), tslist.get(i), dist, dist_parameters.combinationWeights(), dist_parameters.compensation());
-				System.out.println("Compensation" + compensate_dist);
+				double mfdrdist = mfdr.getDistance(mfdrdata.get(i), mfdrdata.get(j), tslist.get(i), dist);
 				System.out.println("N["+ i +"] and N[" + j + "]-" 
 				+ "  Original:" + format.format(originaldist) 
-				+ "  MFDR:" + format.format(mfdrdist) 
-				+ "  Compen"+ format.format(compensate_dist) 
-				+ "  Error" + format.format((err)/originaldist) 
-				+ "  CompErr" + format.format((originaldist-compensate_dist)/originaldist));
-				error += err;
+				+ "  MFDR:" + format.format(mfdrdist));
 				count++;
 			}
 			
@@ -88,11 +81,11 @@ public class TestMFDRFacade extends TestCase {
 		
 		MFDRParameters p = facade.learnMFDRParameters(ts1, NoC, false);
 		System.out.println("NoC_t:" + p.trendNoC() + "  NoC_s:" + p.seasonalNoC() + "  Noise Period:" + p.lowestPeriod());
-		mfdr = new MFDR(p.trendNoC(), p.seasonalNoC(), p.lowestPeriod());
+		mfdr = new MFDRWave(p.trendNoC(), p.seasonalNoC());
 		TimeSeries mfdrfull = mfdr.getFullResolutionDR(ts1);
-		MFDRData data = mfdr.getDR(ts1);
+		MFDRWaveData data = mfdr.getDR(ts1);
 		PLA pla = new PLA(p.trendNoC());
-		DFT dft = new DFT(p.seasonalNoC());
+		DFTWave dft = new DFTWave(p.seasonalNoC());
 		TimeSeries trendfull = pla.getFullResolutionDR(data.trends(), ts1);
 		TimeSeries seasonalfull = dft.getFullResolutionDR(data.seasonal(), ts1);
 		TimeSeries noisefull = mfdr.getFullResolutionNoise(data.noiseEnergyDensity(), ts1);
@@ -106,7 +99,7 @@ public class TestMFDRFacade extends TestCase {
 //		File.getInstance().saveLinkedListToFile("Nosie", noisefull, writeaddress[0]);
 		
 		pla = new PLA(NoC);
-		dft = new DFT(NoC);
+		dft = new DFTWave(NoC);
 		PAA paa = new PAA(NoC);
 		TimeSeries trenddd = pla.getFullResolutionDR(ts1);
 		TimeSeries seasonaldd = dft.getFullResolutionDR(ts1);

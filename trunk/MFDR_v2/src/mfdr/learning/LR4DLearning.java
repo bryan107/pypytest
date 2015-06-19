@@ -9,7 +9,8 @@ import flanagan.analysis.Regression;
 import mfdr.datastructure.MFDRDistanceDetails;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.MFDRData;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.datastructure.MFDRWaveData;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.distance.Distance;
 import mfdr.learning.datastructure.TrainingSet;
 
@@ -38,13 +39,13 @@ public class LR4DLearning extends LinearLearning {
 	 * This is the main function for training
 	 */
 	@Override
-	public LinearLearningResults trainingParameters(TimeSeries[] ts, MFDR mfdr, Distance d) {
+	public LinearLearningResults trainingParameters(TimeSeries[] ts, MFDRWave mfdr, Distance d) {
 		LinkedList<TrainingSet> trainingset = getTrainingSet(ts, mfdr, d);
 		return trainingParameters(trainingset);
 	}
 
 	@Override
-	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts, MFDR mfdr, Distance d) {
+	public LinearLearningResults trainingParameters(LinkedList<TimeSeries> ts, MFDRWave mfdr, Distance d) {
 		LinkedList<TrainingSet> trainingset = getTrainingSet(ts, mfdr, d);
 		return trainingParameters(trainingset);
 	}
@@ -73,9 +74,9 @@ public class LR4DLearning extends LinearLearning {
 	}
 	
 	@Override
-	public LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts, MFDR mfdr, Distance d) {
+	public LinkedList<TrainingSet> getTrainingSet(LinkedList<TimeSeries> ts, MFDRWave mfdr, Distance d) {
 		LinkedList<TrainingSet> trainingset = new LinkedList<TrainingSet>();
-		MFDRData[] mfdrdata= new MFDRData[ts.size()];
+		MFDRWaveData[] mfdrdata= new MFDRWaveData[ts.size()];
 		for(int i = 0 ; i < ts.size() ; i++){
 			mfdrdata[i] = mfdr.getDR(ts.get(i));
 		}
@@ -90,9 +91,9 @@ public class LR4DLearning extends LinearLearning {
 	}
 	
 	@Override
-	public LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDR mfdr, Distance d) {
+	public LinkedList<TrainingSet> getTrainingSet(TimeSeries[] ts, MFDRWave mfdr, Distance d) {
 		LinkedList<TrainingSet> trainingset = new LinkedList<TrainingSet>();
-		MFDRData[] mfdrdata= new MFDRData[ts.length];
+		MFDRWaveData[] mfdrdata= new MFDRWaveData[ts.length];
 		for(int i = 0 ; i < ts.length ; i++){
 			mfdrdata[i] = mfdr.getDR(ts[i]);
 		}

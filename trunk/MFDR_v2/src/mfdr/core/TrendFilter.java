@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import flanagan.analysis.Stat;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.distance.Distance;
 import mfdr.math.emd.datastructure.IMF;
 import mfdr.math.emd.datastructure.IMFS;
@@ -74,12 +74,12 @@ public class TrendFilter {
 	 */
 	public int[] getMFDRNoCs(TimeSeries ts, int NoC, double lowestperiod){
 		int[] candidateNoCs = {0 , NoC};
-		MFDR mfdr = new MFDR(candidateNoCs[0], candidateNoCs[1], lowestperiod);
+		MFDRWave mfdr = new MFDRWave(candidateNoCs[0], candidateNoCs[1]);
 		TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
 		double candidateError = residual.energyDensity();
 		for(int NoC_t = 1 ; NoC_t <=NoC ; NoC_t++){
 			int NoC_s = NoC - NoC_t;
-			mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
+			mfdr = new MFDRWave(NoC_t, NoC_s);
 			residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
 			double error = residual.energyDensity();
 			if(error < candidateError ){
@@ -103,7 +103,7 @@ public class TrendFilter {
 	public int[] getMFDRNoCs(TimeSeries ts, IMFS imfs, int NoC, double lowestperiod){
 		boolean endflag = false;
 		int[] candidateNoCs = {0 , NoC};
-		MFDR mfdr = new MFDR(candidateNoCs[0], candidateNoCs[1], lowestperiod);
+		MFDRWave mfdr = new MFDRWave(candidateNoCs[0], candidateNoCs[1]);
 		TimeSeries residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
 		double candidateError = residual.energyDensity();
 		for (int i = imfs.size()-1 ; i >= 0; i--) {
@@ -125,7 +125,7 @@ public class TrendFilter {
 				endflag = true;
 			}
 			int NoC_s = NoC - NoC_t;
-			mfdr = new MFDR(NoC_t, NoC_s, lowestperiod);
+			mfdr = new MFDRWave(NoC_t, NoC_s);
 			residual = DataListCalculator.getInstance().getDifference(ts, mfdr.getFullResolutionDR(ts));
 			double error = residual.energyDensity();
 			if(candidateError == -1 || error < candidateError ){

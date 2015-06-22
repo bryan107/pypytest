@@ -284,8 +284,8 @@ public class MFDRWave extends DimensionalityReduction {
 			DFTWaveData w1, DFTWaveData w2, int tslength) {
 		int windowsize = tslength / NoC_t;
 		double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
-		for (int x = 0; x <= windowsize; x++) {
-			sum1 += a3 * (x + 1) * w1.getWaveValue(x, tslength, j, windowsize );
+		for (int x = 0; x < windowsize; x++) {
+			sum1 += a3 * (x + 1) * w1.getWaveValue(x, tslength, j, windowsize);
 			sum2 += b3 * w1.getWaveValue(x, tslength, j, windowsize);
 			sum3 += a3 * (x + 1) * w2.getWaveValue(x, tslength, j, windowsize);
 			sum4 += b3 * w2.getWaveValue(x, tslength, j, windowsize );
@@ -306,30 +306,23 @@ public class MFDRWave extends DimensionalityReduction {
 			for (int i = 0; i < NoC_s; i++) {
 				double c1 = mfdrdata1.seasonal().get(i).amplitude();
 				double c2 = mfdrdata1.seasonal().get(i).amplitude();
-				
-				total = getCrossDistance(a3, b3, c1, tslength, NoC_t,
-						mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
-						.seasonal().get(i).k(tslength, j+1, tslength/NoC_t))-getCrossDistance(a3, b3, c2, tslength, NoC_t,
-						mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
-								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
-				
-				ts1_total += getCrossDistance(a3, b3, c1, tslength, NoC_t,
-						mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
-								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
-				ts2_total += getCrossDistance(a3, b3, c2, tslength, NoC_t,
-						mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
-								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
+				int windowsize = tslength / NoC_t;
+				ts1_total += getCrossDistance(a3, b3, c1, tslength, mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
+								.seasonal().get(i).k(tslength, j+1, windowsize));
+				ts2_total += getCrossDistance(a3, b3, c2, tslength, mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
+								.seasonal().get(i).k(tslength, j+1, windowsize));
 			}
 		}
 		return 2*(ts1_total - ts2_total);
 	}
 
-	private double getCrossDistance(double a3, double b3, double c1,
-			int tslength, int windownum, double g, double k) {
-		double sum1 = a3 * c1
-				* Sum.getInstance().xCos(g, k, tslength / windownum - 1)
-				+ (a3 + b3) * c1
-				* Sum.getInstance().cos(g, k, tslength / windownum - 1);
+	private double getCrossDistance(double a3, double b3, double c,
+			int tslength, double g, double k) {
+		int windowsize = tslength / NoC_t;
+		double sum1 = a3 * c
+				* Sum.getInstance().xCos(g, k, windowsize-1)
+				+ (a3 + b3) * c
+				* Sum.getInstance().cos(g, k, windowsize-1);
 		return sum1;
 	}
 

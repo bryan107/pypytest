@@ -64,8 +64,8 @@ public class DFTWaveData {
 			return 0;
 		}
 		
-		double tt =  2 * Math.PI * freq * (windowsize*(j-1)+x)/ length  + phasedelay;
-		double ff = getAngle(x, length, j, windowsize);
+//		double tt =  2 * Math.PI * freq * (windowsize*(j-1)+x)/ length  + phasedelay;
+//		double ff = getAngle(x, length, j, windowsize);
 		
 		return amplitude*Math.cos(getAngle(x, length, j, windowsize));
 	}

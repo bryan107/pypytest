@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.file.FileAccessAgent;
 
 public class File {

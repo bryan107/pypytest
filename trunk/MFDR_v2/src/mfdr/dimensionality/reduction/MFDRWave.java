@@ -242,17 +242,16 @@ public class MFDRWave extends DimensionalityReduction {
 			TimeSeries ts1, Distance distance) {
 		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1, mfdrdata2, ts1, distance);
 		double crossdistance = getTotalCrossDistance(mfdrdata1, mfdrdata2, ts1.size());
-		return dist_details.trend() + dist_details.seasonal() + crossdistance;
+		return Math.sqrt(Math.pow(dist_details.trend(), 2) + Math.pow(dist_details.seasonal(), 2) + crossdistance);
 	}
 	
-	public double getDDistance(MFDRWaveData mfdrdata1, MFDRWaveData mfdrdata2,
+	public double getCrossBruteForceDistance(MFDRWaveData mfdrdata1, MFDRWaveData mfdrdata2,
 			TimeSeries ts1, Distance distance) {
 		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1, mfdrdata2, ts1, distance);
 		double crossdistance = getTotalCellValue(mfdrdata1, mfdrdata2, ts1.size());
-		return dist_details.trend() + dist_details.seasonal() + crossdistance;
+		return Math.sqrt(Math.pow(dist_details.trend(), 2) + Math.pow(dist_details.seasonal(), 2) + crossdistance);
 	}
 
-	
 	
 	private double getTotalCellValue(MFDRWaveData mfdrdata1,
 			MFDRWaveData mfdrdata2, int tslength){
@@ -263,23 +262,20 @@ public class MFDRWave extends DimensionalityReduction {
 			double b3 = mfdrdata1.trends().get(j).a0()
 					- mfdrdata2.trends().get(j).a0();
 			for (int i = 0; i < NoC_s; i++) {
-				double c1 = mfdrdata1.seasonal().get(i).amplitude();
-				double c2 = mfdrdata1.seasonal().get(i).amplitude();
-				getCellValue(a3, b3, c1, c2, tslength / NoC_t);
+				total += getCellValue(j+1 ,a3, b3, mfdrdata1.seasonal().get(i), mfdrdata2.seasonal().get(i), tslength);
 			}
 		}
 		return total;
 	}
-	private double getCellValue(double a3, double b3, double c1, double c2,
-			int windowsize) {
+	private double getCellValue(int windownum, double a3, double b3, DFTWaveData w1, DFTWaveData w2,
+			int tslength) {
+		int windowsize = tslength / NoC_t;
 		double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
-		Theta theta1 = new Theta(4, 0, 128, 1, windowsize);
-		Theta theta2 = new Theta(4, 0, 128, 1, windowsize);
 		for (int x = 0; x <= windowsize; x++) {
-			sum1 += a3 * (x + 1) * c1 * Math.cos(theta1.getAngle(x));
-			sum2 += b3 * c1 * Math.cos(theta1.getAngle(x));
-			sum3 += a3 * (x + 1) * c2 * Math.cos(theta2.getAngle(x));
-			sum4 += b3 * c2 * Math.cos(theta2.getAngle(x));
+			sum1 += a3 * (x + 1) * w1.getWaveValue(x, tslength, windownum);
+			sum2 += b3 * w1.getWaveValue(x, tslength, windownum);
+			sum3 += a3 * (x + 1) * w2.getWaveValue(x, tslength, windownum);
+			sum4 += b3 * w2.getWaveValue(x, tslength, windownum);
 		}
 		return sum1 + sum2 - sum3 - sum4;
 	}
@@ -332,6 +328,7 @@ public class MFDRWave extends DimensionalityReduction {
 		// Retrieve Full resolution Trends
 		TimeSeries ts1_trend = pla.getFullResolutionDR(mfdrdata1.trends(), ref);
 		TimeSeries ts2_trend = pla.getFullResolutionDR(mfdrdata2.trends(), ref);
+		logger.info("Trend Dist:" + dist.calDistance(ts1_trend, ts2_trend, ref));
 		// Retrieve full resolution seasonal
 		TimeSeries ts1_seasonal = dft.getFullResolutionDR(mfdrdata1.seasonal(),
 				ref);

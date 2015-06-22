@@ -40,7 +40,18 @@ public class DFTWave extends DimensionalityReduction {
 		Map<Integer, Double> map = new HashMap<Integer, Double>();
 		ValueComparator bvc = new ValueComparator(map);
 		TreeMap<Integer, Double> sorted_map = new TreeMap<Integer, Double>(bvc);
-		for (int i = 0; i < hilb.length; i += 2) {
+		for (int i = 0; i < 2; i ++) {
+			double phasedelay = 0;
+			double amplitude = hilb[i] / hilb.length;
+			double freq;
+			if(i == 0)
+				freq = 0;
+			else
+				freq = hilb.length/2;
+			wavemap.put(i, new DFTWaveData(amplitude, phasedelay, freq));
+			map.put(i, amplitude);
+		}
+		for (int i = 2; i < hilb.length; i += 2) {
 			double cos = hilb[i];
 			double sin = hilb[i + 1];
 			double phasedelay = Triangle.getInstance().getPhaseDelay(cos, sin);
@@ -95,11 +106,29 @@ public class DFTWave extends DimensionalityReduction {
 	public TimeSeries getFullResolutionDR(LinkedList<DFTWaveData> wavelist, TimeSeries ref) {
 		TimeSeries tsreduced = new TimeSeries();
 		double[] real = new double[ref.size()];
-		Iterator<DFTWaveData> it = wavelist.iterator();
-		while (it.hasNext()) {
-			DFTWaveData wave = it.next();
-			for (int i = 0; i < ref.size(); i++) {
-				real[i] += wave.getWaveValue(i, ref.size());
+
+		for(int i = 0 ; i < wavelist.size() ; i++){
+			// Extract constant
+			if(wavelist.get(i).freq() == 0){
+				for (int j = 0; j < ref.size(); j++) {
+					real[j] += wavelist.get(i).amplitude();
+				}
+			}
+			// Extract Highest frequency
+			else if(wavelist.get(i).freq() == ref.size()/2){
+				for (int j = 0; j < ref.size(); j++) {
+					if(j%1 == 0)
+						real[j] += wavelist.get(1).amplitude();
+					else
+						real[j] -= wavelist.get(1).amplitude();
+				}
+
+			}
+			// Extract remainders
+			else{
+				for (int j = 0; j < ref.size(); j++) {
+					real[j] += wavelist.get(i).getWaveValue(j, ref.size());
+				}	
 			}
 		}
 		for (int i = 0; i < ref.size(); i++) {
@@ -136,26 +165,42 @@ public class DFTWave extends DimensionalityReduction {
 				Iterator<Double> it2 = dr1map.keySet().iterator();
 				while (it2.hasNext()) {
 					double index = it2.next();
-					list1.add(dr1map.get(index).getCosAmplitude()*(signallength/2));
-					list1.add(dr1map.get(index).getSinAmplitude()*(signallength/2));
-					if(dr2map.containsKey(index)){
-						list2.add(dr2map.get(index).getCosAmplitude()*(signallength/2));
-						list2.add(dr2map.get(index).getSinAmplitude()*(signallength/2));
-						dr2map.remove(index);
-					}else{
-						list2.add(0.0);
-						list2.add(0.0);
+					if(dr1map.get(index).freq() == 0 || dr1map.get(index).freq() == signallength/2){
+						list1.add( dr1map.get(index).amplitude()*Math.sqrt(signallength));
+						if(dr2map.containsKey(index)){
+							list2.add(dr2map.get(index).amplitude()*Math.sqrt(signallength));
+							dr2map.remove(index);
+						} else{
+							list2.add(0.0);
+						}
+					} else{
+						list1.add(dr1map.get(index).getCosAmplitude()*Math.sqrt(signallength/2));
+						list1.add(dr1map.get(index).getSinAmplitude()*Math.sqrt(signallength/2));
+						if(dr2map.containsKey(index)){
+							list2.add(dr2map.get(index).getCosAmplitude()*Math.sqrt(signallength/2));
+							list2.add(dr2map.get(index).getSinAmplitude()*Math.sqrt(signallength/2));
+							dr2map.remove(index);
+						}else{
+							list2.add(0.0);
+							list2.add(0.0);
+						}
 					}
+		
 				}
 				
 				// Iterate through dr2map
 				it2 = dr2map.keySet().iterator();
 				while (it2.hasNext()) {
 					double index = it2.next();
-					list2.add(dr2map.get(index).getCosAmplitude()*(signallength/2));
-					list2.add(dr2map.get(index).getSinAmplitude()*(signallength/2));
-					list1.add(0.0);
-					list1.add(0.0);
+					if(dr2map.get(index).freq() == 0 || dr2map.get(index).freq() == signallength/2){
+						list2.add(dr2map.get(index).amplitude()*Math.sqrt(signallength));
+						list1.add(0.0);
+					} else{
+						list2.add(dr2map.get(index).getCosAmplitude()*Math.sqrt(signallength/2));
+						list2.add(dr2map.get(index).getSinAmplitude()*Math.sqrt(signallength/2));
+						list1.add(0.0);
+						list1.add(0.0);
+					}
 				}
 		
 				double[][] drarray = new double[2][list1.size()];
@@ -163,6 +208,6 @@ public class DFTWave extends DimensionalityReduction {
 				    drarray[0][i] = list1.get(i);
 				    drarray[1][i] = list2.get(i);
 				}
-		return distance.calDistance(drarray[0], drarray[1])/Math.pow(signallength/2, 0.5);
+		return distance.calDistance(drarray[0], drarray[1]);
 	}
 }

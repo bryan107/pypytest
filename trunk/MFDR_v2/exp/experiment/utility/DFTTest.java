@@ -28,41 +28,82 @@ import junit.framework.TestCase;
 
 public class DFTTest extends TestCase {
 
+	public void testPLA(){
+		TimeSeries ts1 = generatePLASeries(0, 1, 256);
+		TimeSeries ts2 = generatePLASeries(0, 0, 256);
+		
+		Distance dist = new EuclideanDistance();
+		
+		PLA pla = new PLA(2);
+		double full = pla.getBruteForceDistance(ts1, ts2, dist);
+		double cal = pla.getDistance(ts1, ts2, dist);
+		
+		System.out.println("FULL:" + full);
+		System.out.println("REAL" + cal);
+	}
+	
+	private TimeSeries generatePLASeries(double trendamplidute, double constant, int size) {
+		TimeSeries ts = new TimeSeries();
+		for (double i = 0; i < size; i += 1) {
+			double value = trendamplidute * i + constant;
+			ts.add(new Data(i, value));
+		}
+		return ts;
+		// return 1/(2*Math.PI*3);
+	}
+	
 	public void testAll(){
-		TimeSeries ts1 = generateTimeSeries(8, 0, 10, 256);
-		TimeSeries ts2 = generateTimeSeries(4, 0, 5, 256);
-		File.getInstance().saveLinkedListToFile("TS_1", ts1 , "C:\\TEST\\MDFR\\Data\\___FINAL.csv");
-		File.getInstance().saveLinkedListToFile("TS_2", ts2 , "C:\\TEST\\MDFR\\Data\\___FINAL.csv");
-		
-		Distance distance = new EuclideanDistance();
-		
-		MFDRWave mfdr = new MFDRWave(2, 2);
-		MFDRWaveData data1 = mfdr.getDR(ts1);
-		MFDRWaveData data2 = mfdr.getDR(ts2);
-		DFTWave dft = new DFTWave(2);
-		PLA pla = new PLA(4);
-		
-		double dist = distance.calDistance(ts1, ts2, ts1);
-		double dist_dft = dft.getDistance(ts1, ts2, distance);
-		double dist_pla = pla.getDistance(ts1, ts2, distance);
-		double dist_o = mfdr.getDistanceBruteForce(data1, data2, ts1, distance);
-		double dist_of = mfdr.getDDistance(data1, data2, ts1, distance);
-		double dist_f = mfdr.getDistance(data1, data2, ts1, distance);
-		
-		System.out.println("DIST:" + dist);
-		System.out.println("DIST_O:" + dist_o);
-		System.out.println("DIST_OF:" + dist_of);
-		System.out.println("DIST_F:" + dist_f);
-		System.out.println("DIST_PLA:" + dist_pla);
-		System.out.println("DIST_DFT:" + dist_dft);
-		System.out.println("All Done");
+//		TimeSeries ts1 = generateTimeSeries(1, 8, 0, 5, 256);
+//		TimeSeries ts2 = generateTimeSeries(2, 4, 0, 10, 256);
+//		File.getInstance().saveLinkedListToFile("TS_1", ts1 , "C:\\Programming\\TEST\\___FINAL.csv");
+//		File.getInstance().saveLinkedListToFile("TS_2", ts2 , "C:\\Programming\\TEST\\___FINAL.csv");
+//
+//		
+//		Distance distance = new EuclideanDistance();
+//		
+//		MFDRWave mfdr = new MFDRWave(2, 2);
+//		MFDRWaveData data1 = mfdr.getDR(ts1);
+//		MFDRWaveData data2 = mfdr.getDR(ts2);
+//		DFT dft = new DFT(2);
+//		DFTWave dftwave = new DFTWave(2);
+//		PLA pla = new PLA(2);
+//
+//		File.getInstance().saveLinkedListToFile("MFDR_1", mfdr.getFullResolutionDR(ts1) , "C:\\Programming\\TEST\\___FINAL.csv");
+//		File.getInstance().saveLinkedListToFile("MFDR_2", mfdr.getFullResolutionDR(ts2) , "C:\\Programming\\TEST\\___FINAL.csv");
+//		
+//		
+//		
+//		double dist_o = mfdr.getDistanceBruteForce(data1, data2, ts1, distance);
+//		double dist_of = mfdr.getCrossBruteForceDistance(data1, data2, ts1, distance);
+//		double dist_f = mfdr.getDistance(data1, data2, ts1, distance);
+//		
+//		
+//		System.out.println("DIST:" + distance.calDistance(ts1, ts2, ts1));
+//		System.out.println("DIST_Brute_Force:" + dist_o);
+//		System.out.println("DIST_Cross_Brute_Froce:" + dist_of);
+//		System.out.println("DIST_MFDR:" + dist_f);
+//		
+//		double dist_dft = dft.getDistance(ts1, ts2, distance);
+//		double dist_pla = pla.getDistance(ts1, ts2, distance);
+//		double dist_dftwave = dftwave.getDistance(ts1, ts2, distance);
+//		System.out.println();
+//		
+//		TimeSeries wave1 = dftwave.getFullResolutionDR(ts1);
+//		TimeSeries wave2 = dftwave.getFullResolutionDR(ts2);
+//		
+//		System.out.println();
+//		System.out.println("DIST_PLA:" + dist_pla);
+//		System.out.println("DIST_DFT:" + dist_dft);
+//		System.out.println("DIST_DFTWave:" + dist_dftwave);
+////		System.out.println("DIST_DFTWaveFull:" + distance.calDistance(wave1, wave2, wave1));
+//		System.out.println("All Done");
 	}
 	
 	public void testTest() {
-		double realvalue = getCellValue(2, 1, 10, 5, 128);
-		System.out.println("Real Cell Value:" + realvalue);
-		double fastvalue = getFaseCellValue(2, 1, 10, 5, 128);
-		System.out.println("Fast Cell Value:" + fastvalue);
+//		double realvalue = getCellValue(2, 1, 10, 5, 128);
+//		System.out.println("Real Cell Value:" + realvalue);
+//		double fastvalue = getFaseCellValue(2, 1, 10, 5, 128);
+//		System.out.println("Fast Cell Value:" + fastvalue);
 		
 	}
 
@@ -394,14 +435,14 @@ public class DFTTest extends TestCase {
 		// valuearray.length)/(valuearray.length/2)));
 	}
 
-	private TimeSeries generateTimeSeries(double freq, double shift,
+	private TimeSeries generateTimeSeries(double trendamplidute, double freq, double shift,
 			double amplitide, long size) {
 		TimeSeries ts = new TimeSeries();
 		for (double i = 0; i < size; i += 1) {
 			java.util.Random r = new java.util.Random();
 			double noise = 0;
 //			noise = r.nextGaussian() * Math.sqrt(5);
-			double trend = 1 * Math.pow(i, 0.5);
+			double trend = trendamplidute * Math.pow(i, 0.5);
 //			if (i != 0 && i % (size/2) == 0) {
 //				trend = trend + r.nextGaussian() * Math.sqrt(50);
 //			}

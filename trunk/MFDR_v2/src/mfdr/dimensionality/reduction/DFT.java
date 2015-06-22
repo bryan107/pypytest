@@ -133,9 +133,14 @@ public class DFT extends DimensionalityReduction {
 		Iterator<Integer> it = dr1map.keySet().iterator();
 		while (it.hasNext()) {
 			int index = it.next();
-			list1.add(dr1map.get(index));
+			double normalisefactor;
+			if(index < 2)
+				normalisefactor = Math.pow(signallength, 0.5);
+			else
+				normalisefactor = Math.pow(signallength/2, 0.5);
+			list1.add(dr1map.get(index)/normalisefactor);
 			if(dr2map.containsKey(index)){
-				list2.add(dr2map.remove(index));
+				list2.add(dr2map.remove(index)/normalisefactor);
 			}else{
 				list2.add(0.0);
 			}
@@ -145,7 +150,12 @@ public class DFT extends DimensionalityReduction {
 		it = dr2map.keySet().iterator();
 		while (it.hasNext()) {
 			int index = (int) it.next();
-			list2.add(dr2map.get(index));
+			double normalisefactor;
+			if(index < 2)
+				normalisefactor = Math.pow(signallength, 0.5);
+			else
+				normalisefactor = Math.pow(signallength/2, 0.5);
+			list2.add(dr2map.get(index)/normalisefactor);
 			list1.add(0.0);
 		}
 		
@@ -154,7 +164,7 @@ public class DFT extends DimensionalityReduction {
 		    drarray[0][i] = list1.get(i);
 		    drarray[1][i] = list2.get(i);
 		}
-		return distance.calDistance(drarray[0], drarray[1])/Math.pow(signallength/2, 0.5);
+		return distance.calDistance(drarray[0], drarray[1]);
 	}
 	
 	/**

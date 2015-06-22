@@ -27,10 +27,10 @@ public class Sum {
 	 * @return
 	 */
 	public double xCos(double g, double k, int n) {
-		double part1 = ((n + 1) * Math.sin(g * (n + 0.5 + k)) - Math.sin(g / 2
+		double part1 = ((n + 1) * Math.sin(g * (n + 0.5 + k/g)) - Math.sin(g / 2
 				+ k))
 				/ (2 * Math.sin(g / 2));
-		double part2 = (Math.cos(g * (n + 1 + k)) - Math.cos(g * (1 + k)))
+		double part2 = (Math.cos(g * (n + 1 + k/g)) - Math.cos(g * (1 + k/g)))
 				/ (2 * (1 - Math.cos(g)));
 		return part1 + part2;
 	}

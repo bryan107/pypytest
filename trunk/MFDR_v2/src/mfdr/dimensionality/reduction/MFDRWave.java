@@ -14,9 +14,7 @@ import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 import mfdr.math.Sum;
 import mfdr.math.emd.utility.DataListCalculator;
-import mfdr.math.trigonometric.Theta;
 import mfdr.utility.DataListOperator;
-import mfdr.utility.File;
 
 public class MFDRWave extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(MFDRWave.class);
@@ -279,7 +277,7 @@ public class MFDRWave extends DimensionalityReduction {
 		}
 		return 2 * total;
 	}
-
+	
 	private double getCellDistance(int j, double a3, double b3,
 			DFTWaveData w1, DFTWaveData w2, int tslength) {
 		int windowsize = tslength / NoC_t;
@@ -295,7 +293,6 @@ public class MFDRWave extends DimensionalityReduction {
 
 	private double getTotalCrossDistance(MFDRWaveData mfdrdata1,
 			MFDRWaveData mfdrdata2, int tslength) {
-		double total = 0;
 		double ts1_total = 0;
 		double ts2_total = 0;
 		for (int j = 0; j < NoC_t; j++) {
@@ -305,25 +302,27 @@ public class MFDRWave extends DimensionalityReduction {
 					- mfdrdata2.trends().get(j).a0();
 			for (int i = 0; i < NoC_s; i++) {
 				double c1 = mfdrdata1.seasonal().get(i).amplitude();
-				double c2 = mfdrdata1.seasonal().get(i).amplitude();
+				double c2 = mfdrdata2.seasonal().get(i).amplitude();
 				int windowsize = tslength / NoC_t;
-				ts1_total += getCrossDistance(a3, b3, c1, tslength, mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
+				ts1_total += getCrossDistance(a3, b3, c1, tslength, 
+						mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
 								.seasonal().get(i).k(tslength, j+1, windowsize));
-				ts2_total += getCrossDistance(a3, b3, c2, tslength, mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
+				ts2_total += getCrossDistance(a3, b3, c2, tslength, 
+						mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
 								.seasonal().get(i).k(tslength, j+1, windowsize));
 			}
 		}
 		return 2*(ts1_total - ts2_total);
 	}
-
-	private double getCrossDistance(double a3, double b3, double c,
+	
+	private double getCrossDistance(double a3, double b3, double c1,
 			int tslength, double g, double k) {
 		int windowsize = tslength / NoC_t;
-		double sum1 = a3 * c
+		double sum = a3 * c1
 				* Sum.getInstance().xCos(g, k, windowsize-1)
-				+ (a3 + b3) * c
+				+ (a3 + b3) * c1
 				* Sum.getInstance().cos(g, k, windowsize-1);
-		return sum1;
+		return sum;
 	}
 
 	public double getDistanceBruteForce(TimeSeries ts1, TimeSeries ts2,

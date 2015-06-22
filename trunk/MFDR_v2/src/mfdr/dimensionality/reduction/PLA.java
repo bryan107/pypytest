@@ -1,9 +1,7 @@
 package mfdr.dimensionality.reduction;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,8 +10,6 @@ import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
-import mfdr.math.statistic.LinearEstimator;
-import mfdr.math.statistic.LinearRegression;
 
 public class PLA extends DimensionalityReduction {
 	private static Log logger = LogFactory.getLog(PLA.class);
@@ -39,38 +35,18 @@ public class PLA extends DimensionalityReduction {
 
 	private void calFullResolutionDR(TimeSeries ts, TimeSeries plafull,
 			LinkedList<PLAData> pla) {
-		if (pla == null) {
-			getNullTimeSeries(ts, plafull);
-			return;
-		}
-		double init_time = -1;
-		double end_time = -1;
-		try {
-			end_time = pla.get(0).time();
-		} catch (Exception e) {
-			logger.info("Empty PLA retuls" + e);
-			return;
-		}
+		int windowsize = ts.size()/pla.size();
 		Iterator<Data> it = ts.iterator();
-		Data data = (Data) it.next();
-		// When pla has end point windows.
-		for (int index = 1; index < pla.size(); index++) {
-			init_time = end_time;
-			end_time = pla.get(index).time();
-			while (data.time() >= init_time && data.time() < end_time) {
-				double value = pla.get(index - 1).getValue(data.time());
-				plafull.add(new Data(data.time(), value));
-				if (it.hasNext()) {
-					data = it.next();
-				}
-			}
-		}
-		double value = pla.get(pla.size() - 1).getValue(data.time());
-		plafull.add(new Data(data.time(), value));
-		while (it.hasNext()) {
-			data = it.next();
-			value = pla.get(pla.size() - 1).getValue(data.time());
+		int winnum = 0;
+		int plaindex = 0;
+		while(it.hasNext()){
+			Data data = it.next();
+			double value = pla.get(plaindex).getValue(data.time()-(plaindex*windowsize));
 			plafull.add(new Data(data.time(), value));
+			winnum++;
+			if(winnum % windowsize == 0){
+				plaindex++;
+			}
 		}
 	}
 
@@ -81,17 +57,17 @@ public class PLA extends DimensionalityReduction {
 		}
 		LinkedList<PLAData> pla = new LinkedList<PLAData>();
 		// n = window size
-		int l = ts.size() / NoC;
-		int j = 1;
+		double l = ts.size() / NoC;
+		double j = 1;
 		int i = 1;
 		double asum = 0, bsum = 0;
 		while (j <= ts.size()) {
-			asum += (j - (i - 1)*l - (l+1)/2) * ts.get(j - 1).value();
-			bsum += (j - (i - 1)*l - (2*l+1)/3) * ts.get(j - 1).value();
+			asum += (j - (i - 1)*l - (l + 1)/2) * ts.get((int) j - 1).value();
+			bsum += (j - (i - 1)*l - (2*l+1)/3) * ts.get((int) j - 1).value();
 			if (j % l == 0) {
 				double a = 12 * asum / (l * (l + 1) * (l - 1));
 				double b = 6 * bsum / (l * (1 - l));
-				pla.add(new PLAData(ts.get(j - l).time(), b, a));
+				pla.add(new PLAData(ts.get((int) (j - l)).time(), b, a));
 				asum = 0;
 				bsum = 0;
 				i++;
@@ -99,24 +75,6 @@ public class PLA extends DimensionalityReduction {
 			j++;
 		}
 		return pla;
-	}
-
-	private void getNullTimeSeries(TimeSeries ts, TimeSeries plafull) {
-		for (int i = 0; i < ts.size(); i++) {
-			plafull.add(new Data(ts.get(i).time(), 0));
-		}
-	}
-
-	private void convertMapToArray(Map<Double, Double> temp, double[] x,
-			double[] y) {
-		int index = 0;
-		Iterator<Double> it2 = temp.keySet().iterator();
-		while (it2.hasNext()) {
-			Double time = (Double) it2.next();
-			x[index] = time;
-			y[index] = temp.get(time);
-			index++;
-		}
 	}
 
 	@Override
@@ -154,7 +112,7 @@ public class PLA extends DimensionalityReduction {
 			PLAData pla_2 = dr2.get(i);
 			double a3 = pla_1.a1() - pla_2.a1();
 			double b3 = pla_1.a0() - pla_2.a0();
-			double part1 = (l * (l + 1) * (2l + 1)) / 6 * Math.pow(a3, 2); 
+			double part1 = ((l * (l + 1) * (2*l + 1))/6) * Math.pow(a3, 2); 
 			double part2 = l * (l + 1) * a3 * b3;
 			double part3 = l * Math.pow(b3, 2);
 			dist_total +=  part1 + part2 + part3;

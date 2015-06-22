@@ -80,7 +80,6 @@ public class MFDRWave extends DimensionalityReduction {
 		return this.NoC_s;
 	}
 
-
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries output = new TimeSeries();
@@ -157,6 +156,7 @@ public class MFDRWave extends DimensionalityReduction {
 
 	/**
 	 * getDR with frequency filter
+	 * 
 	 * @param ts
 	 * @param lowestperiod
 	 * @return
@@ -172,7 +172,8 @@ public class MFDRWave extends DimensionalityReduction {
 		LinkedList<DFTWaveData> seasonal;
 		double noise_energy_density;
 		double[] freq = dft.converTSToFrequency(residualfull);
-		double[] noise = dft.extractHighFrequency(freq, lowestperiod, residualfull.timeInterval());
+		double[] noise = dft.extractHighFrequency(freq, lowestperiod,
+				residualfull.timeInterval());
 		seasonal = dft.getDR(freq);
 		noise_energy_density = noiseEnergyDensity(noise);
 
@@ -240,21 +241,31 @@ public class MFDRWave extends DimensionalityReduction {
 
 	public double getDistance(MFDRWaveData mfdrdata1, MFDRWaveData mfdrdata2,
 			TimeSeries ts1, Distance distance) {
-		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1, mfdrdata2, ts1, distance);
-		double crossdistance = getTotalCrossDistance(mfdrdata1, mfdrdata2, ts1.size());
-		return Math.sqrt(Math.pow(dist_details.trend(), 2) + Math.pow(dist_details.seasonal(), 2) + crossdistance);
-	}
-	
-	public double getCrossBruteForceDistance(MFDRWaveData mfdrdata1, MFDRWaveData mfdrdata2,
-			TimeSeries ts1, Distance distance) {
-		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1, mfdrdata2, ts1, distance);
-		double crossdistance = getTotalCellValue(mfdrdata1, mfdrdata2, ts1.size());
-		return Math.sqrt(Math.pow(dist_details.trend(), 2) + Math.pow(dist_details.seasonal(), 2) + crossdistance);
+		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1,
+				mfdrdata2, ts1, distance);
+		double trend_distance = dist_details.trend();
+		double seasonal_distance = dist_details.seasonal();
+		double cross_distance = getTotalCrossDistance(mfdrdata1, mfdrdata2,
+				ts1.size());
+		logger.info("Cross Error:" + cross_distance);
+		return Math.sqrt(Math.pow(trend_distance, 2) + Math.pow(seasonal_distance, 2) + cross_distance);
 	}
 
-	
-	private double getTotalCellValue(MFDRWaveData mfdrdata1,
-			MFDRWaveData mfdrdata2, int tslength){
+	public double getCrossBruteForceDistance(MFDRWaveData mfdrdata1,
+			MFDRWaveData mfdrdata2, TimeSeries ts1, Distance distance) {
+		MFDRDistanceDetails dist_details = getDistanceDetails(mfdrdata1,
+				mfdrdata2, ts1, distance);
+		double trend_distance = dist_details.trend();
+		double seasonal_distance = dist_details.seasonal();
+		double cross_distance = getTotalCellDistance(mfdrdata1, mfdrdata2,
+				ts1.size());
+		logger.info("Brute Cross Error:" + cross_distance);
+		return Math.sqrt(Math.pow(trend_distance, 2)
+				+ Math.pow(seasonal_distance, 2) + cross_distance);
+	}
+
+	private double getTotalCellDistance(MFDRWaveData mfdrdata1,
+			MFDRWaveData mfdrdata2, int tslength) {
 		double total = 0;
 		for (int j = 0; j < NoC_t; j++) {
 			double a3 = mfdrdata1.trends().get(j).a1()
@@ -262,26 +273,29 @@ public class MFDRWave extends DimensionalityReduction {
 			double b3 = mfdrdata1.trends().get(j).a0()
 					- mfdrdata2.trends().get(j).a0();
 			for (int i = 0; i < NoC_s; i++) {
-				total += getCellValue(j+1 ,a3, b3, mfdrdata1.seasonal().get(i), mfdrdata2.seasonal().get(i), tslength);
+				total += getCellDistance(j + 1, a3, b3, mfdrdata1.seasonal()
+						.get(i), mfdrdata2.seasonal().get(i), tslength);
 			}
 		}
-		return total;
+		return 2 * total;
 	}
-	private double getCellValue(int windownum, double a3, double b3, DFTWaveData w1, DFTWaveData w2,
-			int tslength) {
+
+	private double getCellDistance(int j, double a3, double b3,
+			DFTWaveData w1, DFTWaveData w2, int tslength) {
 		int windowsize = tslength / NoC_t;
 		double sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
 		for (int x = 0; x <= windowsize; x++) {
-			sum1 += a3 * (x + 1) * w1.getWaveValue(x, tslength, windownum);
-			sum2 += b3 * w1.getWaveValue(x, tslength, windownum);
-			sum3 += a3 * (x + 1) * w2.getWaveValue(x, tslength, windownum);
-			sum4 += b3 * w2.getWaveValue(x, tslength, windownum);
+			sum1 += a3 * (x + 1) * w1.getWaveValue(x, tslength, j, windowsize );
+			sum2 += b3 * w1.getWaveValue(x, tslength, j, windowsize);
+			sum3 += a3 * (x + 1) * w2.getWaveValue(x, tslength, j, windowsize);
+			sum4 += b3 * w2.getWaveValue(x, tslength, j, windowsize );
 		}
 		return sum1 + sum2 - sum3 - sum4;
 	}
-	
+
 	private double getTotalCrossDistance(MFDRWaveData mfdrdata1,
 			MFDRWaveData mfdrdata2, int tslength) {
+		double total = 0;
 		double ts1_total = 0;
 		double ts2_total = 0;
 		for (int j = 0; j < NoC_t; j++) {
@@ -292,23 +306,30 @@ public class MFDRWave extends DimensionalityReduction {
 			for (int i = 0; i < NoC_s; i++) {
 				double c1 = mfdrdata1.seasonal().get(i).amplitude();
 				double c2 = mfdrdata1.seasonal().get(i).amplitude();
+				
+				total = getCrossDistance(a3, b3, c1, tslength, NoC_t,
+						mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
+						.seasonal().get(i).k(tslength, j+1, tslength/NoC_t))-getCrossDistance(a3, b3, c2, tslength, NoC_t,
+						mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
+								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
+				
 				ts1_total += getCrossDistance(a3, b3, c1, tslength, NoC_t,
 						mfdrdata1.seasonal().get(i).g(tslength), mfdrdata1
-								.seasonal().get(i).k(tslength, j+1));
+								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
 				ts2_total += getCrossDistance(a3, b3, c2, tslength, NoC_t,
 						mfdrdata2.seasonal().get(i).g(tslength), mfdrdata2
-								.seasonal().get(i).k(tslength, j+1));
+								.seasonal().get(i).k(tslength, j+1, tslength/NoC_t));
 			}
 		}
-		return ts1_total - ts2_total;
+		return 2*(ts1_total - ts2_total);
 	}
 
 	private double getCrossDistance(double a3, double b3, double c1,
 			int tslength, int windownum, double g, double k) {
 		double sum1 = a3 * c1
-				* Sum.getInstance().xCos(g, k, tslength / windownum)
+				* Sum.getInstance().xCos(g, k, tslength / windownum - 1)
 				+ (a3 + b3) * c1
-				* Sum.getInstance().cos(g, k, tslength / windownum);
+				* Sum.getInstance().cos(g, k, tslength / windownum - 1);
 		return sum1;
 	}
 
@@ -328,17 +349,30 @@ public class MFDRWave extends DimensionalityReduction {
 		// Retrieve Full resolution Trends
 		TimeSeries ts1_trend = pla.getFullResolutionDR(mfdrdata1.trends(), ref);
 		TimeSeries ts2_trend = pla.getFullResolutionDR(mfdrdata2.trends(), ref);
-		logger.info("Trend Dist:" + dist.calDistance(ts1_trend, ts2_trend, ref));
 		// Retrieve full resolution seasonal
 		TimeSeries ts1_seasonal = dft.getFullResolutionDR(mfdrdata1.seasonal(),
 				ref);
 		TimeSeries ts2_seasonal = dft.getFullResolutionDR(mfdrdata2.seasonal(),
 				ref);
-
+		logger.info("Dist Trend:" + dist.calDistance(ts1_trend, ts2_trend, ref));
+		logger.info("Dist Seasonal:"
+				+ dist.calDistance(ts1_seasonal, ts2_seasonal, ref));
 		TimeSeries ts1 = DataListCalculator.getInstance().getSum(ts1_trend,
 				ts1_seasonal);
+		// TimeSeries ts11 =
+		// DataListOperator.getInstance().linkedListSum(ts1_trend,
+		// ts1_seasonal);
 		TimeSeries ts2 = DataListCalculator.getInstance().getSum(ts2_trend,
 				ts2_seasonal);
+		// ***********
+		double total_dist = dist.calDistance(ts1, ts2, ts1);
+		double seasonal_dist = dist
+				.calDistance(ts1_seasonal, ts2_seasonal, ref);
+		double trend_dist = dist.calDistance(ts1_trend, ts2_trend, ref);
+		logger.info("Error:"
+				+ (Math.pow(total_dist, 2) - Math.pow(seasonal_dist, 2) - Math
+						.pow(trend_dist, 2)));
+		// ***************
 		return dist.calDistance(ts1, ts2, ts1);
 	}
 

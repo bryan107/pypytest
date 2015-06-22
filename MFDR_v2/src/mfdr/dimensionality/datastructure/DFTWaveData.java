@@ -34,7 +34,12 @@ public class DFTWaveData {
 	public double getSinAmplitude(){
 		return amplitude*Math.sin(phasedelay);
 	}
-	
+	/**
+	 * Only one window use this
+	 * @param index
+	 * @param length
+	 * @return
+	 */
 	public double getWaveValue(int index, int length){
 		if(length < 2*freq){
 			logger.info("time length too small for freq" + freq);
@@ -43,6 +48,12 @@ public class DFTWaveData {
 		return amplitude*Math.cos(( 2 * Math.PI * freq *index/ length  + phasedelay));
 	}
 	
+	/**
+	 * @param x
+	 * @param length: size of time series
+	 * @param windownum: Window number start from 1
+	 * @return
+	 */
 	public double getWaveValue(double x, int length, int windownum){
 		if(length < 2*freq){
 			logger.info("time length too small for freq" + freq);

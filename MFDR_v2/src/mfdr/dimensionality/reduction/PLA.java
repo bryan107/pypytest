@@ -46,16 +46,24 @@ public class PLA extends DimensionalityReduction {
 			winnum++;
 			if(winnum % windowsize == 0){
 				plaindex++;
+				if(plaindex >= pla.size()){
+					break;
+				}
 			}
+		}
+		for(;winnum < ts.size();winnum++){
+			double value = pla.getLast().getValue(ts.get(winnum).time()-((pla.size()-1)*windowsize));
+			plafull.add(new Data(ts.get(winnum).time(), value));
 		}
 	}
 
 	@Override
 	public LinkedList<PLAData> getDR(TimeSeries ts) {
-		if (NoC == 0) {
-			return null;
-		}
 		LinkedList<PLAData> pla = new LinkedList<PLAData>();
+		if (NoC == 0) {
+			pla.add(new PLAData(ts.peek().time(), 0, 0));
+			return pla;
+		}
 		// n = window size
 		double l = ts.size() / NoC;
 		double j = 1;

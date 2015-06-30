@@ -26,7 +26,7 @@ import mfdr.utility.File;
 import junit.framework.TestCase;
 
 public class TestMFDRFacade extends TestCase {
-	private final String[] writeaddress = { "C:\\TEST\\MDFR\\Data\\FacadeExample.csv",
+	private final String[] writeaddress = { "C:\\TEST\\MDFR\\Data\\FacadeExample2.csv",
 											"C:\\TEST\\MDFR\\Data\\OOO.csv" };
 	private double white_noise_level = 3;
 	private double white_noise_threshold = 6.2;
@@ -38,7 +38,7 @@ public class TestMFDRFacade extends TestCase {
 	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
 	private MFDRWave mfdr;
 	private final int datanum = 10;
-	private final int NoC = 6;
+	private final int NoC = 4;
 	// **************** Test Cases ****************
 	
 	DecimalFormat format = new DecimalFormat("0.0000");
@@ -71,9 +71,9 @@ public class TestMFDRFacade extends TestCase {
 		}
 		
 		System.out.println("Average Error:" + (error/count));
-//		for(int i = 1 ; i <11 ; i++ ){
-//			test(i, "C:\\TEST\\MDFR\\Data\\GOOD.csv");
-//		}
+		for(int i = 2 ; i <9 ; i+=2 ){
+			test(i, "C:\\TEST\\MDFR\\Data\\GOOD.csv");
+		}
 	}
 	
 	private void test(int NoC, String readingaddress){

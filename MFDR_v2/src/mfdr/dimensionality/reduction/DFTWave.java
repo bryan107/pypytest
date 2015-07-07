@@ -58,7 +58,12 @@ public class DFTWave extends DimensionalityReduction {
 		}
 		for (int i = 2; i < hilb.length; i += 2) {
 			double cos = hilb[i];
-			double sin = hilb[i + 1];
+			double sin;
+			if(i+1>=hilb.length){
+				sin = 0;	
+			}else{
+				sin = hilb[i + 1];
+			}
 			double phasedelay = Triangle.getInstance().getPhaseDelay(cos, sin);
 			double amplitude = Triangle.getInstance().getAmplitude(cos, sin)
 					/ (hilb.length / 2);

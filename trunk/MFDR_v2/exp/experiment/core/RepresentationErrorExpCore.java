@@ -31,7 +31,7 @@ public class RepresentationErrorExpCore {
 			errors[i] = error.energyDensity();
 		}
 		long endTime = System.currentTimeMillis();
-		return new RepresentationErrorResult(Stat.mean(errors),Stat.variance(errors), startTime-endTime);
+		return new RepresentationErrorResult(Stat.mean(errors),Stat.variance(errors), endTime-startTime);
 	}
 	
 	public RepresentationErrorResult runOptimalSolutionMFDR(LinkedList<TimeSeries> tsset, MFDRParameterFacade facade, int NoC, boolean usenoise){
@@ -48,7 +48,7 @@ public class RepresentationErrorExpCore {
 //			errors[i] = getRepresentationError(reduced, tsset.get(i));
 		}
 		long endTime = System.currentTimeMillis();
-		return new RepresentationErrorResult(Stat.mean(errors),Stat.variance(errors), startTime-endTime);
+		return new RepresentationErrorResult(Stat.mean(errors),Stat.variance(errors), endTime-startTime);
 	}
 	
 	public double getRepresentationError(TimeSeries a, TimeSeries b){

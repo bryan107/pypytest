@@ -29,6 +29,7 @@ public class UCRData implements FileStructure {
 				count++;
 				if(count == 0){
 					clusternumber = (int)extractValue(split, i);
+					continue;
 				}
 				try {
 					double test = extractValue(split, i);

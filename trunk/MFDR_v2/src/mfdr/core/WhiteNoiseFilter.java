@@ -87,7 +87,7 @@ public class WhiteNoiseFilter {
 				index = i;
 			}
 			imfs_temp.removeLast();
-			System.out.println();
+//			System.out.println();
 		}
 		// No IMF combination is white noise.
 		if(index == -1){
@@ -123,7 +123,7 @@ public class WhiteNoiseFilter {
 			} else { // If
 				imfs_temp.removeLast();
 			}
-			System.out.println();
+//			System.out.println();
 		}
 		// No IMF combination is white noise.
 		return 0;
@@ -164,7 +164,7 @@ public class WhiteNoiseFilter {
 	public double isSignal(IMFS imfs) {
 		double signal_num = 0;
 		for (int i = 0; i < imfs.size(); i++) {
-			System.out.print("IMF[" + i + "]:");
+//			System.out.print("IMF[" + i + "]:");
 			if (isSignal(imfs, imfs.get(i))) {
 				signal_num++;
 			}

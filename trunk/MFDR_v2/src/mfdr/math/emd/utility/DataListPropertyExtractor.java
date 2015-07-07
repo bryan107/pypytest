@@ -211,11 +211,12 @@ public class DataListPropertyExtractor {
 	 * Retrieve local extremas from data.
 	 */
 	public LocalExtremas getLocalExtremas(LinkedList<Data> data) {
+
 		LocalExtremas le = new LocalExtremas();
 		// Exam first data point
 		if(data.get(0).value() > data.get(1).value()){
 			le.localMaxima().add(data.get(0));
-		}else{
+		}else if (data.get(0).value() < data.get(1).value()){
 			le.localMinima().add(data.get(0));
 		}
 		// Iterate through the middles
@@ -232,7 +233,7 @@ public class DataListPropertyExtractor {
 		// Exam the final data point
 		if(data.get(data.size()-1).value() > data.get(data.size()-2).value()){
 			le.localMaxima().add(data.get(data.size()-1));
-		}else{
+		}else if(data.get(data.size()-1).value() < data.get(data.size()-2).value()){
 			le.localMinima().add(data.get(data.size()-1));
 		}
 		return le;

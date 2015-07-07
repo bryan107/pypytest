@@ -15,13 +15,15 @@ import flanagan.interpolation.CubicSpline;
 
 public class DataListEnvelopCalculator {
 
-	private static Log logger = LogFactory.getLog(DataListEnvelopCalculator.class);
+	private static Log logger = LogFactory
+			.getLog(DataListEnvelopCalculator.class);
 	private final short TIME = 0;
 	private final short VALUE = 1;
 	private int location;
 
 	// Default resolution and location. setup before use.
-	private static DataListEnvelopCalculator self = new DataListEnvelopCalculator(1);
+	private static DataListEnvelopCalculator self = new DataListEnvelopCalculator(
+			1);
 
 	private DataListEnvelopCalculator(int location) {
 		this.location = location;
@@ -36,27 +38,32 @@ public class DataListEnvelopCalculator {
 	}
 
 	public Envelopes getEnvelopes(LinkedList<Data> residual, LocalExtremas le) {
-		Envelopes envelopes = new Envelopes(new TimeSeries(),	new TimeSeries());
+		Envelopes envelopes = new Envelopes(new TimeSeries(), new TimeSeries());
 		// 0. Use symmetric extremes to complete Extrapolation.
 		symFrontEnvelope(residual, le, location);
 		symRearEnvelope(residual, le, location);
-		
+
 		// 1. Convert Data from linked list to array
 
-		double[] upperextremas = DataListOperator.getInstance().linkedListToArray(le.localMaxima(), TIME);
-		double[] lowerextremas = DataListOperator.getInstance().linkedListToArray(le.localMinima(), TIME);
+		double[] upperextremas = DataListOperator.getInstance()
+				.linkedListToArray(le.localMaxima(), TIME);
+		double[] lowerextremas = DataListOperator.getInstance()
+				.linkedListToArray(le.localMinima(), TIME);
 
 		// 2. Prepare value array for interpolation.
-		double[] uppervalues = DataListOperator.getInstance().linkedListToArray(le.localMaxima(), VALUE);
-		double[] lowervalues = DataListOperator.getInstance().linkedListToArray(le.localMinima(), VALUE);
+		double[] uppervalues = DataListOperator.getInstance()
+				.linkedListToArray(le.localMaxima(), VALUE);
+		double[] lowervalues = DataListOperator.getInstance()
+				.linkedListToArray(le.localMinima(), VALUE);
 
 		// 3. Do Cubic Spline Interpolation
 		CubicSpline upperCS = new CubicSpline(upperextremas, uppervalues);
 		CubicSpline lowerCS = new CubicSpline(lowerextremas, lowervalues);
 		// Calculate upperenvelope
-		calculateEnvelope(envelopes.upperEnvelope(), upperCS, residual);
-		// Calculate lowerenvelope
-		calculateEnvelope(envelopes.lowerEnvelope(), lowerCS, residual);
+			calculateEnvelope(envelopes.upperEnvelope(), upperCS, residual);
+			// Calculate lowerenvelope
+			calculateEnvelope(envelopes.lowerEnvelope(), lowerCS, residual);
+
 		return envelopes;
 	}
 
@@ -70,53 +77,94 @@ public class DataListEnvelopCalculator {
 		 * First extrema is a maxima.
 		 */
 		if (le.localMaxima().peek().time() < le.localMinima().peek().time()) {
-			// residual[0] is not a minima.
-			if (residual.peek().value() > le.localMinima().peek().value()) {
-				// Symmetric section is too small
-				if ((2 * le.localMaxima().peek().time())
-						- le.localMinima().peek().time() > residual.peek()
-						.time()) {
-					symFrontMaximaAlongOrigin(residual, le, location);
-					symFrontMinimaAlongOrigin(residual, le, location);
-				}
-				// Symmetric section is long enough
-				else {
-					symFrontMaximaAlongMaxima(residual, le, location);
-					symFrontMinimaAlongMaxima(residual, le, location);
-				}
-			}
-			// residual[0] is a minima, sym along residual[0]
-			else {
+			// Symmetric section is too small
+			if (le.localMinima().peek().time() - le.localMaxima().peek().time() < le
+					.localMaxima().peek().time()
+					- residual.peek().time()) {
 				symFrontMaximaAlongOrigin(residual, le, location);
-				symFrontMinimaOriginNewMinima(residual, le, location);
+				symFrontMinimaAlongOrigin(residual, le, location);
+			}
+			// Symmetric section is long enough
+			else {
+				symFrontMinimaAlongMaxima(residual, le, location);
+				symFrontMaximaAlongMaxima(residual, le, location);
 			}
 		}
 		/*
 		 * First extrema is a minima.
 		 */
 		else {
-			// residual[0] is not a maxima.
-			if (residual.peek().value() < le.localMaxima().peek().value()) {
-				// Symmetric section is too small
-				if ((2 * le.localMinima().peek().time())
-						- le.localMaxima().peek().time() > residual.peek()
-						.time()) {
-					symFrontMaximaAlongOrigin(residual, le, location);
-					symFrontMinimaAlongOrigin(residual, le, location);
-				}
-				// Symmetric section is long enough
-				else {
-					symFrontMaximaAlongMinima(residual, le, location);
-					symFrontMinimaAlongMinima(residual, le, location);
-				}
-			}
-			// residual[0] is a maxima, sym along residual[0]
-			else {
-				symFrontMaximaOriginNewMaxima(residual, le, location);
+			// Symmetric section is too small
+			if ((le.localMaxima().peek().time())
+					- le.localMinima().peek().time() < le.localMinima().peek()
+					.time()
+					- residual.peek().time()) {
+				symFrontMaximaAlongOrigin(residual, le, location);
 				symFrontMinimaAlongOrigin(residual, le, location);
 			}
+			// Symmetric section is long enough
+			else {
+				symFrontMaximaAlongMinima(residual, le, location);
+				symFrontMinimaAlongMinima(residual, le, location);
+			}
+			// residual[0] is a maxima, sym along residual[0]
 		}
 	}
+
+	// private void symFrontEnvelope(LinkedList<Data> residual, LocalExtremas
+	// le,
+	// int location) {
+	// /*
+	// * First extrema is a maxima.
+	// */
+	// if (le.localMaxima().peek().time() < le.localMinima().peek().time()) {
+	// // residual[0] is not a minima.
+	// if (residual.peek().value() > le.localMinima().peek().value()) {
+	// // Symmetric section is too small
+	// if ((2 * le.localMaxima().peek().time())
+	// - le.localMinima().peek().time() > residual.peek()
+	// .time()) {
+	// symFrontMaximaAlongOrigin(residual, le, location);
+	// symFrontMinimaAlongOrigin(residual, le, location);
+	// }
+	// // Symmetric section is long enough
+	// else {
+	// symFrontMaximaAlongMaxima(residual, le, location);
+	// symFrontMinimaAlongMaxima(residual, le, location);
+	// }
+	// }
+	// // residual[0] is a minima, sym along residual[0]
+	// else {
+	// symFrontMaximaAlongOrigin(residual, le, location);
+	// symFrontMinimaOriginNewMinima(residual, le, location);
+	// }
+	// }
+	// /*
+	// * First extrema is a minima.
+	// */
+	// else {
+	// // residual[0] is not a maxima.
+	// if (residual.peek().value() < le.localMaxima().peek().value()) {
+	// // Symmetric section is too small
+	// if ((2 * le.localMinima().peek().time())
+	// - le.localMaxima().peek().time() > residual.peek()
+	// .time()) {
+	// symFrontMaximaAlongOrigin(residual, le, location);
+	// symFrontMinimaAlongOrigin(residual, le, location);
+	// }
+	// // Symmetric section is long enough
+	// else {
+	// symFrontMaximaAlongMinima(residual, le, location);
+	// symFrontMinimaAlongMinima(residual, le, location);
+	// }
+	// }
+	// // residual[0] is a maxima, sym along residual[0]
+	// else {
+	// symFrontMaximaOriginNewMaxima(residual, le, location);
+	// symFrontMinimaAlongOrigin(residual, le, location);
+	// }
+	// }
+	// }
 
 	private void symFrontMaximaOriginNewMaxima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
@@ -179,7 +227,7 @@ public class DataListEnvelopCalculator {
 
 	private void symFrontMinimaAlongMaxima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
-		for (int i = 0; i < location + 1; i++) {
+		for (int i = 0; i < location; i++) {
 			double minimatime = 2 * le.localMaxima().peek().time()
 					- le.localMinima().get(i).time();
 			double minimavalue = le.localMinima().get(i).value();
@@ -218,55 +266,94 @@ public class DataListEnvelopCalculator {
 		 */
 		if (le.localMaxima().peekLast().time() > le.localMinima().peekLast()
 				.time()) {
-			// residual[n] is not a minima.
-			if (residual.peekLast().value() > le.localMinima().peekLast()
-					.value()) {
-				// Symmetric section is too small
-				if ((2 * le.localMaxima().peekLast().time())
-						- le.localMinima().peekLast().time() < residual
-						.peekLast().time()) {
-					symRearMaximaAlongEnd(residual, le, location);
-					symRearMinimaAlongEnd(residual, le, location);
-				}
-				// Symmetric section is long enough
-				else {
-					symRearMaximaAlongMaxima(residual, le, location);
-					symRearMinimaAlongMaxima(residual, le, location);
-				}
-			}
-			// residual[n] is a minima, sym along residual[n]
-			else {
+			// Symmetric section is too small
+			if (le.localMaxima().peekLast().time()
+					- le.localMinima().peekLast().time() < residual.peekLast()
+					.time() - le.localMaxima().peekLast().time()) {
 				symRearMaximaAlongEnd(residual, le, location);
-				symRearMinimaEndNewMinima(residual, le, location);
+				symRearMinimaAlongEnd(residual, le, location);
+			}
+			// Symmetric section is long enough
+			else {
+				symRearMinimaAlongMaxima(residual, le, location);
+				symRearMaximaAlongMaxima(residual, le, location);
 			}
 		}
 		/*
 		 * Last extrema is a minima.
 		 */
 		else {
-			// residual[n] is not a maxima.
-			if (residual.peekLast().value() < le.localMaxima().peekLast()
-					.value()) {
-				// Symmetric section is too small
-				if ((2 * le.localMinima().peekLast().time())
-						- le.localMaxima().peekLast().time() > residual.peek()
-						.time()) {
-					symRearMaximaAlongEnd(residual, le, location);
-					symRearMinimaAlongEnd(residual, le, location);
-				}
-				// Symmetric section is long enough
-				else {
-					symRearMaximaAlongMinima(residual, le, location);
-					symRearMinimaAlongMinima(residual, le, location);
-				}
-			}
-			// residual[n] is a maxima, sym along residual[n]
-			else {
-				symRearMaximaEndNewMaxima(residual, le, location);
+			// Symmetric section is too small
+			if (le.localMinima().peekLast().time()
+					- le.localMaxima().peekLast().time() < residual.peekLast()
+					.time()-le.localMinima().peekLast().time()) {
+				symRearMaximaAlongEnd(residual, le, location);
 				symRearMinimaAlongEnd(residual, le, location);
+			}
+			// Symmetric section is long enough
+			else {
+				symRearMaximaAlongMinima(residual, le, location);
+				symRearMinimaAlongMinima(residual, le, location);
 			}
 		}
 	}
+
+	// private void symRearEnvelope(LinkedList<Data> residual, LocalExtremas le,
+	// int location) {
+	// /*
+	// * Last extrema is a maxima.
+	// */
+	// if (le.localMaxima().peekLast().time() > le.localMinima().peekLast()
+	// .time()) {
+	// // residual[n] is not a minima.
+	// if (residual.peekLast().value() > le.localMinima().peekLast()
+	// .value()) {
+	// // Symmetric section is too small
+	// if ((2 * le.localMaxima().peekLast().time())
+	// - le.localMinima().peekLast().time() < residual
+	// .peekLast().time()) {
+	// symRearMaximaAlongEnd(residual, le, location);
+	// symRearMinimaAlongEnd(residual, le, location);
+	// }
+	// // Symmetric section is long enough
+	// else {
+	// symRearMaximaAlongMaxima(residual, le, location);
+	// symRearMinimaAlongMaxima(residual, le, location);
+	// }
+	// }
+	// // residual[n] is a minima, sym along residual[n]
+	// else {
+	// symRearMaximaAlongEnd(residual, le, location);
+	// symRearMinimaEndNewMinima(residual, le, location);
+	// }
+	// }
+	// /*
+	// * Last extrema is a minima.
+	// */
+	// else {
+	// // residual[n] is not a maxima.
+	// if (residual.peekLast().value() < le.localMaxima().peekLast()
+	// .value()) {
+	// // Symmetric section is too small
+	// if ((2 * le.localMinima().peekLast().time())
+	// - le.localMaxima().peekLast().time() > residual.peek()
+	// .time()) {
+	// symRearMaximaAlongEnd(residual, le, location);
+	// symRearMinimaAlongEnd(residual, le, location);
+	// }
+	// // Symmetric section is long enough
+	// else {
+	// symRearMaximaAlongMinima(residual, le, location);
+	// symRearMinimaAlongMinima(residual, le, location);
+	// }
+	// }
+	// // residual[n] is a maxima, sym along residual[n]
+	// else {
+	// symRearMaximaEndNewMaxima(residual, le, location);
+	// symRearMinimaAlongEnd(residual, le, location);
+	// }
+	// }
+	// }
 
 	private void symRearMaximaEndNewMaxima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
@@ -275,9 +362,12 @@ public class DataListEnvelopCalculator {
 		le.localMaxima().addLast(new Data(time, value));
 		for (int i = 0; i < location; i++) { // Ensure the copy is one less then
 												// other situation.
-			time = 2 * residual.peekLast().time()
-					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
-			value = le.localMaxima().get(le.localMaxima().size() -1 - i).value();
+			time = 2
+					* residual.peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() - 1 - i)
+							.time();
+			value = le.localMaxima().get(le.localMaxima().size() - 1 - i)
+					.value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
@@ -289,9 +379,12 @@ public class DataListEnvelopCalculator {
 		le.localMinima().addLast(new Data(time, value));
 		for (int i = 0; i < location - 1; i++) { // Ensure the copy is one less
 													// then other situation.
-			time = 2 * residual.peekLast().time()
-					- le.localMinima().get(le.localMinima().size() -1 - i).time();
-			value = le.localMinima().get(le.localMinima().size() -1 - i).value();
+			time = 2
+					* residual.peekLast().time()
+					- le.localMinima().get(le.localMinima().size() - 1 - i)
+							.time();
+			value = le.localMinima().get(le.localMinima().size() - 1 - i)
+					.value();
 			le.localMinima().addFirst(new Data(time, value));
 		}
 	}
@@ -312,10 +405,13 @@ public class DataListEnvelopCalculator {
 
 	private void symRearMinimaAlongMaxima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
-		for (int i = 0; i < location + 1; i++) {
-			double time = 2 * le.localMaxima().peekLast().time()
-					- le.localMinima().get(le.localMinima().size() -1 - i).time();
-			double value = le.localMinima().get(le.localMinima().size() -1 - i).value();
+		for (int i = 0; i < location; i++) {
+			double time = 2
+					* le.localMaxima().peekLast().time()
+					- le.localMinima().get(le.localMinima().size() - 1 - i)
+							.time();
+			double value = le.localMinima()
+					.get(le.localMinima().size() - 1 - i).value();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}
@@ -323,10 +419,12 @@ public class DataListEnvelopCalculator {
 	private void symRearMaximaAlongMinima(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
-			double time = 2 * le.localMinima().peekLast().time()
-					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
-			double value = le.localMaxima().get(le.localMaxima().size() -1 - i)
-					.value();
+			double time = 2
+					* le.localMinima().peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() - 1 - i)
+							.time();
+			double value = le.localMaxima()
+					.get(le.localMaxima().size() - 1 - i).value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
@@ -348,10 +446,12 @@ public class DataListEnvelopCalculator {
 	private void symRearMinimaAlongEnd(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
-			double time = 2 * residual.peekLast().time()
-					- le.localMinima().get(le.localMinima().size() -1 - i).time();
-			double value = le.localMinima().get(le.localMinima().size() -1 - i)
-					.value();
+			double time = 2
+					* residual.peekLast().time()
+					- le.localMinima().get(le.localMinima().size() - 1 - i)
+							.time();
+			double value = le.localMinima()
+					.get(le.localMinima().size() - 1 - i).value();
 			le.localMinima().addLast(new Data(time, value));
 		}
 	}
@@ -359,23 +459,26 @@ public class DataListEnvelopCalculator {
 	private void symRearMaximaAlongEnd(LinkedList<Data> residual,
 			LocalExtremas le, int location) {
 		for (int i = 0; i < location; i++) {
-			double time = 2 * residual.peekLast().time()
-					- le.localMaxima().get(le.localMaxima().size() -1 - i).time();
+			double time = 2
+					* residual.peekLast().time()
+					- le.localMaxima().get(le.localMaxima().size() - 1 - i)
+							.time();
 			double value = le.localMaxima().get(i).value();
 			le.localMaxima().addLast(new Data(time, value));
 		}
 	}
 
 	/*
-	 * Use interpolation and extremes to retrieve envelope. 
-	 * */	
-	
-	private void calculateEnvelope(LinkedList<Data> envelope, CubicSpline CS, LinkedList<Data> residual) {
+	 * Use interpolation and extremes to retrieve envelope.
+	 */
+
+	private void calculateEnvelope(LinkedList<Data> envelope, CubicSpline CS,
+			LinkedList<Data> residual) {
 		Iterator<Data> it = residual.iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			double time = it.next().time();
 			double value = CS.interpolate(time);
-			envelope.add(new Data(time,value));
+			envelope.add(new Data(time, value));
 		}
 	}
 }

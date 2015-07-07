@@ -54,9 +54,21 @@ public class MFDRWave extends DimensionalityReduction {
 		updateSeasonalComponent(NoC_s);
 	}
 
+	@Override
+	public String name() {
+		return "MFDR";
+	}
+	
+	
 	/*
 	 * Setting up parameters
 	 */
+	
+	public void updateParameters(int NoC_t,int NoC_s) {
+		updateTrendComponent(NoC_t);
+		updateSeasonalComponent(NoC_s);
+	}
+	
 	public void updateTrendComponent(int NoC_t) {
 		this.NoC_t = NoC_t;
 		this.pla = new PLA(NoC_t);
@@ -94,13 +106,28 @@ public class MFDRWave extends DimensionalityReduction {
 				.linkedListSum(output, noisefull);
 		return output;
 	}
-
+	
+	public TimeSeries getFullResolutionDR(TimeSeries ts, double lowestperiod) {
+		TimeSeries output = new TimeSeries();
+		MFDRWaveData mfdrdata = getDR(ts,lowestperiod);
+		TimeSeries trendfull = this.pla.getFullResolutionDR(mfdrdata.trends(),
+				ts);
+		TimeSeries seasonalfull = this.dft.getFullResolutionDR(
+				mfdrdata.seasonal(), ts);
+		TimeSeries noisefull = getFullResolutionNoise(
+				mfdrdata.noiseEnergyDensity(), ts);
+		output = DataListOperator.getInstance().linkedListSum(trendfull,
+				seasonalfull);
+		output = DataListOperator.getInstance()
+				.linkedListSum(output, noisefull);
+		return output;
+	}
 	public TimeSeries getFullResolutionNoise(double noise_energy_density,
 			TimeSeries ref) {
 		TimeSeries noisefull = new TimeSeries();
 		// Energy Density = Varience
 		double standard_deviation = Math.pow(noise_energy_density, 0.5);
-		System.out.println("Standard_Deviation:" + standard_deviation);
+//		System.out.println("Standard_Deviation:" + standard_deviation);
 		java.util.Random r = new java.util.Random();
 		for (int i = 0; i < ref.size(); i++) {
 			noisefull.add(new Data(ref.get(i).time(), r.nextGaussian()

@@ -23,6 +23,12 @@ public class PLA_BAK_NEW extends DimensionalityReduction {
 	}
 	
 	@Override
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries plafull = new TimeSeries();
 		LinkedList<PLAData> pla = getDR(ts);

@@ -77,7 +77,7 @@ public class TestMFDRFacade extends TestCase {
 	}
 	
 	private void test(int NoC, String readingaddress){
-		TimeSeries ts1 = (TimeSeries) File.getInstance().readTimeSeriesFromFile(readingaddress);
+		TimeSeries ts1 = (TimeSeries) File.getInstance().readATimeSeriesFromFile(readingaddress);
 		
 		MFDRParameters p = facade.learnMFDRParameters(ts1, NoC, false);
 		System.out.println("NoC_t:" + p.trendNoC() + "  NoC_s:" + p.seasonalNoC() + "  Noise Period:" + p.lowestPeriod());

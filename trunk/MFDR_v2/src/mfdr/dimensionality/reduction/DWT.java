@@ -21,6 +21,11 @@ public class DWT extends DimensionalityReduction {
 	public DWT(int NoC) {
 		setNoC(NoC);
 	}
+	
+	@Override
+	public String name() {
+		return "DWT";
+	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {

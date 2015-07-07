@@ -44,7 +44,25 @@ public class File {
 		return tslist;
 	}
 	
-	public LinkedList<Data> readTimeSeriesFromFile(String fileaddress){
+	public LinkedList<TimeSeries> readreadTimeSeriesFromFile(String fileaddress){
+		LinkedList<TimeSeries> tslist = new LinkedList<TimeSeries>();
+		this.agent.updatereadingpath(fileaddress);
+		for(int i = 0 ;  ; i++){
+			TimeSeries ts = new TimeSeries();
+			String values = this.agent.readLineFromFile();
+			if(values == null)
+				break;
+			String[] valuearray = values.split(",");
+			// Read start from 1 as the first column is reserved for tags. 
+			for(int j = 1 ; j < valuearray.length ; j++){
+				ts.add(new Data(Double.valueOf(j), Double.valueOf(valuearray[j])));
+			}
+			tslist.add(ts);
+		}
+		return tslist;
+	}
+	
+	public LinkedList<Data> readATimeSeriesFromFile(String fileaddress){
 		TimeSeries ts = new TimeSeries();
 		String values = this.agent.readLineFromFile(fileaddress);
 		String[] valuearray = values.split(",");

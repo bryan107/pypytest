@@ -20,8 +20,8 @@ import mfdr.learning.datastructure.TrainingSet;
 import mfdr.math.emd.EMD;
 import mfdr.math.emd.datastructure.IMFS;
 
-public class MFDRParameterFacade {
-	private static Log logger = LogFactory.getLog(MFDRParameterFacade.class);
+public class MFDRParameterFacade_BAK {
+	private static Log logger = LogFactory.getLog(MFDRParameterFacade_BAK.class);
 	// private MFDR mfdr;
 	// ****** Post processing flags ******
 	// private boolean windowsizetrain = false;
@@ -58,12 +58,13 @@ public class MFDRParameterFacade {
 	 * @param motif_k
 	 * @param motif_threshold
 	 */
-	public MFDRParameterFacade(double white_noise_level,
-			double white_noise_threshold, double min_NSratio) {
+	public MFDRParameterFacade_BAK(double white_noise_level,
+			double white_noise_threshold, double min_NSratio, double FTratio,
+			int motif_k, double motif_threshold) {
 		// this.mfdr = new MFDR();
 		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold,
 				min_NSratio);
-		this.tfilter = new TrendFilter();
+		updateTrendFilter(FTratio, motif_k, motif_threshold);
 	}
 	
 	/**
@@ -73,11 +74,12 @@ public class MFDRParameterFacade {
 	 * @param min_NSratio
 	 * @param dist
 	 */
-	public MFDRParameterFacade(double white_noise_level,
+	public MFDRParameterFacade_BAK(double white_noise_level,
 			double white_noise_threshold, double min_NSratio, Distance dist) {
 		// this.mfdr = new MFDR();
 		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold,
 				min_NSratio);
+		updateTrendFilter(dist);
 	}
 
 	
@@ -86,6 +88,16 @@ public class MFDRParameterFacade {
 		wfilter = new WhiteNoiseFilter(white_noise_level,
 				white_noise_threshold, min_NSratio);
 	}
+
+	public void updateTrendFilter(double FTratio, int motif_k,
+			double motif_threshold) {
+//		tfilter = new TrendFilter(FTratio, motif_k, motif_threshold);
+	}
+	
+	public void updateTrendFilter(Distance dist){
+//		tfilter = new TrendFilter(dist);
+	}
+
 
 	/**
 	 * Learn window size with LinkedList input TimeSeries
@@ -151,37 +163,36 @@ public class MFDRParameterFacade {
 	 * @return
 	 */
 	public MFDRParameters learnMFDRParameters(TimeSeries ts, int NoC, boolean use_IMF_tfilter) {
+		// STEP 1 : EMD
+		// EMD service object
+		EMD emd = new EMD(ts, zerocrossingaccuracy, IFparamaters[0],
+				IFparamaters[1], IFparamaters[2]);
+		// Calculate IMF with EMD
+		IMFS imfs = emd.getIMFs(MAXLEVEL);
+
+		for (int i = 0; i < imfs.size(); i++) {
+			try {
+				System.out.println("IMF[" + i + "]: "
+						+ imfs.get(i).averageWavelength());
+			} catch (Exception e) {
+				System.out.println("IMF[" + i + "]: Infinit");
+			}
+		}
 		int[] NoCs;
 		// STEP 2: AYALYZE IMFs
 		double lowestperiod = 0;
 		if(use_IMF_tfilter){
-			// STEP 1 : EMD
-			// EMD service object
-			EMD emd = new EMD(ts, zerocrossingaccuracy, IFparamaters[0],
-					IFparamaters[1], IFparamaters[2]);
-			// Calculate IMF with EMD
-			IMFS imfs = emd.getIMFs(MAXLEVEL);
-
-			for (int i = 0; i < imfs.size(); i++) {
-				try {
-					System.out.println("IMF[" + i + "]: "
-							+ imfs.get(i).averageWavelength());
-				} catch (Exception e) {
-					System.out.println("IMF[" + i + "]: Infinit");
-				}
-			}
 			lowestperiod = wfilter.getWhiteNoisePeriod(imfs, ts);
-			NoCs = tfilter.getMFDRNoCs(ts, NoC, lowestperiod);
+			NoCs = tfilter.getMFDRNoCs(ts, NoC,lowestperiod);
 		} else{
-			NoCs = tfilter.getMFDRNoCs(ts, NoC, lowestperiod);
+			NoCs = tfilter.getMFDRNoCs(ts, NoC,lowestperiod);
 		}
 		int NoC_t = NoCs[0];
 		int NoC_s = NoCs[1];
 		// STEP 3: Set training result;
 		return new MFDRParameters(NoC_t, NoC_s, lowestperiod);
 	}
-	
-	
+
 
 	/*
 	 * This function trains with reduced distance (should be more accurate) It

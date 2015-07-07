@@ -17,6 +17,11 @@ public class PLA extends DimensionalityReduction {
 	public PLA(int NoC) {
 		setNoC(NoC);
 	}
+	
+	@Override
+	public String name() {
+		return "PLA";
+	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {

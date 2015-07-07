@@ -21,6 +21,11 @@ public class DFTWave extends DimensionalityReduction {
 	public DFTWave(int NoC) {
 		setNoC(NoC);
 	}
+	
+	@Override
+	public String name() {
+		return "DFT";
+	}
 
 	@Override
 	public LinkedList<DFTWaveData> getDR(TimeSeries ts) {

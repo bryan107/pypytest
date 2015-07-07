@@ -8,6 +8,8 @@ public abstract class DimensionalityReduction {
 	public void setNoC(int NoC){
 		this.NoC = NoC;
 	}
+	
+	public abstract String name();
 
 	// Returns DRs with the same resolution as the input Time series.
 	public abstract TimeSeries getFullResolutionDR(TimeSeries ts);

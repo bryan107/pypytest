@@ -34,35 +34,35 @@ public class Test extends TestCase {
 //		System.out.println("Count:" + count );
 //	}
 	
-//	public void testWholeFile(){
-//		LinkedList<String> filenamelist = new LinkedList<String>();
-//		FileAccessAgent fagent = new FileAccessAgent("C:\\TEST\\MDFR\\Null.txt", "C:\\TEST\\MDFR\\Null.txt");
-//		fagent.updatereadingpath("C:\\TEST\\MDFR\\Data\\dataset2\\dataset2_list.txt");
-//		while(true){
-//			String filename = fagent.readLineFromFile();
-//			if(filename == null){
-//				break;
-//			}
-//			filenamelist.add(filename);
-//		}
-//		for(int i = 0 ; i < filenamelist.size() ; i++){
-//			String filename = filenamelist.get(i);
-//			fagent.updatereadingpath("C:\\TEST\\MDFR\\Data\\dataset2\\"+ filename +"\\"+ filename +"_TEST");
-//			DataParser parser = new DataParser(new UCRData(), fagent);
-//			LinkedList<TimeSeries> ts= new LinkedList<TimeSeries>();
-//			int count = 0;
-//			while(true){
-//				count ++;
-//				TimeSeries temp = parser.getTimeSeriesDetails().timeSeries();
-//				if(temp == null)
-//					break;
-//				ts.add(temp);
-//				File.getInstance().saveLinkedListToFile("Series " + count, temp, "C:\\TEST\\MDFR\\Data\\DATA5\\"+ filename +".csv");
-//			}
-//		}
-//
-//	
-//	}
+	public void testWholeFile(){
+		LinkedList<String> filenamelist = new LinkedList<String>();
+		FileAccessAgent fagent = new FileAccessAgent("C:\\TEST\\MDFR\\Null.txt", "C:\\TEST\\MDFR\\Null.txt");
+		fagent.updatereadingpath("C:\\TEST\\MDFR\\Data\\dataset2\\dataset2_list.txt");
+		while(true){
+			String filename = fagent.readLineFromFile();
+			if(filename == null){
+				break;
+			}
+			filenamelist.add(filename);
+		}
+		for(int i = 0 ; i < filenamelist.size() ; i++){
+			String filename = filenamelist.get(i);
+			fagent.updatereadingpath("C:\\TEST\\MDFR\\Data\\dataset2\\"+ filename +"\\"+ filename +"_TEST");
+			DataParser parser = new DataParser(new UCRData(), fagent);
+			LinkedList<TimeSeries> ts= new LinkedList<TimeSeries>();
+			int count = 0;
+			while(true){
+				count ++;
+				TimeSeries temp = parser.getTimeSeriesDetails().timeSeries();
+				if(temp == null)
+					break;
+				ts.add(temp);
+				File.getInstance().saveLinkedListToFile("Series " + count, temp, "C:\\TEST\\MDFR\\Data\\DATA5\\"+ filename +".csv");
+			}
+		}
+
+	
+	}
 	
 	public void testSingle(){
 		FileAccessAgent fagent = new FileAccessAgent("C:\\TEST\\MDFR\\Null.txt", "C:\\TEST\\MDFR\\Null.txt");

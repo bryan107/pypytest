@@ -10,6 +10,11 @@ public class APCA extends DimensionalityReduction {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public String name() {
+		return "APCA";
+	}
 
 	@Override
 	public Object getDR(TimeSeries ts) {
@@ -22,5 +27,7 @@ public class APCA extends DimensionalityReduction {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+
 
 }

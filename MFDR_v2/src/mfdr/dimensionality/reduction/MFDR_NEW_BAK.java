@@ -54,6 +54,12 @@ public class MFDR_NEW_BAK extends DimensionalityReduction {
 		updateTrendComponent(NoC_t);
 		updateSeasonalComponent(NoC_s, noise_freq);
 	}
+	
+	@Override
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/*
 	 * Setting up parameters

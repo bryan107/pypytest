@@ -19,6 +19,11 @@ public class PAA extends DimensionalityReduction {
 	}
 	
 	@Override
+	public String name() {
+		return "PAA";
+	}
+	
+	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {
 		TimeSeries paafull = new TimeSeries();
 		LinkedList<PAAData> paa = getDR(ts);

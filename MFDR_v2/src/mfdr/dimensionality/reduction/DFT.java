@@ -27,6 +27,11 @@ public class DFT extends DimensionalityReduction {
 		setNoC(NoC);
 	}
 
+	@Override
+	public String name() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public TimeSeries getFullResolutionDR(TimeSeries ts) {

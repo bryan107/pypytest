@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.PAAData;
+import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.distance.Distance;
 
 public class PAA extends DimensionalityReduction {
@@ -111,6 +112,21 @@ public class PAA extends DimensionalityReduction {
 		TimeSeries dr1 = getFullResolutionDR(ts1);
 		TimeSeries dr2 = getFullResolutionDR(ts2);
 		return distance.calDistance(dr1, dr2, ts1);
+	}
+	
+	public double getDistance(LinkedList<PAAData> dr1, LinkedList<PAAData> dr2, TimeSeries ref, Distance distance) {
+		if (dr1.size() != dr2.size()) {
+			logger.info("PAA inputs are at different lengths");
+			return 0;
+		}
+		double dist_total = 0;
+		double l = ref.size() / dr1.size();
+		for (int i = 0; i < dr1.size(); i++) {
+			PAAData paa_1 = dr1.get(i);
+			PAAData paa_2 = dr2.get(i);
+			dist_total += Math.pow(paa_1.average()-paa_2.average(), 2)*l;
+		}
+		return Math.sqrt(dist_total);
 	}
 
 }

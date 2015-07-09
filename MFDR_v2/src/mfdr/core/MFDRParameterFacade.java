@@ -161,15 +161,14 @@ public class MFDRParameterFacade {
 					IFparamaters[1], IFparamaters[2]);
 			// Calculate IMF with EMD
 			IMFS imfs = emd.getIMFs(MAXLEVEL);
-
-			for (int i = 0; i < imfs.size(); i++) {
-				try {
-					System.out.println("IMF[" + i + "]: "
-							+ imfs.get(i).averageWavelength());
-				} catch (Exception e) {
-					System.out.println("IMF[" + i + "]: Infinit");
-				}
-			}
+//			for (int i = 0; i < imfs.size(); i++) {
+//				try {
+//					System.out.println("IMF[" + i + "]: "
+//							+ imfs.get(i).averageWavelength());
+//				} catch (Exception e) {
+//					System.out.println("IMF[" + i + "]: Infinit");
+//				}
+//			}
 			lowestperiod = wfilter.getWhiteNoisePeriod(imfs, ts);
 			NoCs = tfilter.getMFDRNoCs(ts, NoC, lowestperiod);
 		} else{

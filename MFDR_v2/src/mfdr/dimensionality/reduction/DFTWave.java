@@ -128,9 +128,9 @@ public class DFTWave extends DimensionalityReduction {
 			else if(wavelist.get(i).freq() == ref.size()/2){
 				for (int j = 0; j < ref.size(); j++) {
 					if(j%1 == 0)
-						real[j] += wavelist.get(1).amplitude();
+						real[j] += wavelist.get(i).amplitude();
 					else
-						real[j] -= wavelist.get(1).amplitude();
+						real[j] -= wavelist.get(i).amplitude();
 				}
 
 			}

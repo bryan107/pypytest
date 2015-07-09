@@ -47,8 +47,8 @@ public class DataListPropertyExtractor {
 				frequency);
 		if (instantfrequency.isEmpty()) {
 			logger.warn("This IMF does not has enough points to calculate Instant Frequency");
-			System.out.print("IMF:");
-			Print.getInstance().printDataLinkedList(imf, 100);
+//			System.out.print("IMF:");
+//			Print.getInstance().printDataLinkedList(imf, 100);
 		}
 		return instantfrequency;
 	}
@@ -216,7 +216,7 @@ public class DataListPropertyExtractor {
 		// Exam first data point
 		if(data.get(0).value() > data.get(1).value()){
 			le.localMaxima().add(data.get(0));
-		}else if (data.get(0).value() < data.get(1).value()){
+		}else{
 			le.localMinima().add(data.get(0));
 		}
 		// Iterate through the middles
@@ -233,7 +233,7 @@ public class DataListPropertyExtractor {
 		// Exam the final data point
 		if(data.get(data.size()-1).value() > data.get(data.size()-2).value()){
 			le.localMaxima().add(data.get(data.size()-1));
-		}else if(data.get(data.size()-1).value() < data.get(data.size()-2).value()){
+		}else{
 			le.localMinima().add(data.get(data.size()-1));
 		}
 		return le;

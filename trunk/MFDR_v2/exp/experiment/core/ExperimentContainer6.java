@@ -17,12 +17,12 @@ import mfdr.file.FileAccessAgent;
 import mfdr.utility.File;
 import junit.framework.TestCase;
 
-public class ExperimentContainer5 extends TestCase {
+public class ExperimentContainer6 extends TestCase {
 
 //	private final int NoC = 4;
 	private final String readaddress = "C:\\TEST\\MDFR\\Data\\dataset\\";
-	private final String writeaddress = "C:\\TEST\\MDFR\\Data\\Experiment\\KNN_Clustering_2.csv";
-	private final String listaddress = "C:\\TEST\\MDFR\\Data\\dataset\\Reduced_File_2.txt";
+	private final String writeaddress = "C:\\TEST\\MDFR\\Data\\Experiment\\KNN_Clustering_1.csv";
+	private final String listaddress = "C:\\TEST\\MDFR\\Data\\dataset\\Reduced_File_1.txt";
 	
 	public void test(){
 		KNNExpCore KNN_core = new KNNExpCore();

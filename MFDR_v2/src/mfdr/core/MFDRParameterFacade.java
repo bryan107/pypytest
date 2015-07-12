@@ -39,7 +39,7 @@ public class MFDRParameterFacade {
 	private WhiteNoiseFilter wfilter;
 
 	// Trend Filter
-	private TrendFilter tfilter;
+	private TrendFilterForMFDR tfilter;
 
 	// ************************************
 	// ********* Learning Objects *********
@@ -63,7 +63,7 @@ public class MFDRParameterFacade {
 		// this.mfdr = new MFDR();
 		updateWhiteNoiseFilter(white_noise_level, white_noise_threshold,
 				min_NSratio);
-		this.tfilter = new TrendFilter();
+		this.tfilter = new TrendFilterForMFDR();
 	}
 	
 	/**

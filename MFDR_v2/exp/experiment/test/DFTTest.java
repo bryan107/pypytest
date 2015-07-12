@@ -14,11 +14,14 @@ import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.DFTWaveData;
 import mfdr.dimensionality.datastructure.MFDRWaveData;
 import mfdr.dimensionality.reduction.DFT;
+import mfdr.dimensionality.reduction.DFTForMFDR;
 import mfdr.dimensionality.reduction.DFTWave;
+import mfdr.dimensionality.reduction.MFDR;
 import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.dimensionality.reduction.PLA;
 import mfdr.distance.Distance;
 import mfdr.distance.EuclideanDistance;
+import mfdr.math.emd.utility.DataListCalculator;
 import mfdr.math.trigonometric.Theta;
 import mfdr.math.trigonometric.Triangle;
 import mfdr.utility.DataListOperator;
@@ -69,8 +72,11 @@ public class DFTTest extends TestCase {
 		Distance distance = new EuclideanDistance();
 		PLA pla = new PLA(2);
 		DFT dft = new DFT(2);
+		DFTForMFDR dft2 = new DFTForMFDR(2);
 		DFTWave dftwave = new DFTWave(2);
-		MFDRWave mfdr = new MFDRWave(1, 1);
+		MFDR mfdr = new MFDR(1, 1);
+		double gg= DataListCalculator.getInstance().getDifference(ts1, dft2.getFullResolutionDR(ts1)).energyDensity();
+		
 		
 		TimeSeries plafull1 = pla.getFullResolutionDR(ts1);
 		TimeSeries plafull2 = pla.getFullResolutionDR(ts2);
@@ -88,7 +94,13 @@ public class DFTTest extends TestCase {
 		
 		File.getInstance().saveLinkedListToFile("MFDR_1", mfdr.getFullResolutionDR(ts1) , "C:\\Programming\\TEST\\___FINAL.csv");
 		File.getInstance().saveLinkedListToFile("MFDR_2", mfdr.getFullResolutionDR(ts2) , "C:\\Programming\\TEST\\___FINAL.csv");
+		double errorpla = DataListCalculator.getInstance().getDifference(ts1, pla.getFullResolutionDR(ts1)).energyDensity();
+		double errordft = DataListCalculator.getInstance().getDifference(ts1, dft.getFullResolutionDR(ts1)).energyDensity();
+		double errordft2= DataListCalculator.getInstance().getDifference(ts1, dft2.getFullResolutionDR(ts1)).energyDensity();
 		
+		System.out.println("ERR_PLA:" + errorpla);
+		System.out.println("ERR_DFT:" + errordft);
+		System.out.println("ERR_DFT2:" + errordft2);
 		
 		
 		double dist_o = mfdr.getDistanceBruteForce(data1, data2, ts1, distance);
@@ -102,6 +114,7 @@ public class DFTTest extends TestCase {
 		System.out.println("DIST_MFDR:" + dist_f);
 		
 		double dist_dft = dft.getDistance(ts1, ts2, distance);
+		double dist_dft2 = dft2.getDistance(ts1, ts2, distance);
 		double dist_pla = pla.getDistance(ts1, ts2, distance);
 
 		double dist_dftwave = dftwave.getDistance(ts1, ts2, distance);
@@ -113,6 +126,7 @@ public class DFTTest extends TestCase {
 		System.out.println();
 		System.out.println("DIST_PLA:" + dist_pla);
 		System.out.println("DIST_DFT:" + dist_dft);
+		System.out.println("DIST_DFT2:" + dist_dft2);
 		System.out.println("DIST_DFTWave:" + dist_dftwave);
 //		System.out.println("DIST_DFTWaveFull:" + distance.calDistance(wave1, wave2, wave1));
 		System.out.println("All Done");

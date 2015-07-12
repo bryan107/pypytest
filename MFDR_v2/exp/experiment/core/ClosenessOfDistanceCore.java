@@ -2,7 +2,7 @@ package experiment.core;
 
 import java.util.LinkedList;
 
-import mfdr.core.MFDRParameterFacade;
+import mfdr.core.MFDRWaveParameterFacade;
 import mfdr.core.MFDRParameters;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.DFTData;
@@ -31,7 +31,7 @@ public class ClosenessOfDistanceCore {
 	public void run(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
 		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MDFR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
-		MFDRParameterFacade facade = new MFDRParameterFacade(3,0.5,6.5);
+		MFDRWaveParameterFacade facade = new MFDRWaveParameterFacade(3,0.5,6.5);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
 			for(int NoC = NoC_Start ; NoC <= NoC_End ; NoC+=NoC_Interval){

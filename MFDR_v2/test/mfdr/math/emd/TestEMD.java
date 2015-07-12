@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import mfdr.core.TrendFilter;
+import mfdr.core.TrendFilterForMFDRWave;
 import mfdr.core.WhiteNoiseFilter;
 import mfdr.datastructure.Data;
 import mfdr.datastructure.TimeSeries;

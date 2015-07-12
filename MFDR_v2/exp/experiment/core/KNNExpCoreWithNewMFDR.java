@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import mfdr.core.MFDRParameterFacade;
 import mfdr.core.MFDRWaveParameterFacade;
 import mfdr.core.MFDRParameters;
 import mfdr.datastructure.TimeSeries;
@@ -16,6 +17,7 @@ import mfdr.dimensionality.datastructure.PAAData;
 import mfdr.dimensionality.datastructure.PLAData;
 import mfdr.dimensionality.reduction.DFT;
 import mfdr.dimensionality.reduction.DFTWave;
+import mfdr.dimensionality.reduction.MFDR;
 import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.dimensionality.reduction.PAA;
 import mfdr.dimensionality.reduction.PLA;
@@ -27,7 +29,46 @@ import experiment.utility.UCRData;
 import experiment.utility.UCRDataDetails;
 import flanagan.analysis.Stat;
 
-public class KNNExpCore {
+public class KNNExpCoreWithNewMFDR {
+	
+	
+	public void runMFDR(String readaddress, String writeaddress,
+			String listaddress, int NoC_Start, int NoC_Interval, int NoC_End,
+			int K) {
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress+"_["+K+"]",
+				"C:\\TEST\\MDFR\\Null.txt");
+		FileAccessAgent fagent2 = new FileAccessAgent(writeaddress,
+				"C:\\TEST\\MDFR\\Null.txt");
+		LinkedList<String> filenamelist = getFileNameList(fagent, listaddress);
+		MFDRParameterFacade facade = new MFDRParameterFacade(3, 0.5, 6.5);
+		double count = 0;
+		for (int i = 0; i < filenamelist.size(); i++) {
+			for (int NoC = NoC_Start; NoC <= NoC_End; NoC += NoC_Interval) {
+				// Train Parameters
+				LinkedList<TimeSeries> trainseries = getTimeSeriesListTrain(
+						fagent, readaddress, filenamelist.get(i));
+				MFDRParameters parameters = facade.learnMFDRParameters(
+						trainseries, NoC, false);
+				System.out.println("Train MFDR Done");
+
+				// Test
+				LinkedList<UCRDataDetails> trainset = getDataDetailsListTrain(fagent2, readaddress, filenamelist.get(i));
+				System.out.println("Load Train Detail Done");
+				LinkedList<UCRDataDetails> testset = getDataDetailsListTest(fagent2, readaddress, filenamelist.get(i));
+				System.out.println("Load Test Detail Done");
+				RepresentationErrorResult r_mfdr = runMFDR(trainset, testset,K, parameters, false);
+				count++;
+				System.out.println("PROGRESS(MFDR):" + (count * 100 / 30 / filenamelist.size()) + "%");
+
+				// Output
+				String outputstring = filenamelist.get(i) + ",[" + NoC + "],";
+				outputstring += "MFDR,M," + r_mfdr.mean() + ",V,"+ r_mfdr.variance() + ",T," + r_mfdr.time() + ",";
+				fagent.writeLineToFile(outputstring);
+				System.out.println("PROGRESS: " + filenamelist.get(i) + "["	+ NoC + "] Stored...");
+			}
+		}
+	}
+	
 	public void run(String readaddress, String writeaddress,
 			String listaddress, int NoC_Start, int NoC_Interval, int NoC_End,
 			int K) {
@@ -264,7 +305,7 @@ public class KNNExpCore {
 			LinkedList<UCRDataDetails> testset, int K, MFDRParameters p,
 			boolean use_noise) {
 		double successcount = 0;
-		MFDRWave mfdr = new MFDRWave(p.trendNoC(), p.seasonalNoC());
+		MFDR mfdr = new MFDR(p.trendNoC(), p.seasonalNoC());
 		Distance d = new EuclideanDistance();
 		LinkedList<MFDRWaveData> traindrlist = new LinkedList<MFDRWaveData>();
 		LinkedList<MFDRWaveData> testdrlist = new LinkedList<MFDRWaveData>();

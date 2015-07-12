@@ -24,13 +24,13 @@ import mfdr.math.motif.Motif;
  * intense signal; otherwise trend intense.
  **/
 
-public class TrendFilter {
+public class TrendFilterForMFDRWave {
 	/**
 	 * Use this constructor for old K 1-motif solution
 	 */
-	private static Log logger = LogFactory.getLog(TrendFilter.class);
+	private static Log logger = LogFactory.getLog(TrendFilterForMFDRWave.class);
 
-	public TrendFilter() {
+	public TrendFilterForMFDRWave() {
 
 	}
 	

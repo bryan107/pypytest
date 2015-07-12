@@ -34,7 +34,7 @@ public class TestMFDRFacade extends TestCase {
 	private double tolerancevarience = 3;
 	private Distance dist = new EuclideanDistance();
 	// ************** Used variables **************
-	private MFDRParameterFacade facade = new MFDRParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
+	private MFDRWaveParameterFacade facade = new MFDRWaveParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
 	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
 	private MFDRWave mfdr;
 	private final int datanum = 10;

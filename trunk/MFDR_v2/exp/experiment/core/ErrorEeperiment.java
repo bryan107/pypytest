@@ -2,7 +2,7 @@ package experiment.core;
 
 import java.util.LinkedList;
 
-import mfdr.core.MFDRParameterFacade;
+import mfdr.core.MFDRWaveParameterFacade;
 import mfdr.core.MFDRParameters;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.datastructure.MFDRWaveData;
@@ -25,7 +25,7 @@ public class ErrorEeperiment extends TestCase {
 	private double tolerancevarience = 3;
 	private Distance dist = new EuclideanDistance();
 	// ************** Used variables **************
-	private MFDRParameterFacade facade = new MFDRParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
+	private MFDRWaveParameterFacade facade = new MFDRWaveParameterFacade(white_noise_level, white_noise_threshold, min_NSratio, dist);
 	private LinkedList<TimeSeries> ts = new LinkedList<TimeSeries>();
 	private MFDRWave mfdr;
 	private final int datanum = 10;

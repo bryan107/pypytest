@@ -9,28 +9,29 @@ import org.apache.commons.logging.LogFactory;
 import experiment.utility.DataParser;
 import experiment.utility.UCRData;
 import flanagan.analysis.Stat;
-import mfdr.core.MFDRWaveParameterFacade;
+import mfdr.core.MFDRParameterFacade;
 import mfdr.core.MFDRParameters;
 import mfdr.datastructure.TimeSeries;
 import mfdr.dimensionality.reduction.DFT;
 import mfdr.dimensionality.reduction.DFTWave;
 import mfdr.dimensionality.reduction.DimensionalityReduction;
+import mfdr.dimensionality.reduction.MFDR;
 import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.dimensionality.reduction.PAA;
 import mfdr.dimensionality.reduction.PLA;
 import mfdr.file.FileAccessAgent;
 import mfdr.utility.DataListOperator;
 
-public class RepresentationErrorExpCore {
-	private static Log logger = LogFactory.getLog(RepresentationErrorExpCore.class);
-	public RepresentationErrorExpCore(){
+public class RepresentationErrorExpCorewithNewMFDR {
+	private static Log logger = LogFactory.getLog(RepresentationErrorExpCorewithNewMFDR.class);
+	public RepresentationErrorExpCorewithNewMFDR(){
 	
 	}
 	
 	public void runReal(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
-		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MDFR\\Null.txt");
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
-		MFDRWaveParameterFacade facade = new MFDRWaveParameterFacade(3,0.5,6.5);
+		MFDRParameterFacade facade = new MFDRParameterFacade(3,0.5,6.5);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
 			for(int NoC = NoC_Start ; NoC <= NoC_End ; NoC+=NoC_Interval){
@@ -61,10 +62,10 @@ public class RepresentationErrorExpCore {
 		}
 	}
 	
-	public void runMFDRReal(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
-		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MDFR\\Null.txt");
+	public void runRealWithNewMFDR(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
-		MFDRWaveParameterFacade facade = new MFDRWaveParameterFacade(3,0.5,6.5);
+		MFDRParameterFacade facade = new MFDRParameterFacade(3,0.5,6.5);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
 			for(int NoC = NoC_Start ; NoC <= NoC_End ; NoC+=NoC_Interval){
@@ -86,7 +87,7 @@ public class RepresentationErrorExpCore {
 	}
 	
 	public void runDFT(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
-		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MDFR\\Null.txt");
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
@@ -110,7 +111,7 @@ public class RepresentationErrorExpCore {
 	}
 	
 	public void runOptimal(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
-		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MDFR\\Null.txt");
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
@@ -126,10 +127,10 @@ public class RepresentationErrorExpCore {
 			RepresentationErrorResult r_paa = runOptimalSolution(tsset, new PAA(NoC));
 			count ++;
 			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr = runOptimalSolutionMFDR(tsset, new MFDRWaveParameterFacade(3,0.5,6.5), NoC ,false);
+			RepresentationErrorResult r_mfdr = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,false);
 			count ++;
 			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr_n = runOptimalSolutionMFDR(tsset, new MFDRWaveParameterFacade(3,0.5,6.5), NoC ,true);
+			RepresentationErrorResult r_mfdr_n = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,true);
 			count ++;
 			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
 			String outputstring = filenamelist.get(i) + ",[" + NoC+"],";
@@ -149,6 +150,26 @@ public class RepresentationErrorExpCore {
 		}
 	}
 	
+	public void runOptimalWithNewMFDR(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
+		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
+		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
+		double count = 0;
+		for(int i = 0 ; i < filenamelist.size() ; i++){
+			for(int NoC = NoC_Start ; NoC <= NoC_End ; NoC+=NoC_Interval){
+			// Get file from list;
+			LinkedList<TimeSeries> tsset = getTimeSeriesListALL(fagent,readaddress,filenamelist.get(i));
+			RepresentationErrorResult r_mfdr = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,false);
+			count ++;
+			System.out.println("PROGRESS:"+ (count*100 / 5 / filenamelist.size()) + "%");
+			
+			String outputstring = filenamelist.get(i) + ",[" + NoC+"],";
+			outputstring += "MFDR,M," + r_mfdr.mean()+",V," + r_mfdr.variance()+",T," + r_mfdr.time()+",";
+			fagent.writeLineToFile(outputstring);
+			System.out.println("PROGRESS: " + filenamelist.get(i) + "[" + NoC + "] Stored...");
+			}
+		}
+	}
+	
 	
 	
 	public RepresentationErrorResult runOptimalSolution(LinkedList<TimeSeries> tsset, DimensionalityReduction dr){
@@ -164,8 +185,8 @@ public class RepresentationErrorExpCore {
 		return new RepresentationErrorResult(Stat.mean(errors),Stat.variance(errors), endTime-startTime);
 	}
 	
-	public RepresentationErrorResult runOptimalSolutionMFDR(LinkedList<TimeSeries> tsset, MFDRWaveParameterFacade facade, int NoC, boolean usenoise){
-		MFDRWave mfdr = new MFDRWave(1, 1);
+	public RepresentationErrorResult runOptimalSolutionMFDR(LinkedList<TimeSeries> tsset, MFDRParameterFacade facade, int NoC, boolean usenoise){
+		MFDR mfdr = new MFDR(1, 1);
 		long startTime = System.currentTimeMillis();
 		double[] errors = new double[tsset.size()];
 		//Operations
@@ -181,7 +202,7 @@ public class RepresentationErrorExpCore {
 	}
 	
 	public RepresentationErrorResult runRealSolutionMFDR(LinkedList<TimeSeries> tsset, MFDRParameters p, boolean use_noise){
-		MFDRWave mfdr = new MFDRWave(1, 1);
+		MFDR mfdr = new MFDR(1, 1);
 		long startTime = System.currentTimeMillis();
 		double[] errors = new double[tsset.size()];
 		//Operations

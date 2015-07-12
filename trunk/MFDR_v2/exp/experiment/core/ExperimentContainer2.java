@@ -1,28 +1,16 @@
 package experiment.core;
 
-import java.util.LinkedList;
-
-import experiment.utility.DataParser;
-import experiment.utility.UCRData;
-import mfdr.core.MFDRParameterFacade;
-import mfdr.datastructure.TimeSeries;
-import mfdr.dimensionality.reduction.*;
-import mfdr.file.FileAccessAgent;
 import junit.framework.TestCase;
 
 public class ExperimentContainer2 extends TestCase {
 
-//	private final int NoC = 4;
-	private final String readaddress = "C:\\TEST\\MDFR\\Data\\dataset\\";
-	private final String writeaddress = "C:\\TEST\\MDFR\\Data\\Experiment\\ClosinessOfDistance_2.csv";
-	private final String listaddress = "C:\\TEST\\MDFR\\Data\\dataset\\dataset_list2.txt";
+	private final String readaddress = "C:\\TEST\\MFDR\\dataset\\";
+	private String writeaddress = "C:\\TEST\\MFDR\\Experiment\\ClosinessOfDistance_1000_FULL_2_NEW_FIX.csv";
+	private final String listaddress = "C:\\TEST\\MFDR\\dataset\\dataset_list2.txt";
 	
 	public void test(){
-//		RepresentationErrorExpCore core = new RepresentationErrorExpCore();
-//		core.runDFT(readaddress,writeaddress ,listaddress, 2,2,10);
-		
-		ClosenessOfDistanceCore dist_core = new ClosenessOfDistanceCore();
-		dist_core.run(readaddress, writeaddress, listaddress, 2,2,10);
+		ClosenessOfDistanceCoreWithNewMFDR core = new ClosenessOfDistanceCoreWithNewMFDR();
+		core.runRandom1000(readaddress, writeaddress, listaddress, 2, 2, 10);
 	}
 
 	

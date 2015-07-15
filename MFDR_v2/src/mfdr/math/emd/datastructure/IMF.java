@@ -196,10 +196,11 @@ public class IMF extends TimeSeries {
 	 */
 	public double averageWavelength() throws ArithmeticException{
 //		double freq = averageFrequency();
-		double freq = this.timeLength()/(this.getZeroCrossingCount()/2);
-		if(freq == 0)
-			throw new ArithmeticException("Division by zero!");
-		return 1 / freq;
+		double length = this.timeLength()/(this.getZeroCrossingCount()/2);
+//		if(freq == 0)
+//			throw new ArithmeticException("Division by zero!");
+//		return 1 / freq;
+		return length;
 	}
 	
 	

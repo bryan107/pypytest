@@ -46,7 +46,7 @@ public class PLA extends DimensionalityReduction {
 		int plaindex = 0;
 		while(it.hasNext()){
 			Data data = it.next();
-			double value = pla.get(plaindex).getValue(data.time()-(plaindex*windowsize));
+			double value = pla.get(plaindex).getValue(data.time()-(plaindex*windowsize)+1);
 			plafull.add(new Data(data.time(), value));
 			winnum++;
 			if(winnum % windowsize == 0){
@@ -70,22 +70,23 @@ public class PLA extends DimensionalityReduction {
 			return pla;
 		}
 		// n = window size
-		double l = ts.size() / NoC;
-		double j = 1;
-		int i = 1;
+		double n = ts.size() / NoC;
+		double x = 1;
+		int j = 1;
 		double asum = 0, bsum = 0;
-		while (j <= ts.size()) {
-			asum += (j - (i - 1)*l - (l + 1)/2) * ts.get((int) j - 1).value();
-			bsum += (j - (i - 1)*l - (2*l+1)/3) * ts.get((int) j - 1).value();
-			if (j % l == 0) {
-				double a = 12 * asum / (l * (l + 1) * (l - 1));
-				double b = 6 * bsum / (l * (1 - l));
-				pla.add(new PLAData(ts.get((int) (j - l)).time(), b, a));
+		while (x <= ts.size()) {
+			double t = x - (j - 1)*n;
+			asum += (t - (n + 1)/2) * ts.get((int) x - 1).value();
+			bsum += (t - (2*n+1)/3) * ts.get((int) x - 1).value();
+			if (x % n == 0) {
+				double a = 12 * asum / (n * (n + 1) * (n - 1));
+				double b = 6 * bsum / (n * (1 - n));
+				pla.add(new PLAData(ts.get((int) (x - n)).time(), b, a));
 				asum = 0;
 				bsum = 0;
-				i++;
+				j++;
 			}
-			j++;
+			x++;
 		}
 		return pla;
 	}
@@ -94,7 +95,7 @@ public class PLA extends DimensionalityReduction {
 	public double getDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
 		LinkedList<PLAData> dr1 = getDR(ts1);
 		LinkedList<PLAData> dr2 = getDR(ts2);
-		return getDistance(dr1, dr2, ts1, distance);
+		return getDistance(dr1, dr2, ts1.size(), distance);
 	}
 	
 	public double getBruteForceDistance(TimeSeries ts1, TimeSeries ts2, Distance distance) {
@@ -113,13 +114,13 @@ public class PLA extends DimensionalityReduction {
 	// TODO These are only temperate distance functions, need to implement a
 	// real one
 	public double getDistance(LinkedList<PLAData> dr1, LinkedList<PLAData> dr2,
-			TimeSeries ref, Distance distance) {
+			int size, Distance distance) {
 		if (dr1.size() != dr2.size()) {
 			logger.info("PLA inputs are at different lengths");
 			return 0;
 		}
 		double dist_total = 0;
-		double l = ref.size() / dr1.size();
+		double l = size / dr1.size();
 		for (int i = 0; i < dr1.size(); i++) {
 			PLAData pla_1 = dr1.get(i);
 			PLAData pla_2 = dr2.get(i);

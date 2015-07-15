@@ -178,7 +178,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 			// Original Distance
 			double dist_ori = 1;
 			startTime = System.nanoTime();
-			double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 			endTime = System.nanoTime();
 			time += endTime-startTime;
 			if(dist_ori!=0){
@@ -215,7 +215,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 			// Original Distance
 				double dist_ori = 1;
 				startTime = System.nanoTime();
-				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				time += endTime-startTime;
 				if(dist_ori!=0){
@@ -335,7 +335,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 			// Original Distance
 			double dist_ori = 1;
 			startTime = System.nanoTime();
-			double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 			endTime = System.nanoTime();
 			time = endTime-startTime;
 			if(dist_ori!=0){
@@ -409,7 +409,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
 				startTime = System.nanoTime();
-				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
@@ -503,7 +503,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
 				startTime = System.nanoTime();
-				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
@@ -539,7 +539,7 @@ public class ClosenessOfDistanceCoreWithNewMFDRGG {
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
 				startTime = System.nanoTime();
-				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;

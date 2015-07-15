@@ -114,13 +114,13 @@ public class PAA extends DimensionalityReduction {
 		return distance.calDistance(dr1, dr2, ts1);
 	}
 	
-	public double getDistance(LinkedList<PAAData> dr1, LinkedList<PAAData> dr2, TimeSeries ref, Distance distance) {
+	public double getDistance(LinkedList<PAAData> dr1, LinkedList<PAAData> dr2,int size, Distance distance) {
 		if (dr1.size() != dr2.size()) {
 			logger.info("PAA inputs are at different lengths");
 			return 0;
 		}
 		double dist_total = 0;
-		double l = ref.size() / dr1.size();
+		double l = size / dr1.size();
 		for (int i = 0; i < dr1.size(); i++) {
 			PAAData paa_1 = dr1.get(i);
 			PAAData paa_2 = dr2.get(i);

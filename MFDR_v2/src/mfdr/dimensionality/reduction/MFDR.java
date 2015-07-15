@@ -431,7 +431,7 @@ public class MFDR extends DimensionalityReduction {
 		double e1 = mfdrdata1.noiseEnergyDensity();
 		double e2 = mfdrdata2.noiseEnergyDensity();
 		// Calculate distances of low frequency pla and high frequency dwt
-		double dist_trend = pla.getDistance(trend1, trend2, ref, distance);
+		double dist_trend = pla.getDistance(trend1, trend2, ref.size(), distance);
 		double dist_seasonal = dft.getDistance(seasonal1, seasonal2, distance,
 				ref.size());
 		double dist_noise = distance.calWhiteNoiseDistance(e1, e2, ref.size());

@@ -61,7 +61,7 @@ public class TestMFDRFacade extends TestCase {
 			for(int j = i+1 ; j < datanum ; j++){
 				double originaldist = dist.calDistance(tslist.get(i), tslist.get(j), tslist.get(i));
 //				originaldists.add(originaldist);
-				double mfdrdist = mfdr.getDistance(mfdrdata.get(i), mfdrdata.get(j), tslist.get(i), dist);
+				double mfdrdist = mfdr.getDistance(mfdrdata.get(i), mfdrdata.get(j), tslist.get(i).size(), dist);
 				System.out.println("N["+ i +"] and N[" + j + "]-" 
 				+ "  Original:" + format.format(originaldist) 
 				+ "  MFDR:" + format.format(mfdrdist));

@@ -16,6 +16,7 @@ import mfdr.dimensionality.reduction.DFT;
 import mfdr.dimensionality.reduction.DFTWave;
 import mfdr.dimensionality.reduction.DimensionalityReduction;
 import mfdr.dimensionality.reduction.MFDR;
+import mfdr.dimensionality.reduction.MFDRLCM;
 import mfdr.dimensionality.reduction.MFDRWave;
 import mfdr.dimensionality.reduction.PAA;
 import mfdr.dimensionality.reduction.PLA;
@@ -33,49 +34,59 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 	public void runRandom1000(String readaddress,String writeaddress ,String listaddress, int NoC_Start, int NoC_Interval, int NoC_End) {
 		FileAccessAgent fagent = new FileAccessAgent(writeaddress, "C:\\TEST\\MFDR\\Null.txt");
 		LinkedList<String> filenamelist = getFileNameList(fagent,listaddress);
-		MFDRWaveParameterFacade facadewave = new MFDRWaveParameterFacade(3,0.5,6.5);
 		MFDRParameterFacade facade = new MFDRParameterFacade(3,0.5,6.5);
 		double count = 0;
 		for(int i = 0 ; i < filenamelist.size() ; i++){
 			for(int NoC = NoC_Start ; NoC <= NoC_End ; NoC+=NoC_Interval){
 			// Train Parameters
-			LinkedList<TimeSeries> tsset = getTimeSeriesListTrain(fagent,readaddress,filenamelist.get(i));
-			MFDRParameters parameters = facadewave.learnMFDRParameters(tsset, NoC, false);
-			MFDRParameters parameters_n = facadewave.learnMFDRParameters(tsset, NoC, true);
-			MFDRParameters parameters_t = facade.learnMFDRParameters(tsset, NoC, true);
+			
+			
+			LinkedList<TimeSeries> tsset = getTimeSeriesListTest(fagent,readaddress,filenamelist.get(i));
+			int[][] pairlist = new int[1000][2]; 
+            for(int j = 0 ; j < 1000 ; j++){
+    			int pair_1 = (int) (tsset.size()*Math.random());
+    			int pair_2 = (int) (tsset.size()*Math.random());
+    			while(pair_1==pair_2){
+    				pair_2 = (int) (tsset.size()*Math.random());
+    			}
+    			pairlist[j][0]=pair_1;
+    			pairlist[j][1]=pair_2;
+            }
+			
 			// Test 
 			tsset = getTimeSeriesListTest(fagent,readaddress,filenamelist.get(i));
-			RepresentationErrorResult r_paa = runPAA1000(tsset, new PAA(NoC));
+			RepresentationErrorResult r_paa = runPAA1000(tsset, pairlist , new PAA(NoC));
 			count ++;
-			System.out.println("PROGRESS(PAA):"+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_pla = runPLA1000(tsset, new PLA(NoC));
+			System.out.println("PROGRESS(PAA):"+ (count*100 / 25 / filenamelist.size()) + "%");
+			RepresentationErrorResult r_pla = runPLA1000(tsset, pairlist ,new PLA(NoC));
 			count ++;
-			System.out.println("PROGRESS(PLA): "+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_dftwave = runDFTWave1000(tsset, new DFTWave(NoC));
+			System.out.println("PROGRESS(PLA): "+ (count*100 / 25 / filenamelist.size()) + "%");
+			RepresentationErrorResult r_dftwave = runDFTWave1000(tsset, pairlist ,new DFTWave(NoC));
 			count ++;
-			System.out.println("PROGRESS(DFTWave):"+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_dft = runDFT1000(tsset, new DFT(NoC));
+			System.out.println("PROGRESS(DFTWave):"+ (count*100 / 25 / filenamelist.size()) + "%");
+			RepresentationErrorResult r_dft = runDFT1000(tsset, pairlist ,new DFT(NoC));
 			count ++;
-			System.out.println("PROGRESS(DFT):"+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr = runMFDRWave1000(tsset, parameters, false);
+			System.out.println("PROGRESS(DFT):"+ (count*100 / 25 / filenamelist.size()) + "%");
+			RepresentationErrorResult r_mfdr_t = runMFDR1000(tsset,pairlist ,facade, NoC, false);
 			count ++;
-			System.out.println("PROGRESS(MFDR):"+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr_n = runMFDRWave1000(tsset, parameters_n, true);
-			count ++;
-			System.out.println("PROGRESS(MFDR-N):"+ (count*100 / 35 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr_t = runMFDR1000(tsset,parameters_t, false);
-			count ++;
-			System.out.println("PROGRESS(MFDR-T):"+ (count*100 / 35/ filenamelist.size()) + "%");
+			System.out.println("PROGRESS(MFDR-T):"+ (count*100 / 25/ filenamelist.size()) + "%");
 			
 			// Output
 			String outputstring = filenamelist.get(i) + ",[" + NoC+"],";
-			outputstring += "PLA,M," + r_pla.mean()+",V," + r_pla.variance()+",T," + r_pla.time()+",";
-			outputstring += "DFTWave,M," + r_dftwave.mean()+",V," + r_dftwave.variance()+",T," + r_dftwave.time()+",";
-			outputstring += "DFT,M," + r_dft.mean()+",V," + r_dft.variance()+",T," + r_dft.time()+",";
-			outputstring += "PAA,M," + r_paa.mean()+",V," + r_paa.variance()+",T," + r_paa.time()+",";
-			outputstring += "MFDR,M," + r_mfdr.mean()+",V," + r_mfdr.variance()+",T," + r_mfdr.time()+",";
-			outputstring += "MFDR-N,M," + r_mfdr_n.mean()+",V," + r_mfdr_n.variance()+",T," + r_mfdr_n.time()+",";
-			outputstring += "MFDR-T,M," + r_mfdr_t.mean()+",V," + r_mfdr_t.variance()+",T," + r_mfdr_t.time()+",";
+			//  PLA
+			outputstring += "M," + r_pla.mean()+",V," + r_pla.variance()+",T," + r_pla.time()+",,";
+		    //  DFTWave
+			outputstring += "M," + r_dftwave.mean()+",V," + r_dftwave.variance()+",T," + r_dftwave.time()+",";
+		//  DFT
+			outputstring += "M," + r_dft.mean()+",V," + r_dft.variance()+",T," + r_dft.time()+",,";
+		//  PAA
+			outputstring += "M," + r_paa.mean()+",V," + r_paa.variance()+",T," + r_paa.time()+",,";
+		//  MFDR-wave
+			outputstring += "M," + 0+",V," + 0+",T," + 0+",";
+		//  MFDR-wave-N
+			outputstring += "M," + 0+",V," + 0+",T," + 0+",";
+		//  MFDR
+			outputstring += "M," + r_mfdr_t.mean()+",V," + r_mfdr_t.variance()+",T," + r_mfdr_t.time()+",,";
 			fagent.writeLineToFile(outputstring);
 			System.out.println("PROGRESS: " + filenamelist.get(i) + "[" + NoC + "] Stored...");
 			}
@@ -155,7 +166,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		}
 	}
 	
-	public RepresentationErrorResult runPLA1000(LinkedList<TimeSeries> tsset, PLA pla){
+	public RepresentationErrorResult runPLA1000(LinkedList<TimeSeries> tsset, int[][] pairlist, PLA pla){
 		double[] result = new double[1000];
 		int count = 0;
 		double sum = 0;
@@ -170,15 +181,11 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		long time = 0;
 		long startTime=0,endTime=0;
 		for(int round = 0 ; round < 1000 ; round++){
-			int i = (int) (drlist.size()*Math.random());
-			int j = (int) (drlist.size()*Math.random());
-			while(i==j){
-				j = (int) (drlist.size()*Math.random());
-			}
 			// Original Distance
-			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			double dist_ori = d.calDistance(tsset.get(pairlist[round][0]), tsset.get(pairlist[round][1]), tsset.get(pairlist[round][0]));
+			int size = tsset.get(pairlist[round][0]).size();
 			startTime = System.nanoTime();
-			double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = pla.getDistance(drlist.get(pairlist[round][0]), drlist.get(pairlist[round][1]), size , d);
 			endTime = System.nanoTime();
 			time += endTime - startTime;
 			if(dist_ori!=0){
@@ -192,7 +199,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		return new RepresentationErrorResult(sum/count,Stat.variance(result), time);
 	}
 	
-	public RepresentationErrorResult runPAA1000(LinkedList<TimeSeries> tsset, PAA paa){
+	public RepresentationErrorResult runPAA1000(LinkedList<TimeSeries> tsset, int[][] pairlist, PAA paa){
 		double[] result = new double[1000];
 		int count = 0;
 		double sum = 0;
@@ -207,15 +214,11 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		long time = 0;
 		long startTime=0,endTime=0;
 		for(int round = 0 ; round < 1000 ; round++){
-			int i = (int) (drlist.size()*Math.random());
-			int j = (int) (drlist.size()*Math.random());
-			while(i==j){
-				j = (int) (drlist.size()*Math.random());
-			}
 			// Original Distance
-			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			double dist_ori = d.calDistance(tsset.get(pairlist[round][0]), tsset.get(pairlist[round][1]), tsset.get(pairlist[round][0]));
+			int size = tsset.get(pairlist[round][0]).size();
 			startTime = System.nanoTime();
-			double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = paa.getDistance(drlist.get(pairlist[round][0]), drlist.get(pairlist[round][1]), size, d);
 			endTime = System.nanoTime();
 			time += endTime - startTime;
 			if(dist_ori!=0){
@@ -230,7 +233,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		return new RepresentationErrorResult(sum/count,Stat.variance(result), time);
 	}
 	
-	public RepresentationErrorResult runDFT1000(LinkedList<TimeSeries> tsset, DFT dft){
+	public RepresentationErrorResult runDFT1000(LinkedList<TimeSeries> tsset, int[][] pairlist, DFT dft){
 		double[] result = new double[1000];
 		int count = 0;
 		double sum = 0;
@@ -245,15 +248,10 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		long time = 0;
 		long startTime=0,endTime=0;
 		for(int round = 0 ; round < 1000 ; round++){
-			int i = (int) (drlist.size()*Math.random());
-			int j = (int) (drlist.size()*Math.random());
-			while(i==j){
-				j = (int) (drlist.size()*Math.random());
-			}
 			// Original Distance
-			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			double dist_ori = d.calDistance(tsset.get(pairlist[round][0]), tsset.get(pairlist[round][1]), tsset.get(pairlist[round][0]));
 			startTime = System.nanoTime();
-			double dist_dr = dft.getDistance(drlist.get(i), drlist.get(j), d, tsset.get(i).size());
+			double dist_dr = dft.getDistance(drlist.get(pairlist[round][0]), drlist.get(pairlist[round][1]), d, tsset.get(pairlist[round][0]).size());
 			endTime = System.nanoTime();
 			time += endTime - startTime;
 			if(dist_ori!=0){
@@ -268,7 +266,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		return new RepresentationErrorResult(sum/count,Stat.variance(result), time);
 	}
 	
-	public RepresentationErrorResult runDFTWave1000(LinkedList<TimeSeries> tsset, DFTWave dftwave){
+	public RepresentationErrorResult runDFTWave1000(LinkedList<TimeSeries> tsset,int[][] pairlist, DFTWave dftwave){
 		double[] result = new double[1000];
 		int count = 0;
 		double sum = 0;
@@ -283,15 +281,11 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		long time = 0;
 		long startTime=0,endTime=0;
 		for(int round = 0 ; round < 1000 ; round++){
-			int i = (int) (drlist.size()*Math.random());
-			int j = (int) (drlist.size()*Math.random());
-			while(i==j){
-				j = (int) (drlist.size()*Math.random());
-			}
 			// Original Distance
-			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			double dist_ori = d.calDistance(tsset.get(pairlist[round][0]), tsset.get(pairlist[round][1]), tsset.get(pairlist[round][0]));
+			int size = tsset.get(pairlist[round][0]).size();
 			startTime = System.nanoTime();
-			double dist_dr = dftwave.getDistance(drlist.get(i), drlist.get(j), d, tsset.get(i).size());
+			double dist_dr = dftwave.getDistance(drlist.get(pairlist[round][0]), drlist.get(pairlist[round][1]), d, size);
 			endTime = System.nanoTime();
 			time += endTime-startTime;
 			if(dist_ori!=0){
@@ -334,8 +328,9 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 			// Original Distance
 			// Original Distance
 			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			int size = tsset.get(i).size();
 			startTime = System.nanoTime();
-			double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), size , d);
 			endTime = System.nanoTime();
 			time += endTime-startTime;
 			if(dist_ori!=0){
@@ -349,8 +344,8 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		return new RepresentationErrorResult(sum/count,Stat.variance(result), time);
 	}
 	
-	public RepresentationErrorResult runMFDR1000(LinkedList<TimeSeries> tsset, MFDRParameters p, boolean use_noise){
-		MFDR mfdr = new MFDR(p.trendNoC(), p.seasonalNoC());
+	public RepresentationErrorResult runMFDR1000(LinkedList<TimeSeries> tsset, int[][] pairlist, MFDRParameterFacade facade, int NoC, boolean use_noise){
+		MFDRLCM mfdr = new MFDRLCM(0, 0);
 		double[] result = new double[1000];
 		int count = 0;
 		double sum = 0;
@@ -358,6 +353,8 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		LinkedList<MFDRWaveData> drlist = new LinkedList<MFDRWaveData>();
 		// Accumulate DR data
 		for(int i = 0 ; i < tsset.size() ; i++){
+			MFDRParameters p = facade.learnMFDRParameters(tsset.get(i), NoC, use_noise);
+			mfdr.updateParameters(p.trendNoC(), p.seasonalNoC());
 			if(use_noise){
 				drlist.add(mfdr.getDR(tsset.get(i),p.lowestPeriod()));
 			} else{
@@ -369,15 +366,11 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 		long time = 0;
 		long startTime=0,endTime=0;
 		for(int round = 0 ; round < 1000 ; round++){
-			int i = (int) (drlist.size()*Math.random());
-			int j = (int) (drlist.size()*Math.random());
-			while(i==j){
-				j = (int) (drlist.size()*Math.random());
-			}
 			// Original Distance
-			double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+			double dist_ori = d.calDistance(tsset.get(pairlist[round][0]), tsset.get(pairlist[round][1]), tsset.get(pairlist[round][0]));
+			int size =  tsset.get(pairlist[round][0]).size();
 			startTime = System.nanoTime();
-			double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+			double dist_dr = mfdr.getDistance(drlist.get(pairlist[round][0]), drlist.get(pairlist[round][1]),size, d);
 			endTime = System.nanoTime();
 			time += endTime - startTime;
 			if(dist_ori!=0){
@@ -408,8 +401,9 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 			for(int j = i+1 ; j<drlist.size();j++){
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
+				int size =  tsset.get(i).size();
 				startTime = System.nanoTime();
-				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j),size , d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
@@ -503,7 +497,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
 				startTime = System.nanoTime();
-				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
@@ -539,7 +533,7 @@ public class ClosenessOfDistanceCoreWithNewMFDR {
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
 				startTime = System.nanoTime();
-				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				endTime = System.nanoTime();
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;

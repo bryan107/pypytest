@@ -23,7 +23,7 @@ public class TestPLA extends TestCase {
 //		generateResidual(ts1, datasize, 0);
 //		generateResidual(ts2, datasize, 1);
 		generateResidual(ts1, 10, 1, datasize);
-		generateResidual(ts2, 10, 1, datasize);
+		generateResidual(ts2, 20, 0, datasize);
 		PLA pla = new PLA(4);
 		LinkedList<PLAData> dr1 = pla.getDR(ts1);
 		LinkedList<PLAData> dr2 = pla.getDR(ts2);
@@ -46,10 +46,22 @@ public class TestPLA extends TestCase {
 	public void testDistance(){
 		// TestDist
 		generateResidual(ts1, 10, 1, datasize);
-		generateResidual(ts2, 10, 1, datasize);
+		generateResidual(ts2, 20, 1, datasize);
 		Distance dist = new EuclideanDistance();
 		double[][] ts1array = DataListOperator.getInstance().linkedDataListToArray(ts1);
 		double[][] ts2array = DataListOperator.getInstance().linkedDataListToArray(ts2);
+		System.out.println("ORIGNAL");
+		Print.getInstance().printDataLinkedList(ts1, ts1.size());
+		Print.getInstance().printDataLinkedList(ts2, ts2.size());
+		
+		System.out.println("DR");
+		Print.getInstance().printPLADataLinkedList(pla.getDR(ts1),pla.getDR(ts1).size());
+		Print.getInstance().printPLADataLinkedList(pla.getDR(ts2),pla.getDR(ts2).size());
+		System.out.println("DR FULL");
+		Print.getInstance().printDataLinkedList(pla.getFullResolutionDR(ts1), ts1.size());
+		Print.getInstance().printDataLinkedList(pla.getFullResolutionDR(ts2), ts2.size());
+		System.out.println("Distance Original: " + pla.getBruteForceDistance(ts1, ts2, dist));
+		System.out.println("Distance Original: " + dist.calDistance(ts1, ts2,ts1));
 		System.out.println("Distance Original: " + dist.calDistance(ts1array[1], ts2array[1]));
 		System.out.println("Distance PLA: " + pla.getDistance(ts1, ts2, dist));
 		
@@ -64,12 +76,12 @@ public class TestPLA extends TestCase {
 		for (double i = 0; i < size; i+=1) {
 			java.util.Random r = new java.util.Random();
 			double noise = r.nextGaussian() * Math.sqrt(noisevariation);
-			double trend = trendvariation * Math.pow(i, 0.5);
-			if(i > size/2){
-				trend = -trend;
-			}
+			double trend = trendvariation * i;
+//			if(i > size/2){
+//				trend = -trend;
+//			}
 //			double value = 9.5 * Math.sin(i*Math.PI / 3) + 4.5 * Math.cos(i*Math.PI / 6)  + noise + trend;
-			double value = noise + trend;
+			double value =  trend;
 			residual.add(new Data(i, value));
 		}
 	}

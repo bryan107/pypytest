@@ -34,9 +34,9 @@ public class StatisticalProperty {
 		if(x_value > t_threshold){
 			return true;
 		}
-//		logger.info("X:" + x_value + "  Value:" + y_value + " Upper Bound:"
-//				+ sb.upperbound(x_value) + " Lower Bound:"
-//				+ sb.lowerbound(x_value));
+		logger.info("X:" + x_value + "  Value:" + y_value + " Upper Bound:"
+				+ sb.upperbound(x_value) + " Lower Bound:"
+				+ sb.lowerbound(x_value));
 		if (y_value > sb.upperbound(x_value) ||  y_value < sb.lowerbound(x_value) ){
 			return true;
 		}

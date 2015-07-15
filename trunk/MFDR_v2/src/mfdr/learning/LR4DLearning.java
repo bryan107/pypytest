@@ -82,7 +82,7 @@ public class LR4DLearning extends LinearLearning {
 		}
 		for (int i = 0; i < ts.size() - 1; i++) {
 			for(int j = i+1 ; j < ts.size() ; j++){
-				MFDRDistanceDetails details = mfdr.getDistanceDetails(mfdrdata[i], mfdrdata[j], ts.get(i), d);
+				MFDRDistanceDetails details = mfdr.getDistanceDetails(mfdrdata[i], mfdrdata[j], ts.get(i).size(), d);
 				double oridist = d.calDistance(ts.get(i), ts.get(j), ts.get(i));
 				trainingset.add(new TrainingSet(details.trend(), details.seasonal(), details.noise(), oridist));
 			}
@@ -99,7 +99,7 @@ public class LR4DLearning extends LinearLearning {
 		}
 		for (int i = 0; i < ts.length - 1; i++) {
 			for(int j = i+1 ; j < ts.length ; j++){
-				MFDRDistanceDetails details = mfdr.getDistanceDetails(mfdrdata[i], mfdrdata[j], ts[i], d);
+				MFDRDistanceDetails details = mfdr.getDistanceDetails(mfdrdata[i], mfdrdata[j], ts[i].size(), d);
 				double oridist = d.calDistance(ts[i], ts[j], ts[i]);
 				trainingset.add(new TrainingSet(details.trend(), details.seasonal(), details.noise(), oridist));
 			}

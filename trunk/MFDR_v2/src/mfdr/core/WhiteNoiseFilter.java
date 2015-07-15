@@ -209,9 +209,10 @@ public class WhiteNoiseFilter {
 		try {
 			// If count zerocorssings
 			// OPTION 1: use zerocrossingcount to calculate average period (This can be more robust)
-			double T2 = imf.timeLength()/(imf.getZeroCrossingCount()/2)/(this.original_time_series.normalisedWhiteNoiseWaveLength());
+//			double T2 = imf.timeLength()/(imf.getZeroCrossingCount()/2)/(this.original_time_series.normalisedWhiteNoiseWaveLength());
 			// OPTION 2: use instant frequency to calculate average period
-//			double T2 = imf.averageWavelength()/(this.original_time_series.normalisedWhiteNoiseWaveLength());
+//			T2 = imf.averageWavelength()/(this.original_time_series.normalisedWhiteNoiseWaveLength());
+//			double tt = imf.averageWavelength();
 //			logger.info("T2:" + T2);
 			// If use instant frequencies
 			T = imf.averageWavelength()

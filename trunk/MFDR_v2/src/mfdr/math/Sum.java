@@ -63,9 +63,8 @@ public class Sum {
 	 * @return
 	 */
 	public double cos(double g, double k, int n) {
-		double nn = n;
-		double part1 = Math.sin((nn + 1) * g / 2) / Math.sin(g / 2);
-		double part2 = Math.cos((2 * k + nn * g) / 2);
+		double part1 = Math.sin((n + 1) * g / 2) / Math.sin(g / 2);
+		double part2 = Math.cos((2 * k + n * g) / 2);
 		return part1 * part2;
 	}
 

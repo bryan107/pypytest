@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.jtransforms.fft.DoubleFFT_1D;
@@ -51,9 +52,20 @@ public class DFTForMFDR extends DimensionalityReduction {
 		sorted_map.putAll(map);
 		
 		// Store results to DFTData Map
-		Iterator<Integer> it = sorted_map.keySet().iterator();
+		
+		Map<Integer, Double> final_map = new HashMap<Integer, Double>();
+        Iterator<Integer> it = sorted_map.keySet().iterator();
+        for(int j = 0 ; j < NoC ; j++) {
+        	int index = it.next();
+        	double value = hilb[index];
+			final_map.put(index, value);
+		}
+        it = final_map.keySet().iterator();
+        LinkedList<Integer> removedlist = new LinkedList<Integer>();
 		for(int j = 0 ; j < NoC ; j++){
 			int index = it.next();
+			if(removedlist.contains(index))
+				continue;
 			// If index < 2
 			if(index < 2){
 				double phasedelay = 0;
@@ -74,10 +86,10 @@ public class DFTForMFDR extends DimensionalityReduction {
 					cos =hilb[index];
 					sin =0;
 				}
-				else if(sorted_map.containsKey(index+1)){
+				else if(final_map.containsKey(index+1)){
 					cos =hilb[index];
 					sin =hilb[index+1];
-					sorted_map.remove(index+1);
+					removedlist.add(index+1);
 				} else {
 					cos =hilb[index];
 					sin =0;
@@ -92,10 +104,10 @@ public class DFTForMFDR extends DimensionalityReduction {
 			if(index % 2 == 1){
 				double cos, sin;
 				// If map contains its complex number
-				if(sorted_map.containsKey(index-1)){
+				if(final_map.containsKey(index-1)){
 					cos =hilb[index-1];
 					sin =hilb[index];
-					sorted_map.remove(index-1);
+					removedlist.add(index-1);
 				} else {
 					cos =0;
 					sin =hilb[index];
@@ -184,6 +196,8 @@ public class DFTForMFDR extends DimensionalityReduction {
 	public double getDistance(LinkedList<DFTWaveData> wavelist1 , LinkedList<DFTWaveData> wavelist2 , Distance distance, int signallength){
 		Map<Double, DFTWaveData> dr1map = new HashMap<Double, DFTWaveData>();
 		Map<Double, DFTWaveData> dr2map = new HashMap<Double, DFTWaveData>();
+		
+		
 		// Save to maps
 		Iterator<DFTWaveData> it = wavelist1.iterator();
 		while (it.hasNext()) {

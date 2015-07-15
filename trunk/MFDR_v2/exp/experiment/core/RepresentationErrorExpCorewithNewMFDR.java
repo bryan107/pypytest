@@ -120,32 +120,38 @@ public class RepresentationErrorExpCorewithNewMFDR {
 			LinkedList<TimeSeries> tsset = getTimeSeriesListALL(fagent,readaddress,filenamelist.get(i));
 			RepresentationErrorResult r_pla = runOptimalSolution(tsset, new PLA(NoC));
 			count ++;
-			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
+			System.out.println("PROGRESS:"+ (count*100 / 20 / filenamelist.size()) + "%");
 			RepresentationErrorResult r_dft = runOptimalSolution(tsset, new DFTWave(NoC));
 			count ++;
-			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
+			System.out.println("PROGRESS:"+ (count*100 / 20 / filenamelist.size()) + "%");
 			RepresentationErrorResult r_paa = runOptimalSolution(tsset, new PAA(NoC));
 			count ++;
-			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
+			System.out.println("PROGRESS:"+ (count*100 / 20 / filenamelist.size()) + "%");
 			RepresentationErrorResult r_mfdr = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,false);
 			count ++;
-			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
-			RepresentationErrorResult r_mfdr_n = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,true);
-			count ++;
-			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
+			System.out.println("PROGRESS:"+ (count*100 / 20 / filenamelist.size()) + "%");
+//			RepresentationErrorResult r_mfdr_n = runOptimalSolutionMFDR(tsset, new MFDRParameterFacade(3,0.5,6.5), NoC ,true);
+//			count ++;
+//			System.out.println("PROGRESS:"+ (count*100 / 25 / filenamelist.size()) + "%");
+			
+			// Output
 			String outputstring = filenamelist.get(i) + ",[" + NoC+"],";
-			outputstring += "PLA,M," + r_pla.mean()+",V," + r_pla.variance()+",T," + r_pla.time()+",";
-			outputstring += "DFT,M," + r_dft.mean()+",V," + r_dft.variance()+",T," + r_dft.time()+",";
-			outputstring += "PAA,M," + r_paa.mean()+",V," + r_paa.variance()+",T," + r_paa.time()+",";
-			outputstring += "MFDR,M," + r_mfdr.mean()+",V," + r_mfdr.variance()+",T," + r_mfdr.time()+",";
-			outputstring += "MFDR-N,M," + r_mfdr_n.mean()+",V," + r_mfdr_n.variance()+",T," + r_mfdr_n.time()+",";
+			//  PLA
+			outputstring += "M," + r_pla.mean()+",V," + r_pla.variance()+",T," + r_pla.time()+",,";
+		    //  DFTWave
+			outputstring += "M," + 0+",V," + 0+",T," + 0+",";
+		//  DFT
+			outputstring += "M," + r_dft.mean()+",V," + r_dft.variance()+",T," + r_dft.time()+",,";
+		//  PAA
+			outputstring += "M," + r_paa.mean()+",V," + r_paa.variance()+",T," + r_paa.time()+",,";
+		//  MFDR-wave
+			outputstring += "M," + 0+",V," + 0+",T," + 0+",";
+		//  MFDR-wave-N
+			outputstring += "M," + 0+",V," + 0+",T," + 0+",";
+		//  MFDR
+			outputstring += "M," + r_mfdr.mean()+",V," + r_mfdr.variance()+",T," + r_mfdr.time()+",,";
 			fagent.writeLineToFile(outputstring);
 			System.out.println("PROGRESS: " + filenamelist.get(i) + "[" + NoC + "] Stored...");
-//			System.out.println("PLA- M:" + r_pla.mean()+" V:" + r_pla.variance()+" T:" + r_pla.time());
-//			System.out.println("DFT- M:" + r_dft.mean()+" V:" + r_dft.variance()+" T:" + r_dft.time());
-//			System.out.println("PAA- M:" + r_paa.mean()+" V:" + r_paa.variance()+" T:" + r_paa.time());
-//			System.out.println("MFDR- M:" + r_mfdr.mean()+" V:" + r_mfdr.variance()+" T:" + r_mfdr.time());
-//			System.out.println("MFDR-N M:" + r_mfdr_n.mean()+" V:" + r_mfdr_n.variance()+" T:" + r_mfdr_n.time());
 			}
 		}
 	}

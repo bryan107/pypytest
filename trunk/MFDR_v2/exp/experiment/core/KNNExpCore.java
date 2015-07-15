@@ -132,7 +132,7 @@ public class KNNExpCore {
 			for (int j = 0; j < traindrlist.size(); j++) {
 				// Original Distance
 				double dist_dr = paa.getDistance(testdrlist.get(i),
-						traindrlist.get(j), testset.get(i).timeSeries(), d);
+						traindrlist.get(j), testset.get(i).timeSeries().size(), d);
 				dists[j] = dist_dr;
 				candidates.put(dist_dr, trainset.get(j).ClusterNumber());
 			}
@@ -245,7 +245,7 @@ public class KNNExpCore {
 			for (int j = 0; j < traindrlist.size(); j++) {
 				// Original Distance
 				double dist_dr = pla.getDistance(testdrlist.get(i),
-						traindrlist.get(j), testset.get(i).timeSeries(), d);
+						traindrlist.get(j), testset.get(i).timeSeries().size(), d);
 				dists[j] = dist_dr;
 				candidates.put(dist_dr, trainset.get(j).ClusterNumber());
 			}
@@ -294,7 +294,7 @@ public class KNNExpCore {
 			for (int j = 0; j < traindrlist.size(); j++) {
 				// Original Distance
 				double dist_dr = mfdr.getDistance(testdrlist.get(i),
-						traindrlist.get(j), testset.get(i).timeSeries(), d);
+						traindrlist.get(j), testset.get(i).timeSeries().size(), d);
 				dists[j] = dist_dr;
 				candidates.put(dist_dr, trainset.get(j).ClusterNumber());
 			}

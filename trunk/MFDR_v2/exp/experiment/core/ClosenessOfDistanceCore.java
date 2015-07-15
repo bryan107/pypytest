@@ -93,7 +93,7 @@ public class ClosenessOfDistanceCore {
 			for(int j = i+1 ; j<drlist.size();j++){
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
-				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = paa.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
 				sum += Math.abs(dist_ori-dist_dr)/dist_ori;
@@ -183,7 +183,7 @@ public class ClosenessOfDistanceCore {
 			for(int j = i+1 ; j<drlist.size();j++){
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
-				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = pla.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
 				sum += Math.abs(dist_ori-dist_dr)/dist_ori;
@@ -218,7 +218,7 @@ public class ClosenessOfDistanceCore {
 			for(int j = i+1 ; j<drlist.size();j++){
 				// Original Distance
 				double dist_ori = d.calDistance(tsset.get(i), tsset.get(j), tsset.get(i));
-				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i), d);
+				double dist_dr = mfdr.getDistance(drlist.get(i), drlist.get(j), tsset.get(i).size(), d);
 				result[count]=Math.abs(dist_ori-dist_dr)/dist_ori;
 				count++;
 				sum += Math.abs(dist_ori-dist_dr)/dist_ori;
